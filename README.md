@@ -9,13 +9,10 @@ Author: Sick.Codes https://sick.codes/
 Credits: OSX-KVM project among many others: https://github.com/kholia/OSX-KVM/blob/master/CREDITS.md
 
 ```
-git clone https://github.com/sickcodes/Docker-OSX.git
 
-cd Docker-OSX
+docker pull sickcodes/docker-osx
 
-docker build -t docker-osx .
-
-docker run --privileged -v /tmp/.X11-unix:/tmp/.X11-unix docker-osx
+docker run --privileged -v /tmp/.X11-unix:/tmp/.X11-unix sickcodes/docker-osx
 
 # press ctrl G if your mouse gets stuck
 
