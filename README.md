@@ -46,6 +46,34 @@ docker start $(docker ps -q --all --filter "ancestor=docker-osx")
 
 ```
 
+# Docker install
+
+If you don't have Docker already
+
+```
+### Arch (pacman version isn't right at time of writing)
+
+wget https://download.docker.com/linux/static/stable/x86_64/docker-19.03.5.tgz
+tar -xzvf docker-*.tgz
+sudo cp docker/* /usr/bin/
+sudo dockerd &
+sudo groupadd docker
+sudo usermod -aG docker $USER
+# run docker later
+sudo nohup dockerd &
+
+### Ubuntu
+
+apt-get remove docker docker-engine docker.io containerd runc -y
+apt-get install apt-transport-https ca-certificates curl gnupg-agent software-properties-common -y
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg |  apt-key add -
+apt-key fingerprint 0EBFCD88
+add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+apt-get update -y
+apt-get install docker-ce docker-ce-cli containerd.io -y
+
+```
+
 # Backup the disk
 
 your image will be stored in:
