@@ -17,6 +17,17 @@ docker build -t docker-osx .
 
 docker run --privileged -v /tmp/.X11-unix:/tmp/.X11-unix docker-osx
 
+# press ctrl G if your mouse gets stuck
+
+```
+
+# Start the same container later (persistent disk)
+```
+# look at it
+docker ps --all --filter "ancestor=docker-osx"
+
+# boot my old one
+docker start $(docker ps -q --all --filter "ancestor=docker-osx")
 ```
 
 # Additional Boot Instructions
@@ -32,6 +43,16 @@ docker run --privileged -v /tmp/.X11-unix:/tmp/.X11-unix docker-osx
 # Partition that disk and subtract 1GB and press Apply
 
 # Click Reinstall macOS
+
+```
+
+
+# Wipe old images
+
+```
+# WARNING deletes all old images, but saves disk space if you make too many containers
+docker system prune --all
+docker image prune --all
 
 ```
 
