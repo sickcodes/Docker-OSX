@@ -8,6 +8,8 @@ Author: Sick.Codes https://sick.codes/
 
 Credits: OSX-KVM project among many others: https://github.com/kholia/OSX-KVM/blob/master/CREDITS.md
 
+Docker Hub: https://hub.docker.com/r/sickcodes/docker-osx
+
 ```
 
 docker pull sickcodes/docker-osx
