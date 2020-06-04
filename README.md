@@ -46,11 +46,29 @@ docker start $(docker ps -q --all --filter "ancestor=docker-osx")
 
 ```
 
+# Backup the disk
+
+your image will be stored in:
+
+/var/lib/docker/overlay2/...../arch/OSX-KVM/home/arch/OSX-KVM/mac_hdd_ng.img
+```
+# find your container's root folder
+
+docker inspect $(docker ps -q --all --filter "ancestor=docker-osx") | grep UpperDir
+
+# In the folder from the above command, your image is inside ./home/arch/OSX-KVM/mac_hdd_ng.img
+
+# then sudo cp it somewhere. Don't do it while the container is running tho, it bugs out.
+
+```
+
 
 # Wipe old images
 
 ```
+
 # WARNING deletes all old images, but saves disk space if you make too many containers
+
 docker system prune --all
 docker image prune --all
 
