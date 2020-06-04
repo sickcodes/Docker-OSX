@@ -8,7 +8,14 @@ Author: Sick.Codes https://sick.codes/
 Credits: OSX-KVM project among many others: https://github.com/kholia/OSX-KVM/blob/master/CREDITS.md
 
 ```
-docker run --privileged -v /tmp/.X11-unix:/tmp/.X11-unix sickcodes/docker-osx:latest
+git clone https://github.com/sickcodes/Docker-OSX.git
+
+cd Docker-OSX
+
+docker build -t docker-osx .
+
+docker run --privileged -v /tmp/.X11-unix:/tmp/.X11-unix docker-osx
+
 ```
 
 # Instant OSX-KVM in a BOX!
@@ -24,15 +31,11 @@ This file builds on top of the work done by Dhiru Kholia and many others on the 
 # Custom Build
 ```
 
-git clone https://github.com/sickcodes/Docker-OSX.git
-
-cd Docker-OSX
-
 docker build -t docker-osx:latest \
 --build-arg VERSION=10.14.6 \
 --build-arg SIZE=200G
 
-docker run --privileged -v /tmp/.X11-unix:/tmp/.X11-unix sickcodes/docker-osx:latest
+docker run --privileged -v /tmp/.X11-unix:/tmp/.X11-unix docker-osx:latest
 
 ```
 
