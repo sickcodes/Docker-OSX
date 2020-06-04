@@ -37,7 +37,8 @@ MAINTAINER 'https://sick.codes' <https://sick.codes>
 ARG SIZE=32G
 ARG VERSION=10.14.6
 
-RUN [[ $(egrep -c '(svm|vmx)' /proc/cpuinfo) -gt 0 ]] || { echo KVM not possible on this host && exit 1; }
+# This fails on hub.docker.com
+# RUN [[ $(egrep -c '(svm|vmx)' /proc/cpuinfo) -gt 0 ]] || { echo KVM not possible on this host && exit 1; }
 
 WORKDIR /root
 RUN tee -a /etc/pacman.conf <<< '[community-testing]'
