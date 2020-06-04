@@ -19,6 +19,23 @@ docker run --privileged -v /tmp/.X11-unix:/tmp/.X11-unix docker-osx
 
 ```
 
+# Additional Boot Instructions
+
+```
+
+# Boot the macOS Base System
+
+# Click Disk Utility
+
+# Erase the biggest disk
+
+# Partition that disk and subtract 1GB and press Apply
+
+# Click Reinstall macOS
+
+```
+
+
 # Instant OSX-KVM in a BOX!
 This Dockerfile automates the installation of OSX-KVM inside a docker container.
 

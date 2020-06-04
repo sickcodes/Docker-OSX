@@ -6,13 +6,13 @@
 # /_____/\____/\___/_/|_|\___/_/   \____//____/_/|_|  
 # 
 # Title:            Mac on Docker (Docker-OSX)
-# Author:           Sick.Codes https://sick.codes/
-# Credits:          Kholia https://github.com/kholia/osx-kvm        
+# Author:           Sick.Codes https://sick.codes/        
 # Version:          1.0
 # License:          GPLv3
 # 
-# All credits for OpenCore support go to https://github.com/Leoyzen/KVM-Opencore and
-# https://github.com/thenickdude/KVM-Opencore/. Thanks!
+# All credits for OSX-KVM and the rest at Kholia's repo: https://github.com/kholia/osx-kvm
+# OpenCore support go to https://github.com/Leoyzen/KVM-Opencore 
+# and https://github.com/thenickdude/KVM-Opencore/
 # 
 # This Dockerfile automates the installation of Docker-OSX
 # It will build a 32GB Mojave Disk, you can change the size using build arguments.
