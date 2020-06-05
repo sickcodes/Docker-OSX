@@ -68,7 +68,16 @@ docker start $(docker ps -q --all --filter "ancestor=docker-osx")
 
 ```
 
-# Docker install
+# Troubleshooting
+
+Check if your hardware virt is on
+```egrep -c '(svm|vmx)' /proc/cpuinfo```
+
+Try adding yourself to the docker group
+```sudo usermod -aG docker $USER```
+
+Turn on docker daemon
+```sudo nohup dockerd &```
 
 If you don't have Docker already
 
@@ -93,6 +102,9 @@ apt-key fingerprint 0EBFCD88
 add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
 apt-get update -y
 apt-get install docker-ce docker-ce-cli containerd.io -y
+sudo dockerd &
+sudo groupadd docker
+sudo usermod -aG docker $USER
 
 ```
 
