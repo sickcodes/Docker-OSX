@@ -20,6 +20,7 @@ docker run --privileged -v /tmp/.X11-unix:/tmp/.X11-unix sickcodes/docker-osx
 
 # press ctrl G if your mouse gets stuck
 
+# scroll down to troubleshooting if you have problems
 
 ```
 
@@ -47,6 +48,11 @@ sudo modprobe kvm
 ```
 
 # Start the same container later (persistent disk)
+
+This is for when you want to run your system later.
+
+If you don't run this you will have a new image every time.
+
 ```
 # look at your recent containers
 docker ps --all --filter "ancestor=docker-osx"
@@ -83,12 +89,12 @@ docker start xxxxxxx
 ```
 
 # Troubleshooting
+```
 
 ```
-# alternative run, thanks @roryrjb
-docker run --privileged --net host --cap-add=ALL -v /tmp/.X11-unix:/tmp/.X11-unix -v /dev:/dev -v /lib/modules:/lib/modules sickcodes/docker-osx
 
-```
+Alternative run, thanks @roryrjb
+```docker run --privileged --net host --cap-add=ALL -v /tmp/.X11-unix:/tmp/.X11-unix -v /dev:/dev -v /lib/modules:/lib/modules sickcodes/docker-osx```
 
 Check if your hardware virt is on
 ```egrep -c '(svm|vmx)' /proc/cpuinfo```
@@ -98,6 +104,10 @@ Try adding yourself to the docker group
 
 Turn on docker daemon
 ```sudo nohup dockerd &```
+
+Check /dev/kvm permissions
+```sudo chmod 666 /dev/kvm```
+
 
 If you don't have Docker already
 
