@@ -10,6 +10,8 @@ Credits: OSX-KVM project among many others: https://github.com/kholia/OSX-KVM/bl
 
 Docker Hub: https://hub.docker.com/r/sickcodes/docker-osx
 
+Pull requests, suggestions very welcome!
+
 ```
 
 docker pull sickcodes/docker-osx
@@ -17,6 +19,7 @@ docker pull sickcodes/docker-osx
 docker run --privileged -v /tmp/.X11-unix:/tmp/.X11-unix sickcodes/docker-osx
 
 # press ctrl G if your mouse gets stuck
+
 
 ```
 
@@ -45,11 +48,22 @@ sudo modprobe kvm
 
 # Start the same container later (persistent disk)
 ```
-# look at it
+# look at your recent containers
 docker ps --all --filter "ancestor=docker-osx"
+docker ps --all --filter "ancestor=sickcodes/docker-osx"
 
-# boot my old one
+# boot the old ones
 docker start $(docker ps -q --all --filter "ancestor=docker-osx")
+docker start $(docker ps -q --all --filter "ancestor=sickcodes/docker-osx")
+
+# close all the ones you don't need
+
+# check which one is still running
+docker ps
+
+# write down the good one and then use that for later
+docker start xxxxxxx
+
 ```
 
 # Additional Boot Instructions
@@ -69,6 +83,12 @@ docker start $(docker ps -q --all --filter "ancestor=docker-osx")
 ```
 
 # Troubleshooting
+
+```
+# alternative run, thanks @roryrjb
+docker run --privileged --net host --cap-add=ALL -v /tmp/.X11-unix:/tmp/.X11-unix -v /dev:/dev -v /lib/modules:/lib/modules sickcodes/docker-osx
+
+```
 
 Check if your hardware virt is on
 ```egrep -c '(svm|vmx)' /proc/cpuinfo```
