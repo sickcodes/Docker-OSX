@@ -89,8 +89,24 @@ docker start xxxxxxx
 ```
 
 # Troubleshooting
-```
 
+libgtk permissions denied error, thanks @raoulh + @arsham
+```
+echo $DISPLAY
+
+# ARCH
+sudo pacman -S xorg-xhost
+
+# UBUNTU DEBIAN
+sudo apt install x11-xserver-utils
+
+# CENTOS RHEL FEDORA
+sudo yum install xorg-x11-server-utils
+
+# then runx
+host +
+
+docker run --privileged -e "DISPLAY=${DISPLAY:-:0.0}" -v /tmp/.X11-unix:/tmp/.X11-unix sickcodes/docker-osx ./OpenCore-Boot.sh
 ```
 
 Alternative run, thanks @roryrjb
