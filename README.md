@@ -20,6 +20,29 @@ docker run --privileged -v /tmp/.X11-unix:/tmp/.X11-unix sickcodes/docker-osx
 
 ```
 
+# Requirements KVM on the host
+Need to turn on hardware virtualization in your BIOS, very easy to do.
+
+Then have QEMU on the host if you haven't already:
+```
+# ARCH
+sudo pacman -S qemu libvirt dnsmasq virt-manager bridge-utils flex bison ebtables edk2-ovmf
+
+# UBUNTU DEBIAN
+sudo apt install qemu qemu-kvm libvirt-clients libvirt-daemon-system bridge-utils virt-manager
+
+# CENTOS RHEL FEDORA
+sudo yum install libvirt qemu-kvm -y
+
+# then run
+sudo systemctl enable libvirtd.service
+sudo systemctl enable virtlogd.service
+sudo modprobe kvm
+
+# reboot
+
+```
+
 # Start the same container later (persistent disk)
 ```
 # look at it
