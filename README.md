@@ -103,8 +103,8 @@ sudo apt install x11-xserver-utils
 # CENTOS RHEL FEDORA
 sudo yum install xorg-x11-server-utils
 
-# then runx
-host +
+# then run
+xhost +
 
 docker run --privileged -e "DISPLAY=${DISPLAY:-:0.0}" -v /tmp/.X11-unix:/tmp/.X11-unix sickcodes/docker-osx ./OpenCore-Boot.sh
 ```
