@@ -16,7 +16,7 @@ Pull requests, suggestions very welcome!
 
 docker pull sickcodes/docker-osx
 
-docker run --privileged -v /tmp/.X11-unix:/tmp/.X11-unix sickcodes/docker-osx
+docker run --privileged -e "DISPLAY=${DISPLAY:-:0.0}" -v /tmp/.X11-unix:/tmp/.X11-unix sickcodes/docker-osx
 
 # press ctrl G if your mouse gets stuck
 
