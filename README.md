@@ -20,7 +20,7 @@ docker run --privileged -v /tmp/.X11-unix:/tmp/.X11-unix sickcodes/docker-osx
 
 ```
 
-# Requirements KVM on the host
+# Requirements: KVM on the host
 Need to turn on hardware virtualization in your BIOS, very easy to do.
 
 Then have QEMU on the host if you haven't already:

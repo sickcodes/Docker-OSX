@@ -66,8 +66,8 @@ RUN perl -p -i -e 's/print("Succeeded:")/exit()/' ./gibMacOS.command
 RUN python gibMacOS.command -v "${VERSION}" || echo Done
 
 RUN sudo pacman -S qemu libvirt dnsmasq virt-manager bridge-utils flex bison ebtables edk2-ovmf --noconfirm
-RUN sudo systemctl enable libvirtd.service
-RUN sudo systemctl enable virtlogd.service
+# RUN sudo systemctl enable libvirtd.service
+# RUN sudo systemctl enable virtlogd.service
 
 WORKDIR /home/arch
 RUN git clone https://github.com/kholia/OSX-KVM.git
