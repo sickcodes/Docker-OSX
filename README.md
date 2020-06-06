@@ -54,21 +54,14 @@ This is for when you want to run your system later.
 If you don't run this you will have a new image every time.
 
 ```
-# look at your recent containers
-docker ps --all --filter "ancestor=docker-osx"
-docker ps --all --filter "ancestor=sickcodes/docker-osx"
+# look at your recent containers and copy the CONTAINER ID
+docker ps --all
 
-# boot the old ones
-docker start $(docker ps -q --all --filter "ancestor=docker-osx")
-docker start $(docker ps -q --all --filter "ancestor=sickcodes/docker-osx")
+# docker start the container ID
+docker start abc123xyz567
 
-# close all the ones you don't need
-
-# check which one is still running
-docker ps
-
-# write down the good one and then use that for later
-docker start xxxxxxx
+# if you have many containers, you can try automate it with filters like this
+# docker ps --all --filter "ancestor=sickcodes/docker-osx"
 
 ```
 
