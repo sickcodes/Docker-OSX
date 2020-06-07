@@ -22,6 +22,11 @@ docker run --privileged -e "DISPLAY=${DISPLAY:-:0.0}" -v /tmp/.X11-unix:/tmp/.X1
 
 # scroll down to troubleshooting if you have problems
 
+# need more RAM?
+# try this, change the number 8000, e.g. 8GB:
+
+# docker run --privileged -v /tmp/.X11-unix:/tmp/.X11-unix sickcodes/docker-osx /bin/bash -c "sed -e 's/3072/8000/g' ./OpenCore-Boot.sh | sh -"
+
 ```
 
 # Requirements: KVM on the host
