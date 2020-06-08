@@ -1,6 +1,7 @@
 # Docker-OSX
 
-![Running mac osx in a docker container](/running-mac-inside-docker-qemu.png?raw=true "OSX KVM DOCKER")
+[realScreenshotHere](/running-mac-inside-docker-qemu.png?raw=true "OSX KVM DOCKER")
+![Running mac osx in a docker container](/what-we-are-doing-banner.png?raw=true "OSX KVM DOCKER")
 
 Run Mac in a Docker container! Run near native OSX-KVM in Docker! X11 Forwarding!
 
