@@ -1,8 +1,11 @@
 # Docker-OSX
-
+#### [Follow @sickcodes on Twitter](https://twitter.com/sickcodes) for v2.0 notification (SSH TUNNELING, XFVB HEADLESS, NFS, FULL AUTO CI/CD)
 ![Running mac osx in a docker container](/running-mac-inside-docker-qemu.png?raw=true "OSX KVM DOCKER")
 
 Run Mac in a Docker container! Run near native OSX-KVM in Docker! X11 Forwarding!
+
+
+
 
 Author: Sick.Codes https://sick.codes/
 
