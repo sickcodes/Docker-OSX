@@ -1,0 +1,18 @@
+version: '3.1'
+
+services:
+  osx:
+    build:
+      context: .
+      args:
+        - SIZE=200G
+        - VERSION=10.15.5
+    image: sickcodes/docker-osx
+    privileged: true
+    environment:
+      DISPLAY: ${DISPLAY:-:0.0}
+    network_mode: "host"
+    cap_add:
+      - ALL
+    volumes:
+      - ./tmp/.X11-unix:/tmp/.X11-unix
