@@ -63,7 +63,7 @@ WORKDIR /home/arch/gibMacOS
 RUN perl -p -i -e 's/print("Succeeded:")/exit()/' ./gibMacOS.command
 
 # this command takes a while!
-RUN python gibMacOS.command -v "${VERSION}" || echo Done
+RUN python gibMacOS.command -v "${VERSION}" -d || echo Done
 
 RUN sudo pacman -S qemu libvirt dnsmasq virt-manager bridge-utils flex bison ebtables edk2-ovmf --noconfirm
 # RUN sudo systemctl enable libvirtd.service
