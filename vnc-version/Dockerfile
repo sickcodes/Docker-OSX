@@ -87,8 +87,9 @@ RUN printf '%s\n' \
 'xterm &' > ~/.vnc/xstartup
 
 # this won't work if you have 99 monitors, 98 monitors is fine though
-RUN printf '%s\n%s\n\n' \
+RUN printf '%s\n%s\n%s\n\n' \
 'export DISPLAY=:99' \
+'vncserver -kill :99 || true' \
 'vncserver -geometry 1920x1080 -depth ${DEPTH:=24} -xstartup ~/.vnc/xstartup :99' > vnc.sh
 
 RUN cat vnc.sh OpenCore-Boot.sh > OpenCore-Boot_custom.sh
