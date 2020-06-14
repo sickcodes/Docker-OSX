@@ -53,11 +53,6 @@ RUN chown arch:arch /home/arch
 
 USER arch
 WORKDIR /home/arch
-RUN git clone https://aur.archlinux.org/yay.git
-WORKDIR /home/arch/yay
-RUN makepkg -si --noconfirm
-
-WORKDIR /home/arch
 RUN git clone https://github.com/corpnewt/gibMacOS.git
 WORKDIR /home/arch/gibMacOS
 RUN perl -p -i -e 's/print("Succeeded:")/exit()/' ./gibMacOS.command
