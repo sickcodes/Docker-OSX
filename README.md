@@ -24,7 +24,7 @@ docker run --privileged -e "DISPLAY=${DISPLAY:-:0.0}" -v /tmp/.X11-unix:/tmp/.X1
 
 # need more RAM and SSH on 0.0.0.0:50922?
 
-docker run -e RAM=6 -p 50922:10022 --privileged-e "DISPLAY=${DISPLAY:-:0.0}" -v /tmp/.X11-unix:/tmp/.X11-unix sickcodes/docker-osx:latest
+docker run -e RAM=6 -p 50922:10022 --privileged -e "DISPLAY=${DISPLAY:-:0.0}" -v /tmp/.X11-unix:/tmp/.X11-unix sickcodes/docker-osx:latest
 
 ```
 
