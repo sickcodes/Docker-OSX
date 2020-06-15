@@ -24,7 +24,9 @@ docker run --privileged -e "DISPLAY=${DISPLAY:-:0.0}" -v /tmp/.X11-unix:/tmp/.X1
 
 # need more RAM and SSH on 0.0.0.0:50922?
 
-docker run -e RAM=6 -p 50922:10022 --privileged -e "DISPLAY=${DISPLAY:-:0.0}" -v /tmp/.X11-unix:/tmp/.X11-unix sickcodes/docker-osx:latest
+docker run -e RAM=4 -p 50922:10022 --privileged -e "DISPLAY=${DISPLAY:-:0.0}" -v /tmp/.X11-unix:/tmp/.X11-unix sickcodes/docker-osx:latest
+
+ssh fullname@localhost -p 50922
 
 ```
 
@@ -164,6 +166,9 @@ your image will be stored in:
 
 /var/lib/docker/overlay2/...../arch/OSX-KVM/home/arch/OSX-KVM/mac_hdd_ng.img
 ```
+# fast way
+sudo find /var/lib/docker -size +10G | grep mac_hdd_ng.img
+
 # note the container id
 docker ps
 
