@@ -4,10 +4,7 @@
 
 Run Mac in a Docker container! Run near native OSX-KVM in Docker! X11 Forwarding!
 
-
-
-
-Author: Sick.Codes https://sick.codes/
+Author: Sick.Codes https://sick.codes/ & https://twitter.com/sickcodes
 
 Credits: OSX-KVM project among many others: https://github.com/kholia/OSX-KVM/blob/master/CREDITS.md
 
@@ -25,12 +22,12 @@ docker run --privileged -e "DISPLAY=${DISPLAY:-:0.0}" -v /tmp/.X11-unix:/tmp/.X1
 
 # scroll down to troubleshooting if you have problems
 
-# need more RAM?
-# try this, change the number 8000, e.g. 8GB:
+# need more RAM and SSH on 0.0.0.0:50922?
 
-# docker run --privileged -v /tmp/.X11-unix:/tmp/.X11-unix sickcodes/docker-osx /bin/bash -c "sed -e 's/3072/8000/g' ./OpenCore-Boot.sh | sh -"
+docker run -e RAM=6 -p 50922:10022 --privileged-e "DISPLAY=${DISPLAY:-:0.0}" -v /tmp/.X11-unix:/tmp/.X11-unix docker-osx:latest
 
 ```
+
 
 # Requirements: KVM on the host
 Need to turn on hardware virtualization in your BIOS, very easy to do.
@@ -111,18 +108,23 @@ docker run --privileged -e "DISPLAY=${DISPLAY:-:0.0}" -v /tmp/.X11-unix:/tmp/.X1
 ```
 
 Alternative run, thanks @roryrjb
+
 ```docker run --privileged --net host --cap-add=ALL -v /tmp/.X11-unix:/tmp/.X11-unix -v /dev:/dev -v /lib/modules:/lib/modules sickcodes/docker-osx```
 
 Check if your hardware virt is on
+
 ```egrep -c '(svm|vmx)' /proc/cpuinfo```
 
 Try adding yourself to the docker group
+
 ```sudo usermod -aG docker $USER```
 
 Turn on docker daemon
+
 ```sudo nohup dockerd &```
 
 Check /dev/kvm permissions
+
 ```sudo chmod 666 /dev/kvm```
 
 
@@ -152,6 +154,7 @@ apt-get install docker-ce docker-ce-cli containerd.io -y
 sudo dockerd &
 sudo groupadd docker
 sudo usermod -aG docker $USER
+sudo nohup dockerd &
 
 ```
 
@@ -161,16 +164,17 @@ your image will be stored in:
 
 /var/lib/docker/overlay2/...../arch/OSX-KVM/home/arch/OSX-KVM/mac_hdd_ng.img
 ```
-# find your container's root folder
+# note the container id
+docker ps
 
+# find your container's root folder
 docker inspect $(docker ps -q --all --filter "ancestor=docker-osx") | grep UpperDir
 
 # In the folder from the above command, your image is inside ./home/arch/OSX-KVM/mac_hdd_ng.img
 
-# then sudo cp it somewhere. Don't do it while the container is running tho, it bugs out.
+# then sudo cut it somewhere. Don't do it while the container is running as you might lose data.
 
 ```
-
 
 # Wipe old images
 
@@ -187,7 +191,7 @@ docker image prune --all
 # Instant OSX-KVM in a BOX!
 This Dockerfile automates the installation of OSX-KVM inside a docker container.
 
-It will build a 32GB Mojave Disk.
+It will build a Catalina Disk with up to 200GB of space.
 
 You can change the size and version using build arguments (see below).
 
@@ -201,7 +205,14 @@ docker build -t docker-osx:latest \
 --build-arg VERSION=10.14.6 \
 --build-arg SIZE=200G
 
-docker run --privileged -v /tmp/.X11-unix:/tmp/.X11-unix docker-osx:latest
+docker run \
+-e RAM=4 \
+-e SMP=4 \
+-e CORES=4 \
+-e EXTRA='-usb -device usb-host,hostbus=1,hostaddr=8' \
+-e INTERNAL_SSH_PORT=23 \
+--privileged -v /tmp/.X11-unix:/tmp/.X11-unix docker-osx:latest
+
 
 ```
 

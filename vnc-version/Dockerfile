@@ -26,7 +26,7 @@
 # 
 # Run:
 #       
-#       docker run -p 8888:5999 -d --privileged docker-osx-vnc:latest
+#       docker run -p 8888:5999 -p 50922:10022 -d --privileged docker-osx-vnc:latest
 #
 #
 # Connect locally (safe):
@@ -72,7 +72,7 @@
 # VNC Version
 # Let's piggyback the other image:
 
-FROM sickcodes/docker-osx:latest
+FROM docker-osx:latest
 
 MAINTAINER 'https://sick.codes' <https://sick.codes>
 
@@ -90,11 +90,11 @@ RUN printf '%s\n' \
 RUN printf '%s\n%s\n%s\n\n' \
 'export DISPLAY=:99' \
 'vncserver -kill :99 || true' \
-'vncserver -geometry 1920x1080 -depth ${DEPTH:=24} -xstartup ~/.vnc/xstartup :99' > vnc.sh
+'vncserver -geometry 1920x1080 -depth ${DEPTH} -xstartup ~/.vnc/xstartup :99' > vnc.sh
 
-RUN cat vnc.sh OpenCore-Boot.sh > OpenCore-Boot_custom.sh
+RUN cat vnc.sh Launch.sh > Launch_custom.sh
 
-RUN chmod +x OpenCore-Boot_custom.sh
+RUN chmod +x Launch_custom.sh
 
 RUN tee vncpasswd_file <<< "${VNC_PASSWORD:=$(openssl rand -hex 4)}"
 RUN vncpasswd -f < vncpasswd_file > ${HOME}/.vnc/passwd
@@ -102,7 +102,9 @@ RUN vncpasswd -f < vncpasswd_file > ${HOME}/.vnc/passwd
 RUN chmod 600 ~/.vnc/passwd
 RUN printf '\n\n\n\n%s\n%s\n\n\n\n' '===========VNC_PASSWORD========== ' "$(<vncpasswd_file)"
 
+ENV DEPTH=24
+
 WORKDIR /home/arch/OSX-KVM
 USER arch
 
-CMD ./OpenCore-Boot_custom.sh
+CMD ./enable-ssh.sh && envsubst < ./Launch_custom.sh | bash
