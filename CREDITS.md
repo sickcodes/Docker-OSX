@@ -14,15 +14,5 @@ These credits refer to the contributors to this repository:
 
 [@qcasey](https://github.com/qcasey) - Removed unnecessary yay in Remove yay dependancy #40 
 
+[@tlierdotfr](https://github.com/tlierdotfr) - Reduce number of layers in Dockerfile  
 
-
-
-
-
-
-
-
-
-
-
-```
