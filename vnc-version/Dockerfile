@@ -72,7 +72,7 @@
 # VNC Version
 # Let's piggyback the other image:
 
-FROM docker-osx:latest
+FROM sickcodes/docker-osx:latest
 
 MAINTAINER 'https://sick.codes' <https://sick.codes>
 
