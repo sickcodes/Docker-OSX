@@ -67,35 +67,35 @@ ARG VERSION=10.15.5
 # RUN [[ $(egrep -c '(svm|vmx)' /proc/cpuinfo) -gt 0 ]] || { echo KVM not possible on this host && exit 1; }
 
 WORKDIR /root
-RUN tee -a /etc/pacman.conf <<< '[community-testing]'
-RUN tee -a /etc/pacman.conf <<< 'Include = /etc/pacman.d/mirrorlist'
+RUN tee -a /etc/pacman.conf <<< '[community-testing]' \
+    && tee -a /etc/pacman.conf <<< 'Include = /etc/pacman.d/mirrorlist'
 
-RUN pacman -Syu --noconfirm
-RUN pacman -S sudo git make automake gcc python go autoconf cmake pkgconf alsa-utils fakeroot --noconfirm
-RUN useradd arch -p arch
-RUN tee -a /etc/sudoers <<< 'arch ALL=(ALL) NOPASSWD: ALL'
-RUN mkdir /home/arch
-RUN chown arch:arch /home/arch
+RUN pacman -Syu --noconfirm \
+    && pacman -S sudo git make automake gcc python go autoconf cmake pkgconf alsa-utils fakeroot --noconfirm \
+    && useradd arch -p arch \
+    && tee -a /etc/sudoers <<< 'arch ALL=(ALL) NOPASSWD: ALL' \
+    && mkdir /home/arch \
+    && chown arch:arch /home/arch
 
 # allow ssh to container
 WORKDIR /root
-RUN mkdir .ssh
-RUN chmod 700 .ssh
+RUN mkdir .ssh \
+    && chmod 700 .ssh
 
 WORKDIR /root/.ssh
-RUN touch authorized_keys
-RUN chmod 644 authorized_keys
+RUN touch authorized_keys \
+    && chmod 644 authorized_keys
 
 WORKDIR /etc/ssh
-RUN tee -a sshd_config <<< 'AllowTcpForwarding yes'
-RUN tee -a sshd_config <<< 'PermitTunnel yes'
-RUN tee -a sshd_config <<< 'X11Forwarding yes'
-RUN tee -a sshd_config <<< 'PasswordAuthentication yes'
-RUN tee -a sshd_config <<< 'PermitRootLogin yes'
-RUN tee -a sshd_config <<< 'PubkeyAuthentication yes'
-RUN tee -a sshd_config <<< 'HostKey /etc/ssh/ssh_host_rsa_key'
-RUN tee -a sshd_config <<< 'HostKey /etc/ssh/ssh_host_ecdsa_key'
-RUN tee -a sshd_config <<< 'HostKey /etc/ssh/ssh_host_ed25519_key'
+RUN tee -a sshd_config <<< 'AllowTcpForwarding yes' \
+    && tee -a sshd_config <<< 'PermitTunnel yes' \
+    && tee -a sshd_config <<< 'X11Forwarding yes' \
+    && tee -a sshd_config <<< 'PasswordAuthentication yes' \
+    && tee -a sshd_config <<< 'PermitRootLogin yes' \
+    && tee -a sshd_config <<< 'PubkeyAuthentication yes' \
+    && tee -a sshd_config <<< 'HostKey /etc/ssh/ssh_host_rsa_key' \
+    && tee -a sshd_config <<< 'HostKey /etc/ssh/ssh_host_ecdsa_key' \
+    && tee -a sshd_config <<< 'HostKey /etc/ssh/ssh_host_ed25519_key'
 
 USER arch
 WORKDIR /home/arch
@@ -116,19 +116,19 @@ RUN git clone https://github.com/kholia/OSX-KVM.git
 
 # create disk
 WORKDIR /home/arch/OSX-KVM
-RUN qemu-img convert ${HOME}/gibMacOS/macOS\ Downloads/publicrelease/*/BaseSystem.dmg -O raw ${HOME}/OSX-KVM/BaseSystem.img
-RUN qemu-img create -f qcow2 mac_hdd_ng.img "${SIZE}"
+RUN qemu-img convert ${HOME}/gibMacOS/macOS\ Downloads/publicrelease/*/BaseSystem.dmg -O raw ${HOME}/OSX-KVM/BaseSystem.img \
+    && qemu-img create -f qcow2 mac_hdd_ng.img "${SIZE}"
 
 # enable ssh
 # docker exec .... ./enable-ssh.sh
 USER arch
-RUN touch enable-ssh.sh
-RUN chmod +x ./enable-ssh.sh
-RUN tee -a enable-ssh.sh <<< '[[ -f /etc/ssh/ssh_host_rsa_key ]] || \'
-RUN tee -a enable-ssh.sh <<< '[[ -f /etc/ssh/ssh_host_ed25519_key ]] || \'
-RUN tee -a enable-ssh.sh <<< '[[ -f /etc/ssh/ssh_host_ed25519_key ]] || \'
-RUN tee -a enable-ssh.sh <<< 'sudo /usr/bin/ssh-keygen -A'
-RUN tee -a enable-ssh.sh <<< 'nohup sudo /usr/bin/sshd -D &'
+RUN touch enable-ssh.sh \
+    && chmod +x ./enable-ssh.sh \
+    && tee -a enable-ssh.sh <<< '[[ -f /etc/ssh/ssh_host_rsa_key ]] || \' \
+    && tee -a enable-ssh.sh <<< '[[ -f /etc/ssh/ssh_host_ed25519_key ]] || \' \
+    && tee -a enable-ssh.sh <<< '[[ -f /etc/ssh/ssh_host_ed25519_key ]] || \' \
+    && tee -a enable-ssh.sh <<< 'sudo /usr/bin/ssh-keygen -A' \
+    && tee -a enable-ssh.sh <<< 'nohup sudo /usr/bin/sshd -D &'
 
 # QEMU CONFIGURATOR
 # set optional ram at runtime -e RAM=16
@@ -140,29 +140,29 @@ RUN tee -a enable-ssh.sh <<< 'nohup sudo /usr/bin/sshd -D &'
 # > Launch.sh
 # > Docker-OSX.xml
 
-RUN touch Launch.sh
-RUN chmod +x ./Launch.sh
-RUN tee -a Launch.sh <<< 'qemu-system-x86_64 -enable-kvm -m ${RAM}000 \'
-RUN tee -a Launch.sh <<< '-cpu Penryn,kvm=on,vendor=GenuineIntel,+invtsc,vmware-cpuid-freq=on,+pcid,+ssse3,+sse4.2,+popcnt,+avx,+aes,+xsave,+xsaveopt,check \'
-RUN tee -a Launch.sh <<< '-machine q35 \'
-RUN tee -a Launch.sh <<< '-smp ${SMP},cores=${CORES} \'
-RUN tee -a Launch.sh <<< '-usb -device usb-kbd -device usb-tablet \'
-RUN tee -a Launch.sh <<< '-device isa-applesmc,osk=ourhardworkbythesewordsguardedpleasedontsteal\(c\)AppleComputerInc \'
-RUN tee -a Launch.sh <<< '-drive if=pflash,format=raw,readonly,file=/home/arch/OSX-KVM/OVMF_CODE.fd \'
-RUN tee -a Launch.sh <<< '-drive if=pflash,format=raw,file=./OVMF_VARS-1024x768.fd \'
-RUN tee -a Launch.sh <<< '-smbios type=2 \'
-RUN tee -a Launch.sh <<< '-device ich9-intel-hda -device hda-duplex \'
-RUN tee -a Launch.sh <<< '-device ich9-ahci,id=sata \'
-RUN tee -a Launch.sh <<< '-drive id=OpenCoreBoot,if=none,snapshot=on,format=qcow2,file=/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore.qcow2 \'
-RUN tee -a Launch.sh <<< '-device ide-hd,bus=sata.2,drive=OpenCoreBoot \'
-RUN tee -a Launch.sh <<< '-device ide-hd,bus=sata.3,drive=InstallMedia \'
-RUN tee -a Launch.sh <<< '-drive id=InstallMedia,if=none,file=BaseSystem.img,format=raw \'
-RUN tee -a Launch.sh <<< '-drive id=MacHDD,if=none,file=/home/arch/OSX-KVM/mac_hdd_ng.img,format=qcow2 \'
-RUN tee -a Launch.sh <<< '-device ide-hd,bus=sata.4,drive=MacHDD \'
-RUN tee -a Launch.sh <<< '-netdev user,id=net0,hostfwd=tcp::${INTERNAL_SSH_PORT}-:22, -device e1000-82545em,netdev=net0,id=net0,mac=52:54:00:09:49:17 \'
-RUN tee -a Launch.sh <<< '-monitor stdio \'
-RUN tee -a Launch.sh <<< '-vga vmware \'
-RUN tee -a Launch.sh <<< '${EXTRA}'
+RUN touch Launch.sh \
+    && chmod +x ./Launch.sh \
+    && tee -a Launch.sh <<< 'qemu-system-x86_64 -enable-kvm -m ${RAM}000 \' \
+    && tee -a Launch.sh <<< '-cpu Penryn,kvm=on,vendor=GenuineIntel,+invtsc,vmware-cpuid-freq=on,+pcid,+ssse3,+sse4.2,+popcnt,+avx,+aes,+xsave,+xsaveopt,check \' \
+    && tee -a Launch.sh <<< '-machine q35 \' \
+    && tee -a Launch.sh <<< '-smp ${SMP},cores=${CORES} \' \
+    && tee -a Launch.sh <<< '-usb -device usb-kbd -device usb-tablet \' \
+    && tee -a Launch.sh <<< '-device isa-applesmc,osk=ourhardworkbythesewordsguardedpleasedontsteal\(c\)AppleComputerInc \' \
+    && tee -a Launch.sh <<< '-drive if=pflash,format=raw,readonly,file=/home/arch/OSX-KVM/OVMF_CODE.fd \' \
+    && tee -a Launch.sh <<< '-drive if=pflash,format=raw,file=./OVMF_VARS-1024x768.fd \' \
+    && tee -a Launch.sh <<< '-smbios type=2 \' \
+    && tee -a Launch.sh <<< '-device ich9-intel-hda -device hda-duplex \' \
+    && tee -a Launch.sh <<< '-device ich9-ahci,id=sata \' \
+    && tee -a Launch.sh <<< '-drive id=OpenCoreBoot,if=none,snapshot=on,format=qcow2,file=/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore.qcow2 \' \
+    && tee -a Launch.sh <<< '-device ide-hd,bus=sata.2,drive=OpenCoreBoot \' \
+    && tee -a Launch.sh <<< '-device ide-hd,bus=sata.3,drive=InstallMedia \' \
+    && tee -a Launch.sh <<< '-drive id=InstallMedia,if=none,file=BaseSystem.img,format=raw \' \
+    && tee -a Launch.sh <<< '-drive id=MacHDD,if=none,file=/home/arch/OSX-KVM/mac_hdd_ng.img,format=qcow2 \' \
+    && tee -a Launch.sh <<< '-device ide-hd,bus=sata.4,drive=MacHDD \' \
+    && tee -a Launch.sh <<< '-netdev user,id=net0,hostfwd=tcp::${INTERNAL_SSH_PORT}-:22, -device e1000-82545em,netdev=net0,id=net0,mac=52:54:00:09:49:17 \' \
+    && tee -a Launch.sh <<< '-monitor stdio \' \
+    && tee -a Launch.sh <<< '-vga vmware \' \
+    && tee -a Launch.sh <<< '${EXTRA}'
 
 ENV USER arch
 
