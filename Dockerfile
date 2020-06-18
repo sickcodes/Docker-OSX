@@ -128,7 +128,7 @@ RUN touch enable-ssh.sh \
     && tee -a enable-ssh.sh <<< '[[ -f /etc/ssh/ssh_host_ed25519_key ]] || \' \
     && tee -a enable-ssh.sh <<< '[[ -f /etc/ssh/ssh_host_ed25519_key ]] || \' \
     && tee -a enable-ssh.sh <<< 'sudo /usr/bin/ssh-keygen -A' \
-    && tee -a enable-ssh.sh <<< 'nohup sudo /usr/bin/sshd -D &' \
+    && tee -a enable-ssh.sh <<< 'nohup sudo /usr/bin/sshd -D &'
 
 # QEMU CONFIGURATOR
 # set optional ram at runtime -e RAM=16
