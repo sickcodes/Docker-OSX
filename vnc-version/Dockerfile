@@ -76,9 +76,20 @@ FROM sickcodes/docker-osx:latest
 
 MAINTAINER 'https://sick.codes' <https://sick.codes>
 
+USER root
+
+RUN tee -a /etc/pacman.d/mirrorlist <<< 'Server = http://mirrors.evowise.com/archlinux/$repo/os/$arch'
+RUN tee -a /etc/pacman.d/mirrorlist <<< 'Server = http://mirror.rackspace.com/archlinux/$repo/os/$arch'
+RUN tee -a /etc/pacman.d/mirrorlist <<< 'Server = https://mirror.rackspace.com/archlinux/$repo/os/$arch'
+
+# ARG MIRROR_COUNTRY=US
+# RUN curl -s "https://www.archlinux.org/mirrorlist/?country=${MIRROR_COUNTRY}&protocol=https&use_mirror_status=on" | \
+# sed -e 's/^#Server/Server/' -e '/^#/d' | \
+# rankmirrors -n 5 - > /etc/pacman.d/mirrorlist
+
 USER arch
 
-RUN sudo pacman -Syu --noconfirm
+RUN sudo pacman -Sy --noconfirm
 RUN sudo pacman -S tigervnc xterm xorg-xhost xdotool ufw --noconfirm
 
 RUN mkdir ${HOME}/.vnc
