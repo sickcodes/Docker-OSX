@@ -78,7 +78,7 @@ MAINTAINER 'https://sick.codes' <https://sick.codes>
 
 USER arch
 
-RUN sudo pacman -Syu
+RUN sudo pacman -Syu --noconfirm
 RUN sudo pacman -S tigervnc xterm xorg-xhost xdotool ufw --noconfirm
 
 RUN mkdir ${HOME}/.vnc
