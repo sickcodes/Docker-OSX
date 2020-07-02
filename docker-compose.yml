@@ -1,7 +1,8 @@
-version: '3.1'
+version: '3.4'
 
 services:
   osx:
+    container_name: docker-osx
     build:
       context: .
       args:
@@ -10,9 +11,16 @@ services:
     image: sickcodes/docker-osx
     privileged: true
     environment:
-      DISPLAY: ${DISPLAY:-:0.0}
+      - DISPLAY=${DISPLAY:-:0.0}
     network_mode: "host"
     cap_add:
       - ALL
     volumes:
-      - ./tmp/.X11-unix:/tmp/.X11-unix
+      - /tmp/.X11-unix:/tmp/.X11-unix
+      - /dev:/dev
+      - /lib/modules:/lib/modules
+      - docker-osx_data:/home
+
+volumes:
+  docker-osx_data:
+    name: docker-osx_data
