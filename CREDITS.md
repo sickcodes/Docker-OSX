@@ -16,3 +16,6 @@ These credits refer to the contributors to this repository:
 
 [@tlierdotfr](https://github.com/tlierdotfr) - Reduce number of layers in Dockerfile  
 
+[@Julioevm](https://github.com/Julioevm) - Update docker-compose.yml #57
+
+[@jviotti](https://github.com/jviotti) - Auto-boot thru ShowPicker
