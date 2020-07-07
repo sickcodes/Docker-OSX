@@ -160,6 +160,15 @@ sudo nohup dockerd &
 
 ```
 
+If you have no internet connectivity from the VM, you are using bridge
+networking, and you are running Fedora:
+
+```
+# Set the docker0 bridge to the trusted zone
+sudo firewall-cmd --permanent --zone=trusted --add-interface=docker0
+sudo firewall-cmd --reload
+```
+
 # Backup the disk
 
 your image will be stored in:
