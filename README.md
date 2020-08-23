@@ -80,9 +80,7 @@ docker start abc123xyz567
 
 # Click Disk Utility
 
-# Erase the biggest disk
-
-# Partition that disk and subtract 1GB and press Apply
+# Erase the biggest disk (around 200gb default), DO NOT MODIFY THE SMALLER DISKS.
 
 # Click Reinstall macOS
 
