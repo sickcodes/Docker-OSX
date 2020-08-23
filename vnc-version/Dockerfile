@@ -99,7 +99,7 @@ RUN printf '%s\n' \
 'xterm &' > ~/.vnc/xstartup
 
 # this won't work if you have 99 monitors, 98 monitors is fine though // don't forget to remove the lock file incase you shut down incorrectly or create an image.
-RUN printf '%s\n%s\n%s\n\n' \
+RUN printf '%s\n%s\n%s\n%s\n\n' \
 'sudo rm -f /tmp/.X99-lock' \
 'export DISPLAY=:99' \
 'vncserver -kill :99 || true' \
