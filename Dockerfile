@@ -38,7 +38,7 @@
 # Optargs:
 #       
 #       SIZE=200G
-#       VERSION=10.15.5
+#       VERSION=10.15.6
 #       ENV RAM=5
 #       ENV SMP=4
 #       ENV CORES=4
@@ -61,7 +61,7 @@ MAINTAINER 'https://sick.codes' <https://sick.codes>
 
 # change disk size here or add during build, e.g. --build-arg VERSION=10.14.5 --build-arg SIZE=50G
 ARG SIZE=200G
-ARG VERSION=10.15.5
+ARG VERSION=10.15.6
 
 # This fails on hub.docker.com, useful for debugging in cloud
 # RUN [[ $(egrep -c '(svm|vmx)' /proc/cpuinfo) -gt 0 ]] || { echo KVM not possible on this host && exit 1; }
@@ -159,18 +159,19 @@ RUN touch Launch.sh \
     && tee -a Launch.sh <<< '-drive id=InstallMedia,if=none,file=BaseSystem.img,format=raw \' \
     && tee -a Launch.sh <<< '-drive id=MacHDD,if=none,file=/home/arch/OSX-KVM/mac_hdd_ng.img,format=qcow2 \' \
     && tee -a Launch.sh <<< '-device ide-hd,bus=sata.4,drive=MacHDD \' \
-    && tee -a Launch.sh <<< '-netdev user,id=net0,hostfwd=tcp::${INTERNAL_SSH_PORT}-:22, -device e1000-82545em,netdev=net0,id=net0,mac=52:54:00:09:49:17 \' \
+    && tee -a Launch.sh <<< '-netdev user,id=net0,hostfwd=tcp::${INTERNAL_SSH_PORT}-:22,hostfwd=tcp::${SCREEN_SHARE_PORT}-:5900, -device e1000-82545em,netdev=net0,id=net0,mac=52:54:00:09:49:17 \' \
     && tee -a Launch.sh <<< '-monitor stdio \' \
     && tee -a Launch.sh <<< '-vga vmware \' \
     && tee -a Launch.sh <<< '${EXTRA}'
 
 ENV USER arch
 
-ENV RAM=5
+ENV RAM=8
 ENV SMP=4
 ENV CORES=4
 ENV EXTRA=
 ENV INTERNAL_SSH_PORT=10022
+ENV SCREEN_SHARE_PORT=5900
 
 # if you're in the shell, export these variables to use then in envsubst
 # export RAM=5
@@ -178,6 +179,7 @@ ENV INTERNAL_SSH_PORT=10022
 # export CORES=4
 # export EXTRA=
 # export INTERNAL_SSH_PORT=10022
+# export SCREEN_SHARE_PORT=5900
 
 USER arch
 VOLUME ["/tmp/.X11-unix"]
