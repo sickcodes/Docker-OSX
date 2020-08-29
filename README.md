@@ -80,12 +80,22 @@ docker start abc123xyz567
 
 # Click Disk Utility
 
-# Erase the biggest disk
-
-# Partition that disk and subtract 1GB and press Apply
+# Erase the biggest disk (around 200gb default), DO NOT MODIFY THE SMALLER DISKS.
 
 # Click Reinstall macOS
 
+```
+
+## Creating images:
+```
+# You can create an image of a already configured and setup container. This allows you to effectively duplicate a system.
+# To do this, run the following commands
+
+$ docker ps --all #make note of your container id
+$ docker commit containerID newImageName
+
+# To run this image do the following
+$ docker run --privileged -e "DISPLAY=${DISPLAY:-:0.0}" -v /tmp/.X11-unix:/tmp/.X11-unix newImageName
 ```
 
 # Troubleshooting
