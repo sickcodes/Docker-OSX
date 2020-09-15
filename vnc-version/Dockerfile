@@ -88,7 +88,9 @@ RUN tee -a /etc/pacman.d/mirrorlist <<< 'Server = https://mirror.rackspace.com/a
 # rankmirrors -n 5 - > /etc/pacman.d/mirrorlist
 
 USER arch
-RUN sudo pacman -U https://archive.archlinux.org/packages/t/tigervnc/tigervnc-1.10.1-2-x86_64.pkg.tar.zst --noconfirm
+
+ARG TIGERVNC_VERSION=1.10.1-2
+RUN sudo pacman -U https://archive.archlinux.org/packages/t/tigervnc/tigervnc-${TIGERVNC_VERSION}-x86_64.pkg.tar.zst --noconfirm
 
 RUN sudo pacman -Sy --noconfirm
 RUN sudo pacman -S xterm xorg-xhost xorg-xinit xdotool ufw --noconfirm
