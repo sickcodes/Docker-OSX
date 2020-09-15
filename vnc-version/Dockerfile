@@ -93,7 +93,7 @@ ARG TIGERVNC_VERSION=1.10.1-2
 RUN sudo pacman -U https://archive.archlinux.org/packages/t/tigervnc/tigervnc-${TIGERVNC_VERSION}-x86_64.pkg.tar.zst --noconfirm
 
 RUN sudo pacman -Sy --noconfirm
-RUN sudo pacman -S xterm xorg-xhost xorg-xinit xdotool ufw --noconfirm
+RUN sudo pacman -S xterm xorg-xhost xdotool ufw --noconfirm
 
 RUN mkdir ${HOME}/.vnc
 
