@@ -8,7 +8,7 @@
 # Repo:             https://github.com/sickcodes/Docker-OSX/
 # Title:            Mac on Docker (Docker-OSX)
 # Author:           Sick.Codes https://sick.codes/ 
-# Version:          2.0
+# Version:          2.5
 # License:          GPLv3+
 # 
 # All credits for OSX-KVM and the rest at @Kholia's repo: https://github.com/kholia/osx-kvm
@@ -190,6 +190,3 @@ CMD ./enable-ssh.sh && envsubst < ./Launch.sh | bash
 # CMD virsh define <(envsubst < Docker-OSX.xml) && virt-manager || virt-manager
 # CMD virsh define <(envsubst < macOS-libvirt-Catalina.xml) && virt-manager || virt-manager
 
-
-# all perms
-# 

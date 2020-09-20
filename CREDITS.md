@@ -19,3 +19,7 @@ These credits refer to the contributors to this repository:
 [@Julioevm](https://github.com/Julioevm) - Update docker-compose.yml #57
 
 [@jviotti](https://github.com/jviotti) - Auto-boot thru ShowPicker
+
+[@MrBenFTW](https://github.com/MrBenFTW) - Updated macOS version 10.15.5 -> 10.15.6, Enabled screen sharing port forwarding, Removed the need to remove 1gb from the partition.
+
+[@hoantp](https://github.com/hoantp) - Initialized TigerVNC 1.11.0 fix

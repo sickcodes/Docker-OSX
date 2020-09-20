@@ -7,8 +7,8 @@
 # 
 # Title:            Mac on Docker (Docker-OSX) [VNC EDITION]
 # Author:           Sick.Codes https://sick.codes/        
-# Version:          1.0
-# License:          GPLv3
+# Version:          2.5
+# License:          GPLv3+
 # 
 # All credits for OSX-KVM and the rest at Kholia's repo: https://github.com/kholia/osx-kvm
 # OpenCore support go to https://github.com/Leoyzen/KVM-Opencore 
@@ -74,13 +74,13 @@
 
 FROM sickcodes/docker-osx:latest
 
-MAINTAINER 'https://sick.codes' <https://sick.codes>
+MAINTAINER 'https://twitter.com/sickcodes' <https://sick.codes>
 
 USER root
 
-RUN tee -a /etc/pacman.d/mirrorlist <<< 'Server = http://mirrors.evowise.com/archlinux/$repo/os/$arch'
-RUN tee -a /etc/pacman.d/mirrorlist <<< 'Server = http://mirror.rackspace.com/archlinux/$repo/os/$arch'
-RUN tee -a /etc/pacman.d/mirrorlist <<< 'Server = https://mirror.rackspace.com/archlinux/$repo/os/$arch'
+RUN tee -a /etc/pacman.d/mirrorlist <<< 'Server = http://mirrors.evowise.com/archlinux/$repo/os/$arch' \
+    && tee -a /etc/pacman.d/mirrorlist <<< 'Server = http://mirror.rackspace.com/archlinux/$repo/os/$arch' \
+    && tee -a /etc/pacman.d/mirrorlist <<< 'Server = https://mirror.rackspace.com/archlinux/$repo/os/$arch'
 
 # ARG MIRROR_COUNTRY=US
 # RUN curl -s "https://www.archlinux.org/mirrorlist/?country=${MIRROR_COUNTRY}&protocol=https&use_mirror_status=on" | \
@@ -89,21 +89,20 @@ RUN tee -a /etc/pacman.d/mirrorlist <<< 'Server = https://mirror.rackspace.com/a
 
 USER arch
 
-RUN sudo pacman -Sy --noconfirm
-RUN sudo pacman -S tigervnc xterm xorg-xhost xdotool ufw --noconfirm
+RUN sudo pacman -Syyuu --noconfirm \
+    && sudo pacman -S tigervnc xterm xorg-xhost xdotool ufw --noconfirm \
+    && mkdir -p ${HOME}/.vnc \
+    && touch ~/.vnc/config \
+    && tee -a ~/.vnc/config <<< 'geometry=1920x1080' \
+    && tee -a ~/.vnc/config <<< 'localhost' \
+    && tee -a ~/.vnc/config <<< 'alwaysshared'
 
-RUN mkdir ${HOME}/.vnc
-
-RUN printf '%s\n' \
-'xinit &' \
-'xterm &' > ~/.vnc/xstartup
-
-# this won't work if you have 99 monitors, 98 monitors is fine though // don't forget to remove the lock file incase you shut down incorrectly or create an image.
-RUN printf '%s\n%s\n%s\n%s\n\n' \
+# this won't work if you have 99 monitors, 98 monitors is fine though
+# don't forget to remove the lock file incase you shut down incorrectly or create an image.
+RUN printf '\n%s\n' \
 'sudo rm -f /tmp/.X99-lock' \
 'export DISPLAY=:99' \
-'vncserver -kill :99 || true' \
-'vncserver -geometry 1920x1080 -depth ${DEPTH} -xstartup ~/.vnc/xstartup :99' > vnc.sh
+'/usr/bin/Xvnc -geometry 1920x1080 -rfbauth "${HOME}/.vnc/passwd" :99 &' > vnc.sh
 
 RUN cat vnc.sh Launch.sh > Launch_custom.sh
 
@@ -115,9 +114,6 @@ RUN vncpasswd -f < vncpasswd_file > ${HOME}/.vnc/passwd
 RUN chmod 600 ~/.vnc/passwd
 RUN printf '\n\n\n\n%s\n%s\n\n\n\n' '===========VNC_PASSWORD========== ' "$(<vncpasswd_file)"
 
-ENV DEPTH=24
-
 WORKDIR /home/arch/OSX-KVM
-USER arch
 
 CMD ./enable-ssh.sh && envsubst < ./Launch_custom.sh | bash
