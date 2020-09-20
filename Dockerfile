@@ -156,7 +156,7 @@ RUN touch Launch.sh \
     && tee -a Launch.sh <<< '-drive if=pflash,format=raw,readonly,file=/home/arch/OSX-KVM/OVMF_CODE.fd \' \
     && tee -a Launch.sh <<< '-drive if=pflash,format=raw,file=./OVMF_VARS-1024x768.fd \' \
     && tee -a Launch.sh <<< '-smbios type=2 \' \
-    && tee -a Launch.sh <<< '-device ich9-intel-hda -device hda-duplex \' \
+    && tee -a Launch.sh <<< '-audiodev ${AUDIO_DRIVER:-alsa},id=hda -device ich9-intel-hda -device hda-duplex,audiodev=hda \' \
     && tee -a Launch.sh <<< '-device ich9-ahci,id=sata \' \
     && tee -a Launch.sh <<< '-drive id=OpenCoreBoot,if=none,snapshot=on,format=qcow2,file=/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore.qcow2 \' \
     && tee -a Launch.sh <<< '-device ide-hd,bus=sata.2,drive=OpenCoreBoot \' \
