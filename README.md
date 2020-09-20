@@ -133,6 +133,15 @@ xhost +
 docker run --device /dev/kvm --device /dev/snd -v /tmp/.X11-unix:/tmp/.X11-unix sickcodes/docker-osx ./OpenCore-Boot.sh
 ```
 
+PulseAudio for sound (note neither [AppleALC](https://github.com/acidanthera/AppleALC) and varying [`alcid`](https://dortania.github.io/OpenCore-Post-Install/universal/audio.html) or [VoodooHDA-OC](https://github.com/chris1111/VoodooHDA-OC) have [codec support](https://osy.gitbook.io/hac-mini-guide/details/hda-fix#hda-codec) though [IORegistryExplorer](https://github.com/vulgo/IORegistryExplorer) does show the controller component working):
+```bash
+docker run --device /dev/kvm -e AUDIO_DRIVER=pa,server=unix:/tmp/pulseaudio.socket -v /run/user/$(id -u)/pulse/native:/tmp/pulseaudio.socket -v /tmp/.X11-unix:/tmp/.X11-unix sickcodes/docker-osx
+```
+PulseAudio debugging:
+```bash
+docker run --device /dev/kvm -e AUDIO_DRIVER=pa,server=unix:/tmp/pulseaudio.socket -v /run/user/$(id -u)/pulse/native:/tmp/pulseaudio.socket -v /tmp/.X11-unix:/tmp/.X11-unix -e PULSE_SERVER=unix:/tmp/pulseaudio.socket sickcodes/docker-osx pactl list
+```
+
 Alternative run, thanks @roryrjb
 
 ```bash
