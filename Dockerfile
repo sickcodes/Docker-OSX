@@ -72,6 +72,7 @@ RUN tee -a /etc/pacman.conf <<< '[community-testing]' \
 
 RUN pacman -Syu --noconfirm \
     && pacman -S sudo git make automake gcc python go autoconf cmake pkgconf alsa-utils fakeroot --noconfirm \
+    && yes | pacman -Scc \
     && useradd arch -p arch \
     && tee -a /etc/sudoers <<< 'arch ALL=(ALL) NOPASSWD: ALL' \
     && mkdir /home/arch \
@@ -106,7 +107,7 @@ RUN perl -p -i -e 's/print("Succeeded:")/exit()/' ./gibMacOS.command
 # this command takes a while!
 RUN python gibMacOS.command -v "${VERSION}" -d || echo Done
 
-RUN sudo pacman -Syu qemu libvirt dnsmasq virt-manager bridge-utils flex bison ebtables edk2-ovmf netctl libvirt-dbus libguestfs --noconfirm
+RUN sudo pacman -Syu qemu libvirt dnsmasq virt-manager bridge-utils flex bison ebtables edk2-ovmf netctl libvirt-dbus libguestfs --noconfirm && yes | pacman -Scc
 # RUN sudo systemctl enable libvirtd.service
 # RUN sudo systemctl enable virtlogd.service
 
