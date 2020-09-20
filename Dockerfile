@@ -143,10 +143,10 @@ RUN touch enable-ssh.sh \
 
 RUN touch Launch.sh \
     && chmod +x ./Launch.sh \
-    && tee -a Launch.sh <<< 'qemu-system-x86_64 -enable-kvm -m ${RAM}000 \' \
+    && tee -a Launch.sh <<< 'qemu-system-x86_64 -enable-kvm -m ${RAM:-8}000 \' \
     && tee -a Launch.sh <<< '-cpu Penryn,kvm=on,vendor=GenuineIntel,+invtsc,vmware-cpuid-freq=on,+pcid,+ssse3,+sse4.2,+popcnt,+avx,+aes,+xsave,+xsaveopt,check \' \
     && tee -a Launch.sh <<< '-machine q35 \' \
-    && tee -a Launch.sh <<< '-smp ${SMP},cores=${CORES} \' \
+    && tee -a Launch.sh <<< '-smp ${SMP:-4},cores=${CORES:-4} \' \
     && tee -a Launch.sh <<< '-usb -device usb-kbd -device usb-tablet \' \
     && tee -a Launch.sh <<< '-device isa-applesmc,osk=ourhardworkbythesewordsguardedpleasedontsteal\(c\)AppleComputerInc \' \
     && tee -a Launch.sh <<< '-drive if=pflash,format=raw,readonly,file=/home/arch/OSX-KVM/OVMF_CODE.fd \' \
@@ -160,27 +160,12 @@ RUN touch Launch.sh \
     && tee -a Launch.sh <<< '-drive id=InstallMedia,if=none,file=BaseSystem.img,format=raw \' \
     && tee -a Launch.sh <<< '-drive id=MacHDD,if=none,file=/home/arch/OSX-KVM/mac_hdd_ng.img,format=qcow2 \' \
     && tee -a Launch.sh <<< '-device ide-hd,bus=sata.4,drive=MacHDD \' \
-    && tee -a Launch.sh <<< '-netdev user,id=net0,hostfwd=tcp::${INTERNAL_SSH_PORT}-:22,hostfwd=tcp::${SCREEN_SHARE_PORT}-:5900, -device e1000-82545em,netdev=net0,id=net0,mac=52:54:00:09:49:17 \' \
+    && tee -a Launch.sh <<< '-netdev user,id=net0,hostfwd=tcp::${INTERNAL_SSH_PORT:-10022}-:22,hostfwd=tcp::${SCREEN_SHARE_PORT:-5900}-:5900, -device e1000-82545em,netdev=net0,id=net0,mac=52:54:00:09:49:17 \' \
     && tee -a Launch.sh <<< '-monitor stdio \' \
     && tee -a Launch.sh <<< '-vga vmware \' \
-    && tee -a Launch.sh <<< '${EXTRA}'
+    && tee -a Launch.sh <<< '${EXTRA:-}'
 
 ENV USER arch
-
-ENV RAM=8
-ENV SMP=4
-ENV CORES=4
-ENV EXTRA=
-ENV INTERNAL_SSH_PORT=10022
-ENV SCREEN_SHARE_PORT=5900
-
-# if you're in the shell, export these variables to use then in envsubst
-# export RAM=5
-# export SMP=4
-# export CORES=4
-# export EXTRA=
-# export INTERNAL_SSH_PORT=10022
-# export SCREEN_SHARE_PORT=5900
 
 USER arch
 VOLUME ["/tmp/.X11-unix"]
