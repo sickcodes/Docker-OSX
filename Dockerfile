@@ -145,9 +145,9 @@ RUN touch Launch.sh \
     && chmod +x ./Launch.sh \
     && tee -a Launch.sh <<< '#!/bin/sh' \
     && tee -a Launch.sh <<< 'set -eu' \
-    && tee -a Launch.sh <<< 'exec qemu-system-x86_64 -enable-kvm -m ${RAM:-8}000 \' \
-    && tee -a Launch.sh <<< '-cpu Penryn,kvm=on,vendor=GenuineIntel,+invtsc,vmware-cpuid-freq=on,+pcid,+ssse3,+sse4.2,+popcnt,+avx,+aes,+xsave,+xsaveopt,check \' \
-    && tee -a Launch.sh <<< '-machine q35 \' \
+    && tee -a Launch.sh <<< 'exec qemu-system-x86_64 -m ${RAM:-8}000 \' \
+    && tee -a Launch.sh <<< '-cpu Penryn,vendor=GenuineIntel,+invtsc,vmware-cpuid-freq=on,+pcid,+ssse3,+sse4.2,+popcnt,+avx,+aes,+xsave,+xsaveopt,check \' \
+    && tee -a Launch.sh <<< '-machine q35,accel=kvm:tcg \' \
     && tee -a Launch.sh <<< '-smp ${SMP:-4},cores=${CORES:-4} \' \
     && tee -a Launch.sh <<< '-usb -device usb-kbd -device usb-tablet \' \
     && tee -a Launch.sh <<< '-device isa-applesmc,osk=ourhardworkbythesewordsguardedpleasedontsteal\(c\)AppleComputerInc \' \
