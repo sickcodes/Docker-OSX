@@ -169,6 +169,8 @@ RUN touch Launch.sh \
 
 ENV USER arch
 
+ENV DISPLAY=:0.0
+
 USER arch
 VOLUME ["/tmp/.X11-unix"]
 

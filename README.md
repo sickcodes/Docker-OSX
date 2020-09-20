@@ -32,7 +32,7 @@ Pull requests, suggestions very welcome!
 
 docker pull sickcodes/docker-osx
 
-docker run --privileged -e "DISPLAY=${DISPLAY:-:0.0}" -v /tmp/.X11-unix:/tmp/.X11-unix sickcodes/docker-osx
+docker run --privileged -v /tmp/.X11-unix:/tmp/.X11-unix sickcodes/docker-osx
 
 # press ctrl G if your mouse gets stuck
 
@@ -40,7 +40,7 @@ docker run --privileged -e "DISPLAY=${DISPLAY:-:0.0}" -v /tmp/.X11-unix:/tmp/.X1
 
 # need more RAM and SSH on 0.0.0.0:50922?
 
-docker run -e RAM=4 -p 50922:10022 --privileged -e "DISPLAY=${DISPLAY:-:0.0}" -v /tmp/.X11-unix:/tmp/.X11-unix sickcodes/docker-osx:latest
+docker run -e RAM=4 -p 50922:10022 --privileged -v /tmp/.X11-unix:/tmp/.X11-unix sickcodes/docker-osx:latest
 
 ssh fullname@localhost -p 50922
 
@@ -109,7 +109,7 @@ docker ps --all #make note of your container id
 docker commit containerID newImageName
 
 # To run this image do the following
-docker run --privileged -e "DISPLAY=${DISPLAY:-:0.0}" -v /tmp/.X11-unix:/tmp/.X11-unix newImageName
+docker run --privileged -v /tmp/.X11-unix:/tmp/.X11-unix newImageName
 ```
 
 # Troubleshooting
@@ -130,7 +130,7 @@ sudo yum install xorg-x11-server-utils
 # then run
 xhost +
 
-docker run --privileged -e "DISPLAY=${DISPLAY:-:0.0}" -v /tmp/.X11-unix:/tmp/.X11-unix sickcodes/docker-osx ./OpenCore-Boot.sh
+docker run --privileged -v /tmp/.X11-unix:/tmp/.X11-unix sickcodes/docker-osx ./OpenCore-Boot.sh
 ```
 
 Alternative run, thanks @roryrjb
