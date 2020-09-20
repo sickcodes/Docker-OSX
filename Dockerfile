@@ -99,26 +99,10 @@ RUN tee -a sshd_config <<< 'AllowTcpForwarding yes' \
     && tee -a sshd_config <<< 'HostKey /etc/ssh/ssh_host_ed25519_key'
 
 USER arch
-WORKDIR /home/arch
-RUN git clone https://github.com/corpnewt/gibMacOS.git
-WORKDIR /home/arch/gibMacOS
-RUN perl -p -i -e 's/print("Succeeded:")/exit()/' ./gibMacOS.command
-
-# this command takes a while!
-RUN python gibMacOS.command -v "${VERSION}" -d || echo Done
-
-RUN sudo pacman -Syu qemu libvirt dnsmasq virt-manager bridge-utils flex bison ebtables edk2-ovmf netctl libvirt-dbus libguestfs --noconfirm && yes | pacman -Scc
-# RUN sudo systemctl enable libvirtd.service
-# RUN sudo systemctl enable virtlogd.service
 
 # download OSX-KVM
 WORKDIR /home/arch
 RUN git clone https://github.com/kholia/OSX-KVM.git
-
-# create disk
-WORKDIR /home/arch/OSX-KVM
-RUN qemu-img convert ${HOME}/gibMacOS/macOS\ Downloads/publicrelease/*/BaseSystem.dmg -O raw ${HOME}/OSX-KVM/BaseSystem.img \
-    && qemu-img create -f qcow2 mac_hdd_ng.img "${SIZE}"
 
 # enable ssh
 # docker exec .... ./enable-ssh.sh
@@ -138,9 +122,25 @@ RUN touch enable-ssh.sh \
 
 # default env vars, RUNTIME ONLY, not for editing in build time.
 
+RUN sudo pacman -Syu qemu libvirt dnsmasq virt-manager bridge-utils flex bison ebtables edk2-ovmf netctl libvirt-dbus libguestfs --noconfirm && yes | sudo pacman -Scc
+# RUN sudo systemctl enable libvirtd.service
+# RUN sudo systemctl enable virtlogd.service
+
+WORKDIR /home/arch
+RUN git clone https://github.com/corpnewt/gibMacOS.git
+WORKDIR /home/arch/gibMacOS
+
+# this command takes a while!
+RUN perl -p -i -e 's/print("Succeeded:")/exit()/' ./gibMacOS.command \
+	&& { python gibMacOS.command -v "${VERSION}" -d || echo Done; } \
+	&& qemu-img convert ${HOME}/gibMacOS/macOS\ Downloads/publicrelease/*/BaseSystem.dmg -O qcow2 -p -c ${HOME}/OSX-KVM/BaseSystem.img \
+	&& qemu-img create -f qcow2 ${HOME}/OSX-KVM/mac_hdd_ng.img "${SIZE}" \
+	&& rm ${HOME}/gibMacOS/macOS\ Downloads/publicrelease/*/BaseSystem.dmg
+
 # > Launch.sh
 # > Docker-OSX.xml
 
+WORKDIR /home/arch
 RUN touch Launch.sh \
     && chmod +x ./Launch.sh \
     && tee -a Launch.sh <<< '#!/bin/sh' \
@@ -154,14 +154,14 @@ RUN touch Launch.sh \
     && tee -a Launch.sh <<< '-usb -device usb-kbd -device usb-tablet \' \
     && tee -a Launch.sh <<< '-device isa-applesmc,osk=ourhardworkbythesewordsguardedpleasedontsteal\(c\)AppleComputerInc \' \
     && tee -a Launch.sh <<< '-drive if=pflash,format=raw,readonly,file=/home/arch/OSX-KVM/OVMF_CODE.fd \' \
-    && tee -a Launch.sh <<< '-drive if=pflash,format=raw,file=./OVMF_VARS-1024x768.fd \' \
+    && tee -a Launch.sh <<< '-drive if=pflash,format=raw,file=/home/arch/OSX-KVM/OVMF_VARS-1024x768.fd \' \
     && tee -a Launch.sh <<< '-smbios type=2 \' \
     && tee -a Launch.sh <<< '-audiodev ${AUDIO_DRIVER:-alsa},id=hda -device ich9-intel-hda -device hda-duplex,audiodev=hda \' \
     && tee -a Launch.sh <<< '-device ich9-ahci,id=sata \' \
     && tee -a Launch.sh <<< '-drive id=OpenCoreBoot,if=none,snapshot=on,format=qcow2,file=/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore.qcow2 \' \
     && tee -a Launch.sh <<< '-device ide-hd,bus=sata.2,drive=OpenCoreBoot \' \
     && tee -a Launch.sh <<< '-device ide-hd,bus=sata.3,drive=InstallMedia \' \
-    && tee -a Launch.sh <<< '-drive id=InstallMedia,if=none,file=BaseSystem.img,format=raw \' \
+    && tee -a Launch.sh <<< '-drive id=InstallMedia,if=none,file=/home/arch/OSX-KVM/BaseSystem.img,format=qcow2 \' \
     && tee -a Launch.sh <<< '-drive id=MacHDD,if=none,file=/home/arch/OSX-KVM/mac_hdd_ng.img,format=qcow2 \' \
     && tee -a Launch.sh <<< '-device ide-hd,bus=sata.4,drive=MacHDD \' \
     && tee -a Launch.sh <<< '-netdev user,id=net0,hostfwd=tcp::${INTERNAL_SSH_PORT:-10022}-:22,hostfwd=tcp::${SCREEN_SHARE_PORT:-5900}-:5900, -device e1000-82545em,netdev=net0,id=net0,mac=52:54:00:09:49:17 \' \
