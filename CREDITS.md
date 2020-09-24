@@ -23,3 +23,6 @@ These credits refer to the contributors to this repository:
 [@MrBenFTW](https://github.com/MrBenFTW) - Updated macOS version 10.15.5 -> 10.15.6, Enabled screen sharing port forwarding, Removed the need to remove 1gb from the partition.
 
 [@hoantp](https://github.com/hoantp) - Initialized TigerVNC 1.11.0 fix
+
+[@jimdigriz](https://github.com/jimdigriz) - Epic fixes: image size, shellisms, fallback2kvm, unprivileged mode https://github.com/sickcodes/Docker-OSX/pull/82
+
