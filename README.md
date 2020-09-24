@@ -32,7 +32,7 @@ Pull requests, suggestions very welcome!
 
 docker pull sickcodes/docker-osx
 
-docker run --privileged -e "DISPLAY=${DISPLAY:-:0.0}" -v /tmp/.X11-unix:/tmp/.X11-unix sickcodes/docker-osx
+docker run --device /dev/kvm --device /dev/snd -v /tmp/.X11-unix:/tmp/.X11-unix sickcodes/docker-osx
 
 # press ctrl G if your mouse gets stuck
 
@@ -40,7 +40,7 @@ docker run --privileged -e "DISPLAY=${DISPLAY:-:0.0}" -v /tmp/.X11-unix:/tmp/.X1
 
 # need more RAM and SSH on 0.0.0.0:50922?
 
-docker run -e RAM=4 -p 50922:10022 --privileged -e "DISPLAY=${DISPLAY:-:0.0}" -v /tmp/.X11-unix:/tmp/.X11-unix sickcodes/docker-osx:latest
+docker run --device /dev/kvm --device /dev/snd -e RAM=4 -p 50922:10022 sickcodes/docker-osx:latest
 
 ssh fullname@localhost -p 50922
 
@@ -109,7 +109,7 @@ docker ps --all #make note of your container id
 docker commit containerID newImageName
 
 # To run this image do the following
-docker run --privileged -e "DISPLAY=${DISPLAY:-:0.0}" -v /tmp/.X11-unix:/tmp/.X11-unix newImageName
+docker run --device /dev/kvm --device /dev/snd -v /tmp/.X11-unix:/tmp/.X11-unix newImageName
 ```
 
 # Troubleshooting
@@ -130,7 +130,16 @@ sudo yum install xorg-x11-server-utils
 # then run
 xhost +
 
-docker run --privileged -e "DISPLAY=${DISPLAY:-:0.0}" -v /tmp/.X11-unix:/tmp/.X11-unix sickcodes/docker-osx ./OpenCore-Boot.sh
+docker run --device /dev/kvm --device /dev/snd -v /tmp/.X11-unix:/tmp/.X11-unix sickcodes/docker-osx ./OpenCore-Boot.sh
+```
+
+PulseAudio for sound (note neither [AppleALC](https://github.com/acidanthera/AppleALC) and varying [`alcid`](https://dortania.github.io/OpenCore-Post-Install/universal/audio.html) or [VoodooHDA-OC](https://github.com/chris1111/VoodooHDA-OC) have [codec support](https://osy.gitbook.io/hac-mini-guide/details/hda-fix#hda-codec) though [IORegistryExplorer](https://github.com/vulgo/IORegistryExplorer) does show the controller component working):
+```bash
+docker run --device /dev/kvm -e AUDIO_DRIVER=pa,server=unix:/tmp/pulseaudio.socket -v /run/user/$(id -u)/pulse/native:/tmp/pulseaudio.socket -v /tmp/.X11-unix:/tmp/.X11-unix sickcodes/docker-osx
+```
+PulseAudio debugging:
+```bash
+docker run --device /dev/kvm -e AUDIO_DRIVER=pa,server=unix:/tmp/pulseaudio.socket -v /run/user/$(id -u)/pulse/native:/tmp/pulseaudio.socket -v /tmp/.X11-unix:/tmp/.X11-unix -e PULSE_SERVER=unix:/tmp/pulseaudio.socket sickcodes/docker-osx pactl list
 ```
 
 Alternative run, thanks @roryrjb
@@ -157,12 +166,6 @@ Turn on docker daemon
 sudo dockerd
 # or daemonize it
 sudo nohup dockerd &
-```
-
-Check /dev/kvm permissions
-
-```bash
-sudo chmod 666 /dev/kvm
 ```
 
 If you don't have Docker already
@@ -261,7 +264,7 @@ docker run \
 -e CORES=4 \
 -e EXTRA='-usb -device usb-host,hostbus=1,hostaddr=8' \
 -e INTERNAL_SSH_PORT=23 \
---privileged -v /tmp/.X11-unix:/tmp/.X11-unix docker-osx:latest
+--device /dev/kvm --device /dev/snd -v /tmp/.X11-unix:/tmp/.X11-unix docker-osx:latest
 
 ```
 
