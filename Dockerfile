@@ -174,7 +174,10 @@ ENV USER arch
 ENV DISPLAY=:0.0
 
 USER arch
+
 VOLUME ["/tmp/.X11-unix"]
+
+WORKDIR /home/arch/OSX-KVM
 
 CMD ./enable-ssh.sh && envsubst < ./Launch.sh | bash
 
