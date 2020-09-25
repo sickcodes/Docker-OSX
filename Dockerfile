@@ -107,6 +107,9 @@ RUN git clone https://github.com/kholia/OSX-KVM.git
 # enable ssh
 # docker exec .... ./enable-ssh.sh
 USER arch
+
+WORKDIR /home/arch/OSX-KVM
+
 RUN touch enable-ssh.sh \
     && chmod +x ./enable-ssh.sh \
     && tee -a enable-ssh.sh <<< '[[ -f /etc/ssh/ssh_host_rsa_key ]] || \' \
@@ -126,21 +129,24 @@ RUN sudo pacman -Syu qemu libvirt dnsmasq virt-manager bridge-utils flex bison e
 # RUN sudo systemctl enable libvirtd.service
 # RUN sudo systemctl enable virtlogd.service
 
-WORKDIR /home/arch
+WORKDIR /home/arch/OSX-KVM
+
 RUN git clone https://github.com/corpnewt/gibMacOS.git
+
 WORKDIR /home/arch/gibMacOS
 
 # this command takes a while!
 RUN perl -p -i -e 's/print("Succeeded:")/exit()/' ./gibMacOS.command \
 	&& { python gibMacOS.command -v "${VERSION}" -d || echo Done; } \
-	&& qemu-img convert ${HOME}/gibMacOS/macOS\ Downloads/publicrelease/*/BaseSystem.dmg -O qcow2 -p -c ${HOME}/OSX-KVM/BaseSystem.img \
-	&& qemu-img create -f qcow2 ${HOME}/OSX-KVM/mac_hdd_ng.img "${SIZE}" \
-	&& rm ${HOME}/gibMacOS/macOS\ Downloads/publicrelease/*/BaseSystem.dmg
+	&& qemu-img convert /home/arch/OSX-KVM/gibMacOS/macOS\ Downloads/publicrelease/*/BaseSystem.dmg -O qcow2 -p -c /home/arch/OSX-KVM/BaseSystem.img \
+	&& qemu-img create -f qcow2 /home/arch/OSX-KVM/mac_hdd_ng.img "${SIZE}" \
+	&& rm /home/arch/OSX-KVM/gibMacOS/macOS\ Downloads/publicrelease/*/BaseSystem.dmg
 
 # > Launch.sh
 # > Docker-OSX.xml
 
-WORKDIR /home/arch
+WORKDIR /home/arch/OSX-KVM
+
 RUN touch Launch.sh \
     && chmod +x ./Launch.sh \
     && tee -a Launch.sh <<< '#!/bin/sh' \
