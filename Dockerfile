@@ -133,7 +133,7 @@ WORKDIR /home/arch/OSX-KVM
 
 RUN git clone https://github.com/corpnewt/gibMacOS.git
 
-WORKDIR /home/arch/gibMacOS
+WORKDIR /home/arch/OSX-KVM/gibMacOS
 
 # this command takes a while!
 RUN perl -p -i -e 's/print("Succeeded:")/exit()/' ./gibMacOS.command \
