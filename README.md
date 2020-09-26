@@ -1,8 +1,8 @@
 # Docker-OSX
 ## [Follow @sickcodes on Twitter](https://twitter.com/sickcodes)
 
-### V2.5
-# Features In Docker-OSX v2.5
+### V2.6
+# Features In Docker-OSX v2.6
 - CI/CD weaponization thru vnc and xdotool
 - OSX-KVM
 - X11 Forwarding
@@ -30,9 +30,9 @@ Pull requests, suggestions very welcome!
 
 ```bash
 
-docker pull sickcodes/docker-osx
+docker pull sickcodes/docker-osx:latest
 
-docker run --device /dev/kvm --device /dev/snd -v /tmp/.X11-unix:/tmp/.X11-unix sickcodes/docker-osx
+docker run --device /dev/kvm --device /dev/snd -v /tmp/.X11-unix:/tmp/.X11-unix sickcodes/docker-osx:latest
 
 # press ctrl G if your mouse gets stuck
 
@@ -40,7 +40,12 @@ docker run --device /dev/kvm --device /dev/snd -v /tmp/.X11-unix:/tmp/.X11-unix 
 
 # need more RAM and SSH on 0.0.0.0:50922?
 
-docker run --device /dev/kvm --device /dev/snd -e RAM=4 -p 50922:10022 sickcodes/docker-osx:latest
+docker run --device /dev/kvm \
+--device /dev/snd \
+-e RAM=4 \
+-p 50922:10022 \
+-v /tmp/.X11-unix:/tmp/.X11-unix \
+sickcodes/docker-osx:latest
 
 ssh fullname@localhost -p 50922
 

@@ -7,7 +7,7 @@
 # 
 # Title:            Mac on Docker (Docker-OSX) [VNC EDITION]
 # Author:           Sick.Codes https://sick.codes/        
-# Version:          2.5
+# Version:          2.6
 # License:          GPLv3+
 # 
 # All credits for OSX-KVM and the rest at Kholia's repo: https://github.com/kholia/osx-kvm
