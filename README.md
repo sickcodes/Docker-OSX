@@ -71,7 +71,13 @@ sudo systemctl enable libvirtd.service
 sudo systemctl enable virtlogd.service
 sudo modprobe kvm
 
-# reboot
+# enable network forwarding
+nano /etc/sysctl.conf
+Uncomment or add this line:
+net.ipv4.ip_forward=1
+
+
+# now reboot
 
 ```
 
