@@ -26,31 +26,39 @@ Upstream Credits: OSX-KVM project among many others: https://github.com/kholia/O
 
 Docker Hub: https://hub.docker.com/r/sickcodes/docker-osx
 
+### Other cool Docker-QEMU based projects:
+
+[Run iOS in a Docker with Docker-eyeOS](https://github.com/sickcodes/Docker-eyeOS) - [https://github.com/sickcodes/Docker-eyeOS](https://github.com/sickcodes/Docker-eyeOS)
+
 Pull requests, suggestions very welcome!
 
 ```bash
 
 docker pull sickcodes/docker-osx:latest
 
-docker run --device /dev/kvm --device /dev/snd -v /tmp/.X11-unix:/tmp/.X11-unix sickcodes/docker-osx:latest
+docker run --device /dev/kvm \
+    --device /dev/snd \
+    -v /tmp/.X11-unix:/tmp/.X11-unix \
+    -e "DISPLAY=${DISPLAY:-:0.0}" \
+    sickcodes/docker-osx:latest
 
 # press ctrl G if your mouse gets stuck
 
 # scroll down to troubleshooting if you have problems
 
-# need more RAM and SSH on 0.0.0.0:50922?
+# need more RAM and SSH on localhost -p 50922?
 
 docker run --device /dev/kvm \
---device /dev/snd \
--e RAM=4 \
--p 50922:10022 \
--v /tmp/.X11-unix:/tmp/.X11-unix \
-sickcodes/docker-osx:latest
+    -e "DISPLAY=${DISPLAY:-:0.0}" \
+    --device /dev/snd \
+    -e RAM=4 \
+    -p 50922:10022 \
+    -v /tmp/.X11-unix:/tmp/.X11-unix \
+    sickcodes/docker-osx:latest 
 
 ssh fullname@localhost -p 50922
 
 ```
-
 
 # Requirements: KVM on the host
 Need to turn on hardware virtualization in your BIOS, very easy to do.
@@ -69,16 +77,38 @@ sudo yum install libvirt qemu-kvm -y
 # then run
 sudo systemctl enable libvirtd.service
 sudo systemctl enable virtlogd.service
+
 sudo modprobe kvm
 
-# enable network forwarding
-nano /etc/sysctl.conf
-Uncomment or add this line:
-net.ipv4.ip_forward=1
+# reboot
+```
 
+# How to Enable Network Forwarding
+
+Allow ipv4 forwarding for bridged networking connections:
+
+This is not required for LOCAL installations and may cause containers behind [VPN's to leak host IP](https://sick.codes/cve-2020-15590/).
+
+If you are connecting to a REMOTE Docker-OSX, e.g. a "Mac Mini" in a datacenter, then this may boost networking:
+
+```bash
+# enable for current session
+sudo sysctl -w net.ipv4.ip_forward=1
+
+# OR
+# sudo tee /proc/sys/net/ipv4/ip_forward <<< 1
+
+# enable permanently
+sudo touch /etc/sysctl.conf
+
+sudo tee -a /etc/sysctl.conf <<EOF
+net.ipv4.ip_forward = 1
+EOF
+
+# OR edit manually
+nano /etc/sysctl.conf || vi /etc/sysctl.conf || vim /etc/sysctl.conf
 
 # now reboot
-
 ```
 
 # Start the same container later (persistent disk)
@@ -96,6 +126,8 @@ docker start abc123xyz567
 
 # if you have many containers, you can try automate it with filters like this
 # docker ps --all --filter "ancestor=sickcodes/docker-osx"
+# for locally tagged/built containers
+# docker ps --all --filter "ancestor=docker-osx"
 
 ```
 
@@ -261,6 +293,8 @@ You can change the size and version using build arguments (see below).
 This file builds on top of the work done by Dhiru Kholia and many others on the OSX-KVM project.
 
 
+
+
 # Custom Build
 ```bash
 docker build -t docker-osx:latest \
@@ -278,6 +312,30 @@ docker run \
 --device /dev/kvm --device /dev/snd -v /tmp/.X11-unix:/tmp/.X11-unix docker-osx:latest
 
 ```
+
+## What is `${DISPLAY:-:0.0}`?
+
+`$DISPLAY` is the shell variable that refers to your X11 display server.
+
+`${DISPLAY}` is the same, but allows you to join variables like this:
+
+- e.g. `${DISPLAY}_${DISPLAY}` would print `:0.0_:0.0`
+- e.g. `$DISPLAY_$DISPLAY`     would print `:0.0`
+
+...because `$DISPLAY_` is not `$DISPLAY`
+
+`${variable:-fallback}` allows you to set a "fallback" variable to be substituted if `$variable` is not set.
+
+You can also use `${variable:=fallback}` to set that variable (in your current terminal).
+
+In Docker-OSX, we assume, `:0.0` is your default `$DISPLAY` variable.
+
+You can see what yours is
+```bash
+echo $DISPLAY
+```
+Hence, `${DISPLAY:-:0.0}` will use whatever variable your X11 server has set for you, else `:0.0`
+
 
 ## Todo:
 ```

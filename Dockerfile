@@ -71,8 +71,9 @@ RUN tee -a /etc/pacman.conf <<< '[community-testing]' \
     && tee -a /etc/pacman.conf <<< 'Include = /etc/pacman.d/mirrorlist'
 
 RUN pacman -Syu --noconfirm \
-    && pacman -S sudo git make automake gcc python go autoconf cmake pkgconf alsa-utils fakeroot --noconfirm \
+    && pacman -S sudo git make automake gcc python go autoconf cmake pkgconf alsa-utils fakeroot vim nano --noconfirm \
     && yes | pacman -Scc \
+    && ln -s /bin/vim /bin/vi \
     && useradd arch -p arch \
     && tee -a /etc/sudoers <<< 'arch ALL=(ALL) NOPASSWD: ALL' \
     && mkdir /home/arch \

@@ -26,3 +26,7 @@ These credits refer to the contributors to this repository:
 
 [@jimdigriz](https://github.com/jimdigriz) - Epic fixes: image size, shellisms, fallback2kvm, unprivileged mode https://github.com/sickcodes/Docker-OSX/pull/82
 
+[@NickZhouNan](https://github.com/NickZhouNan) - Bug fix with changed WORKDIR
+
+[@MrBenFTW](https://github.com/MrBenFTW) - Added IP forwarding hot tips, useful for boosting bridged networking in remote environments.
+
