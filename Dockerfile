@@ -176,6 +176,11 @@ RUN touch Launch.sh \
     && tee -a Launch.sh <<< '-vga vmware \' \
     && tee -a Launch.sh <<< '${EXTRA:-}'
 
+# docker exec containerid mv ./Launch-nopicker.sh ./Launch.sh
+RUN grep -v InstallMedia ./Launch.sh > ./Launch-nopicker.sh \
+    && chmod +x ./Launch-nopicker.sh \
+    && sed -i -e s/OpenCore\.qcow2/OpenCore\-nopicker\.qcow2/ ./Launch-nopicker.sh
+
 ENV USER arch
 
 ENV DISPLAY=:0.0
@@ -191,4 +196,3 @@ CMD ./enable-ssh.sh && envsubst < ./Launch.sh | bash
 # virt-manager mode: eta son
 # CMD virsh define <(envsubst < Docker-OSX.xml) && virt-manager || virt-manager
 # CMD virsh define <(envsubst < macOS-libvirt-Catalina.xml) && virt-manager || virt-manager
-

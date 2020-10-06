@@ -70,6 +70,23 @@ ssh fullname@localhost -p 50922
 
 ```
 
+# Autoboot into OSX after you've installed everything
+
+```bash
+# find you containerID
+docker ps
+
+# move the no picker script on top of the Launch script
+# NEW CONTAINERS
+docker exec containerID mv ./Launch-nopicker.sh ./Launch.sh
+
+# LEGACY CONTAINERS
+docker exec containerID bash -c "grep -v InstallMedia ./Launch.sh > ./Launch-nopicker.sh
+chmod +x ./Launch-nopicker.sh
+sed -i -e s/OpenCore\.qcow2/OpenCore\-nopicker\.qcow2/ ./Launch-nopicker.sh
+"
+```
+
 # Requirements: KVM on the host
 Need to turn on hardware virtualization in your BIOS, very easy to do.
 
