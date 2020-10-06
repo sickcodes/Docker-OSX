@@ -12,17 +12,19 @@
 - Create an ARMY using `docker commit`
 - XFVB HEADLESS (use vnc)
 
+### Pull Requests Welcome!
+
 ![Running mac osx in a docker container](/running-mac-inside-docker-qemu.png?raw=true "OSX KVM DOCKER")
 
 Run Mac in a Docker container! Run near native OSX-KVM in Docker! X11 Forwarding!
 
 Author: Sick.Codes https://sick.codes/ & https://twitter.com/sickcodes
 
-Based: https://github.com/kholia/OSX-KVM && the great guy [@kholia](https://twitter.com/kholia)
+PR & Contributor Credits: https://github.com/sickcodes/Docker-OSX/blob/master/CREDITS.md
 
-Credits: https://github.com/sickcodes/Docker-OSX/blob/master/CREDITS.md
+Upstream: https://github.com/kholia/OSX-KVM && the great guy [@kholia](https://twitter.com/kholia)
 
-Upstream Credits: OSX-KVM project among many others: https://github.com/kholia/OSX-KVM/blob/master/CREDITS.md
+Upstream Credits (OSX-KVM project) among many others: https://github.com/kholia/OSX-KVM/blob/master/CREDITS.md
 
 Docker Hub: https://hub.docker.com/r/sickcodes/docker-osx
 
@@ -30,13 +32,14 @@ Docker Hub: https://hub.docker.com/r/sickcodes/docker-osx
 
 [Run iOS in a Docker with Docker-eyeOS](https://github.com/sickcodes/Docker-eyeOS) - [https://github.com/sickcodes/Docker-eyeOS](https://github.com/sickcodes/Docker-eyeOS)
 
-Pull requests, suggestions very welcome!
+# Run Docker-OSX
 
 ```bash
 
 docker pull sickcodes/docker-osx:latest
 
-docker run --device /dev/kvm \
+docker run \
+    --device /dev/kvm \
     --device /dev/snd \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
     -e "DISPLAY=${DISPLAY:-:0.0}" \
@@ -48,14 +51,21 @@ docker run --device /dev/kvm \
 
 # need more RAM and SSH on localhost -p 50922?
 
-docker run --device /dev/kvm \
-    -e "DISPLAY=${DISPLAY:-:0.0}" \
+```
+
+# Run but allow SSH
+
+```bash
+docker run \
+    --device /dev/kvm \
     --device /dev/snd \
     -e RAM=4 \
     -p 50922:10022 \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
+    -e "DISPLAY=${DISPLAY:-:0.0}" \
     sickcodes/docker-osx:latest 
 
+# turn on SSH after you've installed OSX in the "Sharing" settings.
 ssh fullname@localhost -p 50922
 
 ```
@@ -63,7 +73,8 @@ ssh fullname@localhost -p 50922
 # Requirements: KVM on the host
 Need to turn on hardware virtualization in your BIOS, very easy to do.
 
-Then have QEMU on the host if you haven't already:
+Then have QEMU on the host if you haven't already
+
 ```bash
 # ARCH
 sudo pacman -S qemu libvirt dnsmasq virt-manager bridge-utils flex bison iptables-nft edk2-ovmf
@@ -72,7 +83,7 @@ sudo pacman -S qemu libvirt dnsmasq virt-manager bridge-utils flex bison iptable
 sudo apt install qemu qemu-kvm libvirt-clients libvirt-daemon-system bridge-utils virt-manager
 
 # CENTOS RHEL FEDORA
-sudo yum install libvirt qemu-kvm -y
+sudo yum install libvirt qemu-kvm
 
 # then run
 sudo systemctl enable libvirtd.service
@@ -83,37 +94,9 @@ sudo modprobe kvm
 # reboot
 ```
 
-# How to Enable Network Forwarding
-
-Allow ipv4 forwarding for bridged networking connections:
-
-This is not required for LOCAL installations and may cause containers behind [VPN's to leak host IP](https://sick.codes/cve-2020-15590/).
-
-If you are connecting to a REMOTE Docker-OSX, e.g. a "Mac Mini" in a datacenter, then this may boost networking:
-
-```bash
-# enable for current session
-sudo sysctl -w net.ipv4.ip_forward=1
-
-# OR
-# sudo tee /proc/sys/net/ipv4/ip_forward <<< 1
-
-# enable permanently
-sudo touch /etc/sysctl.conf
-
-sudo tee -a /etc/sysctl.conf <<EOF
-net.ipv4.ip_forward = 1
-EOF
-
-# OR edit manually
-nano /etc/sysctl.conf || vi /etc/sysctl.conf || vim /etc/sysctl.conf
-
-# now reboot
-```
-
 # Start the same container later (persistent disk)
 
-This is for when you want to run your system later.
+This is for when you want to run the SAME container again later.
 
 If you don't run this you will have a new image every time.
 
@@ -135,24 +118,30 @@ docker start abc123xyz567
 
 - Boot the macOS Base System
 
-- Click Disk Utility
+- Click `Disk Utility`
 
 - Erase the BIGGEST disk (around 200gb default), DO NOT MODIFY THE SMALLER DISKS.
+-- if you can't click `erase`, you may need to reduce the disk size by 1kb
 
-- Click Reinstall macOS
-
+- Click `Reinstall macOS`
 
 
 ## Creating images:
 ```bash
-# You can create an image of a already configured and setup container. This allows you to effectively duplicate a system.
+# You can create an image of an already configured and setup container.
+# This allows you to effectively duplicate a system.
 # To do this, run the following commands
 
-docker ps --all #make note of your container id
-docker commit containerID newImageName
+# make note of your container id
+docker ps --all 
+docker commit containerid newImageName
 
 # To run this image do the following
-docker run --device /dev/kvm --device /dev/snd -v /tmp/.X11-unix:/tmp/.X11-unix newImageName
+docker run \
+    --device /dev/kvm \
+    --device /dev/snd \
+    -v /tmp/.X11-unix:/tmp/.X11-unix \
+    newImageName
 ```
 
 # Troubleshooting
@@ -173,22 +162,41 @@ sudo yum install xorg-x11-server-utils
 # then run
 xhost +
 
-docker run --device /dev/kvm --device /dev/snd -v /tmp/.X11-unix:/tmp/.X11-unix sickcodes/docker-osx ./OpenCore-Boot.sh
 ```
 
 PulseAudio for sound (note neither [AppleALC](https://github.com/acidanthera/AppleALC) and varying [`alcid`](https://dortania.github.io/OpenCore-Post-Install/universal/audio.html) or [VoodooHDA-OC](https://github.com/chris1111/VoodooHDA-OC) have [codec support](https://osy.gitbook.io/hac-mini-guide/details/hda-fix#hda-codec) though [IORegistryExplorer](https://github.com/vulgo/IORegistryExplorer) does show the controller component working):
+
 ```bash
-docker run --device /dev/kvm -e AUDIO_DRIVER=pa,server=unix:/tmp/pulseaudio.socket -v /run/user/$(id -u)/pulse/native:/tmp/pulseaudio.socket -v /tmp/.X11-unix:/tmp/.X11-unix sickcodes/docker-osx
+docker run \
+    --device /dev/kvm \
+    -e AUDIO_DRIVER=pa,server=unix:/tmp/pulseaudio.socket \
+    -v "/run/user/$(id -u)/pulse/native:/tmp/pulseaudio.socket" \
+    -v /tmp/.X11-unix:/tmp/.X11-unix \
+    sickcodes/docker-osx
 ```
+
 PulseAudio debugging:
 ```bash
-docker run --device /dev/kvm -e AUDIO_DRIVER=pa,server=unix:/tmp/pulseaudio.socket -v /run/user/$(id -u)/pulse/native:/tmp/pulseaudio.socket -v /tmp/.X11-unix:/tmp/.X11-unix -e PULSE_SERVER=unix:/tmp/pulseaudio.socket sickcodes/docker-osx pactl list
+docker run \
+    --device /dev/kvm \
+    -e AUDIO_DRIVER=pa,server=unix:/tmp/pulseaudio.socket \
+    -v "/run/user/$(id -u)/pulse/native:/tmp/pulseaudio.socket" \
+    -v /tmp/.X11-unix:/tmp/.X11-unix \
+    -e PULSE_SERVER=unix:/tmp/pulseaudio.socket \
+    sickcodes/docker-osx pactl list
 ```
 
 Alternative run, thanks @roryrjb
 
 ```bash
-docker run --privileged --net host --cap-add=ALL -v /tmp/.X11-unix:/tmp/.X11-unix -v /dev:/dev -v /lib/modules:/lib/modules sickcodes/docker-osx
+docker run \
+    --privileged \
+    --net host \
+    --cap-add=ALL \
+    -v /tmp/.X11-unix:/tmp/.X11-unix \
+    -v /dev:/dev \
+    -v /lib/modules:/lib/modules \
+    sickcodes/docker-osx
 ```
 
 Check if your hardware virt is on
@@ -206,39 +214,67 @@ sudo usermod -aG docker "${USER}"
 Turn on docker daemon
 
 ```bash
+# run ad hoc
 sudo dockerd
+
 # or daemonize it
 sudo nohup dockerd &
+
+# or enable it in systemd
+sudo systemctl enable docker
 ```
 
-If you don't have Docker already
+# How to Enable Network Forwarding
+
+Allow ipv4 forwarding for bridged networking connections:
+
+This is not required for LOCAL installations and may cause containers behind [VPN's to leak host IP](https://sick.codes/cve-2020-15590/).
+
+If you are connecting to a REMOTE Docker-OSX, e.g. a "Mac Mini" in a datacenter, then this may boost networking:
 
 ```bash
-### Arch (pacman version isn't right at time of writing)
+# enable for current session
+sudo sysctl -w net.ipv4.ip_forward=1
 
-wget https://download.docker.com/linux/static/stable/x86_64/docker-19.03.5.tgz
-tar -xzvf docker-19.03.5.tgz
-sudo cp docker/* /usr/bin/
+# OR
+# sudo tee /proc/sys/net/ipv4/ip_forward <<< 1
+
+# enable permanently
+sudo touch /etc/sysctl.conf
+sudo tee -a /etc/sysctl.conf <<EOF
+net.ipv4.ip_forward = 1
+EOF
+
+# OR edit manually
+nano /etc/sysctl.conf || vi /etc/sysctl.conf || vim /etc/sysctl.conf
+
+# now reboot
+```
+
+# How to install Docker if you don't have Docker already
+
+```bash
+### Arch
+sudo pacman -S docker
 sudo groupadd docker
 sudo usermod -aG docker "${USER}"
 
 ### Ubuntu
 
-apt-get remove docker docker-engine docker.io containerd runc -y
-apt-get install apt-transport-https ca-certificates curl gnupg-agent software-properties-common -y
+sudo apt remove docker docker-engine docker.io containerd runc -y
+sudo apt install apt-transport-https ca-certificates curl gnupg-agent software-properties-common -y
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
 apt-key fingerprint 0EBFCD88
-add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
-apt-get update -y
-apt-get install docker-ce docker-ce-cli containerd.io -y
+sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+sudo apt update -y
+sudo apt install docker-ce docker-ce-cli containerd.io -y
 sudo groupadd docker
 sudo usermod -aG docker "${USER}"
 
 
 ```
 
-If you have no internet connectivity from the VM, you are using bridge
-networking, and you are running Fedora:
+### Fedora: if you have no internet connectivity from the VM, and you are using bridge networking:
 
 ```bash
 # Set the docker0 bridge to the trusted zone
@@ -275,13 +311,16 @@ docker cp ./mac_hdd_ng.img newcontainerid:/home/arch/OSX-KVM/mac_hdd_ng.img
 
 # DESTROY: Wipe old images
 
+This is useful for getting disk space back.
+
+It will delete your old (and new) docker containers.
+
 ```bash
 # WARNING deletes all old images, but saves disk space if you make too many containers
 # The following command will make your containers RIP
 docker system prune --all
 docker image prune --all
 ```
-
 
 # INSTANT OSX-KVM in a BOX!
 This Dockerfile automates the installation of OSX-KVM inside a docker container.
@@ -291,8 +330,6 @@ It will build a Catalina Disk with up to 200GB of space.
 You can change the size and version using build arguments (see below).
 
 This file builds on top of the work done by Dhiru Kholia and many others on the OSX-KVM project.
-
-
 
 
 # Custom Build
