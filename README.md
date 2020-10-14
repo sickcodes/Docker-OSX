@@ -140,6 +140,8 @@ docker start abc123xyz567
 - Erase the BIGGEST disk (around 200gb default), DO NOT MODIFY THE SMALLER DISKS.
 -- if you can't click `erase`, you may need to reduce the disk size by 1kb
 
+- (optional) Create a partition using the unused space to house the OS and your files if you want to limit the capacity. (For Xcode 12 partition at least 60gb.) 
+
 - Click `Reinstall macOS`
 
 
