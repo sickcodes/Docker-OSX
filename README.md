@@ -53,7 +53,7 @@ docker run \
 
 ```
 
-# Run but allow SSH
+# Run but allow SSH into OSX!
 
 ```bash
 docker run \

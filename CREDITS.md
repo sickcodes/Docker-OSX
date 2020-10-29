@@ -1,6 +1,6 @@
 # Credits
 
-The upstream credits are available at @Kholia's repo https://github.com/kholia/OSX-KVM/blob/master/CREDITS.md
+The upstream credits are available at [@Kholia](https://github.com/Kholia)'s repo https://github.com/kholia/OSX-KVM/blob/master/CREDITS.md
 
 These credits refer to the contributors to this repository:
 
@@ -29,4 +29,6 @@ These credits refer to the contributors to this repository:
 [@NickZhouNan](https://github.com/NickZhouNan) - Bug fix with changed WORKDIR
 
 [@MrBenFTW](https://github.com/MrBenFTW) - Added IP forwarding hot tips, useful for boosting bridged networking in remote environments.
+
+[@mikob](https://github.com/mikob) - Added important warning for Xcode users to reserve 60GB++ - Made instructions more clear for those needing Xcode #94 
 
