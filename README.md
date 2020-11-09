@@ -80,6 +80,9 @@ docker ps
 # NEW CONTAINERS
 docker exec containerID mv ./Launch-nopicker.sh ./Launch.sh
 
+# VNC-VERSION-CONTAINER
+docker exec containerID mv ./Launch-nopicker.sh ./Launch_custom.sh
+
 # LEGACY CONTAINERS
 docker exec containerID bash -c "grep -v InstallMedia ./Launch.sh > ./Launch-nopicker.sh
 chmod +x ./Launch-nopicker.sh
