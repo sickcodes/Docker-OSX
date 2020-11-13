@@ -32,3 +32,5 @@ These credits refer to the contributors to this repository:
 
 [@mikob](https://github.com/mikob) - Added important warning for Xcode users to reserve 60GB++ - Made instructions more clear for those needing Xcode #94 
 
+[@AdamMomen](https://github.com/AdamMomen) - Fixed automatic boot vnc-version container instructions for better usablility
+

@@ -26,13 +26,13 @@
 #       
 # Basic Run:
 #       
-#       docker run --privileged -e "DISPLAY=${DISPLAY:-:0.0}" -v /tmp/.X11-unix:/tmp/.X11-unix docker-osx
+#       docker run --device /dev/kvm --device /dev/snd -v /tmp/.X11-unix:/tmp/.X11-unix -e "DISPLAY=${DISPLAY:-:0.0}" sickcodes/docker-osx:latest
 #
 #
 # Run with SSH:
 # 
 # 
-#       docker run -e RAM=6 --privileged -p 50922:10022 -e "DISPLAY=${DISPLAY:-:0.0}" -v /tmp/.X11-unix:/tmp/.X11-unix docker-osx:latest
+#       docker run --device /dev/kvm --device /dev/snd -e RAM=6 -p 50922:10022 -v /tmp/.X11-unix:/tmp/.X11-unix -e "DISPLAY=${DISPLAY:-:0.0}" sickcodes/docker-osx:latest
 #       # ssh fullname@localhost -p 50922
 # 
 # Optargs:
@@ -50,10 +50,6 @@
 #       docker run ... -e EXTRA="-usb -device usb-host,hostbus=1,hostaddr=8" ...
 #       # you will also need to pass the device to the container
 #
-#
-# Other permissions:
-#
-#       docker run --privileged --net host -e "DISPLAY=${DISPLAY:-:0.0}" -e RAM=6 --cap-add=ALL -v /tmp/.X11-unix:/tmp/.X11-unix -v /dev:/dev -v /lib/modules:/lib/modules  -v /var/run/libvirt/libvirt-sock:/var/run/libvirt/libvirt-sock docker-osx:latest
 
 FROM archlinux:latest
 

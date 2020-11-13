@@ -26,7 +26,7 @@
 # 
 # Run:
 #       
-#       docker run -p 8888:5999 -p 50922:10022 -d --privileged docker-osx-vnc:latest
+#       docker run --device /dev/kvm --device /dev/snd -p 8888:5999 -p 50922:10022 -d --privileged docker-osx-vnc:latest
 #
 #
 # Connect locally (safe):
@@ -62,12 +62,6 @@
 #       docker ps
 #       # copy container ID and then 
 #       docker exec abc123fgh456 tail vncpasswd_file
-# 
-# 
-# Optional:
-#       
-#       You can set VNC color depth with -e DEPTH=24, it's not pretty though.
-#
 #
 # VNC Version
 # Let's piggyback the other image:
