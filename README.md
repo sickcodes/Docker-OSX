@@ -316,26 +316,46 @@ docker cp oldcontainerid:/home/arch/OSX-KVM/mac_hdd_ng.img .
 Or if you lost your container, find it with this:
 
 ```bash
-# fast way
+# fast way, find 10 gigabyte OSX disks hiding in your docker container storage
 sudo find /var/lib/docker -size +10G | grep mac_hdd_ng.img
 
-# you can move (mv) it somewhere
+# you can move (mv) it somewhere, using cp can take loads of disk space
 sudo mv somedir/mac_hdd_ng.img .
-
-# start a new container
-# get the new container id
-docker ps
-
-# docker cp INTO new container
-docker cp ./mac_hdd_ng.img newcontainerid:/home/arch/OSX-KVM/mac_hdd_ng.img
 
 ```
 
-# DESTROY: Wipe old images
+# Use an Old Docker-OSX Disk in a Fresh Container (Replication)
+
+You do not have to reinstall everything, you can simply:
+
+- start a new container
+
+- overwrite the .img in the new container with your big old one
+
+```bash
+
+# start a new docker-osx container
+# you can start with ssh, without, or vnc, because they are all interchangable.
+
+# get the NEW container id
+docker ps
+
+# docker cp your OLD disk into the NEW container
+docker cp ./mac_hdd_ng.img newcontainerid:/home/arch/OSX-KVM/mac_hdd_ng.img
+
+# kill the NEW container
+docker kill newcontainerid
+
+# start the NEW container and it just works
+docker start newcontainerid
+
+```
+
+# DESTROY: Wipe old images to get 
 
 This is useful for getting disk space back.
 
-It will delete your old (and new) docker containers.
+It will delete ALL your old (and new) docker containers.
 
 ```bash
 # WARNING deletes all old images, but saves disk space if you make too many containers
@@ -357,18 +377,25 @@ This file builds on top of the work done by Dhiru Kholia and many others on the 
 # Custom Build
 ```bash
 docker build -t docker-osx:latest \
---build-arg VERSION=10.14.6 \
---build-arg SIZE=200G
+    --build-arg VERSION=10.14.6 \
+    --build-arg SIZE=200G
 ```
+
+# Custom QEMU Arguments (passthrough devices)
+
+Pass any devices/directories to the Docker container & the QEMU arguments using the handy `-e EXTRA=` runtime options.
 
 ```bash
 docker run \
--e RAM=4 \
--e SMP=4 \
--e CORES=4 \
--e EXTRA='-usb -device usb-host,hostbus=1,hostaddr=8' \
--e INTERNAL_SSH_PORT=23 \
---device /dev/kvm --device /dev/snd -v /tmp/.X11-unix:/tmp/.X11-unix docker-osx:latest
+    -e RAM=4 \
+    -e SMP=4 \
+    -e CORES=4 \
+    -e EXTRA='-usb -device usb-host,hostbus=1,hostaddr=8' \
+    -e INTERNAL_SSH_PORT=23 \
+    --device /dev/kvm \
+    --device /dev/snd \
+    -v /tmp/.X11-unix:/tmp/.X11-unix \
+    docker-osx:latest
 
 ```
 
@@ -395,10 +422,20 @@ echo $DISPLAY
 ```
 Hence, `${DISPLAY:-:0.0}` will use whatever variable your X11 server has set for you, else `:0.0`
 
+## What is `-v /tmp/.X11-unix:/tmp/.X11-unix`?
+
+`-v` is a Docker command-line option that lets you pass a volume to the container.
+
+The directory that we are letting the Docker container use is a X server display socket.
+
+`/tmp/.X11-unix`
+
+If we let the Docker container use the same display socket as our own environment, then any applications you run inside the Docker container will show up on your screen too! [https://www.x.org/archive/X11R6.8.0/doc/RELNOTES5.html](https://www.x.org/archive/X11R6.8.0/doc/RELNOTES5.html)
+
 
 ## Todo:
 ```
-- GPU Acceleration (Hackintosh? Passthru bus id of cards? AMD Vega? Nvidia-SMI?)
+- Security Documentation
+- GPU Acceleration: Coming Soon
 - Virt-manager
-
 ```
