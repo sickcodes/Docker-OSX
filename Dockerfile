@@ -99,7 +99,7 @@ USER arch
 
 # download OSX-KVM
 WORKDIR /home/arch
-RUN git clone https://github.com/kholia/OSX-KVM.git
+RUN git clone --depth 1 https://github.com/kholia/OSX-KVM.git
 
 # enable ssh
 # docker exec .... ./enable-ssh.sh
@@ -128,7 +128,7 @@ RUN sudo pacman -Syu qemu libvirt dnsmasq virt-manager bridge-utils flex bison e
 
 WORKDIR /home/arch/OSX-KVM
 
-RUN git clone https://github.com/corpnewt/gibMacOS.git
+RUN git clone --depth 1 https://github.com/corpnewt/gibMacOS.git
 
 WORKDIR /home/arch/OSX-KVM/gibMacOS
 
