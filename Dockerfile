@@ -76,9 +76,7 @@ RUN pacman -Syu --noconfirm \
     && chown arch:arch /home/arch
 
 # allow ssh to container
-WORKDIR /root
-RUN mkdir .ssh \
-    && chmod 700 .ssh
+RUN mkdir -m 700 /root/.ssh
 
 WORKDIR /root/.ssh
 RUN touch authorized_keys \
