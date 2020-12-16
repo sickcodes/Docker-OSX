@@ -512,7 +512,7 @@ docker run \
 
 You should see the device show up when you do `system_profiler SPUSBDataType` in the MacOS shell.
 
-
+Important Note: this will cause the host system to lose access to the USB device while the VM is running!
 
 ## What is `${DISPLAY:-:0.0}`?
 
