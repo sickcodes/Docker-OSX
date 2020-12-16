@@ -95,8 +95,7 @@ RUN tee -a sshd_config <<< 'AllowTcpForwarding yes' \
 USER arch
 
 # download OSX-KVM
-WORKDIR /home/arch
-RUN git clone --depth 1 https://github.com/kholia/OSX-KVM.git
+RUN git clone --depth 1 https://github.com/kholia/OSX-KVM.git /home/arch/OSX-KVM
 
 # enable ssh
 # docker exec .... ./enable-ssh.sh
@@ -123,9 +122,7 @@ RUN sudo pacman -Syu qemu libvirt dnsmasq virt-manager bridge-utils flex bison e
 # RUN sudo systemctl enable libvirtd.service
 # RUN sudo systemctl enable virtlogd.service
 
-WORKDIR /home/arch/OSX-KVM
-
-RUN git clone --depth 1 https://github.com/corpnewt/gibMacOS.git
+RUN git clone --depth 1 https://github.com/corpnewt/gibMacOS.git /home/arch/OSX-KVM/gibMacOS
 
 WORKDIR /home/arch/OSX-KVM/gibMacOS
 
