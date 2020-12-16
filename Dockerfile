@@ -62,7 +62,6 @@ ARG VERSION=10.15.6
 # This fails on hub.docker.com, useful for debugging in cloud
 # RUN [[ $(egrep -c '(svm|vmx)' /proc/cpuinfo) -gt 0 ]] || { echo KVM not possible on this host && exit 1; }
 
-WORKDIR /root
 RUN tee -a /etc/pacman.conf <<< '[community-testing]' \
     && tee -a /etc/pacman.conf <<< 'Include = /etc/pacman.d/mirrorlist'
 
@@ -182,8 +181,6 @@ ENV DISPLAY=:0.0
 USER arch
 
 VOLUME ["/tmp/.X11-unix"]
-
-WORKDIR /home/arch/OSX-KVM
 
 CMD ./enable-ssh.sh && envsubst < ./Launch.sh | bash
 
