@@ -273,6 +273,59 @@ nano /etc/sysctl.conf || vi /etc/sysctl.conf || vim /etc/sysctl.conf
 # now reboot
 ```
 
+# How to reduce the size of the image
+* Start up the container as usual, and remove unnecessary files. A useful way
+  to do this is to use `du -sh *` starting from the `/` directory, and find
+  large directories where files can be removed. E.g. unnecessary cached files,
+  Xcode platforms, etc.
+* Once you are satisfied with the amount of free space, enable trim with `sudo trimforce enable`, and reboot.
+* Zero out the empty space on the disk with `dd if=/dev/zero of=./empty && rm -f empty`
+* Shut down the VM and copy out the qcow image with `docker cp stoppedcontainer:/home/arch/OSX-KVM/mac_hdd_ng.img .`
+* Run `qemu-img check -r all mac_hdd_ng.img` to fix any errors.
+* Run `qemu-img convert -O qcow2 mac_hdd_ng.img deduped.img` and check for errors again
+* OPTIONAL: Run `qemu-img -c -O qcow2 deduped.img compressed.img` to further compress the image. This may reduce the runtime speed though, but it should reduce the size by roughly 25%.
+* Check for errors again, and build a fresh docker image. E.g. with this Dockerfile
+
+```
+FROM sickcodes/docker-osx
+USER arch
+COPY --chown=arch ./deduped.img /home/arch/OSX-KVM/mac_hdd_ng.img
+```
+
+# How to run in headless mode
+First make sure [autoboot is enabled](#autoboot-into-osx-after-youve-installed-everything)
+
+Next, you will want to set up SSH to be automatically started.
+
+```bash
+sudo systemsetup -setremotelogin on
+```
+
+Then run it with these arguments.
+
+```bash
+# Run with the -nographic flag, and enable a telnet interface
+  docker run \
+    --device /dev/kvm \
+    -p 50922:10022 \
+    -e "DISPLAY=${DISPLAY:-:0.0}" \
+    -e EXTRA="-monitor telnet::45454,server,nowait -nographic -serial null"
+```
+
+Optionally, you can enable the SPICE protocol, which allows you to use
+`remote-viewer` to access it rather than VNC.
+
+```bash
+  docker run \
+    --device /dev/kvm \
+    -p 50922:10022 \
+    -e "DISPLAY=${DISPLAY:-:0.0}" \
+    -e EXTRA="-monitor telnet::45454,server,nowait -nographic -serial null -spice disable-ticketing,port=3001"
+```
+
+Then simply do `remote-viewer spice://localhost:3001` and add `--spice-debug` for debugging.
+
+
 # How to install Docker if you don't have Docker already
 
 ```bash
