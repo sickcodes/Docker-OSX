@@ -34,3 +34,6 @@ These credits refer to the contributors to this repository:
 
 [@AdamMomen](https://github.com/AdamMomen) - Fixed automatic boot vnc-version container instructions for better usablility
 
+[@PeterDaveHello](https://github.com/PeterDaveHello) - Simplify .ssh directory setup process in Dockerfile #111
+
+[@PeterDaveHello](https://github.com/PeterDaveHello) - Reduce image size by setting git clone depth #110
