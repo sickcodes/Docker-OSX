@@ -62,7 +62,6 @@ ARG VERSION=10.15.6
 # This fails on hub.docker.com, useful for debugging in cloud
 # RUN [[ $(egrep -c '(svm|vmx)' /proc/cpuinfo) -gt 0 ]] || { echo KVM not possible on this host && exit 1; }
 
-WORKDIR /root
 RUN tee -a /etc/pacman.conf <<< '[community-testing]' \
     && tee -a /etc/pacman.conf <<< 'Include = /etc/pacman.d/mirrorlist'
 
@@ -96,8 +95,7 @@ RUN tee -a sshd_config <<< 'AllowTcpForwarding yes' \
 USER arch
 
 # download OSX-KVM
-WORKDIR /home/arch
-RUN git clone --depth 1 https://github.com/kholia/OSX-KVM.git
+RUN git clone --depth 1 https://github.com/kholia/OSX-KVM.git /home/arch/OSX-KVM
 
 # enable ssh
 # docker exec .... ./enable-ssh.sh
@@ -124,9 +122,7 @@ RUN sudo pacman -Syu qemu libvirt dnsmasq virt-manager bridge-utils flex bison e
 # RUN sudo systemctl enable libvirtd.service
 # RUN sudo systemctl enable virtlogd.service
 
-WORKDIR /home/arch/OSX-KVM
-
-RUN git clone --depth 1 https://github.com/corpnewt/gibMacOS.git
+RUN git clone --depth 1 https://github.com/corpnewt/gibMacOS.git /home/arch/OSX-KVM/gibMacOS
 
 WORKDIR /home/arch/OSX-KVM/gibMacOS
 
@@ -182,8 +178,6 @@ ENV DISPLAY=:0.0
 USER arch
 
 VOLUME ["/tmp/.X11-unix"]
-
-WORKDIR /home/arch/OSX-KVM
 
 CMD ./enable-ssh.sh && envsubst < ./Launch.sh | bash
 
