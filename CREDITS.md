@@ -37,3 +37,7 @@ These credits refer to the contributors to this repository:
 [@PeterDaveHello](https://github.com/PeterDaveHello) - Simplify .ssh directory setup process in Dockerfile #111
 
 [@PeterDaveHello](https://github.com/PeterDaveHello) - Reduce image size by setting git clone depth #110
+
+[@PeterDaveHello](https://github.com/PeterDaveHello) -  Reduce Dockerfile instructions and Docker image layers #112
+
+[@weskerfoot](https://github.com/weskerfoot) Docs updates: usb passthrough, headless mode, disk space reduction guide #113
