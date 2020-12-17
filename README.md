@@ -351,7 +351,7 @@ docker start newcontainerid
 
 ```
 
-# DESTROY: Wipe old images to get 
+# DESTROY: Wipe old images to free disk space
 
 This is useful for getting disk space back.
 
@@ -372,6 +372,66 @@ It will build a Catalina Disk with up to 200GB of space.
 You can change the size and version using build arguments (see below).
 
 This file builds on top of the work done by Dhiru Kholia and many others on the OSX-KVM project.
+
+# CI/CD Related Improvements
+## How to reduce the size of the image
+* Start up the container as usual, and remove unnecessary files. A useful way
+  to do this is to use `du -sh *` starting from the `/` directory, and find
+  large directories where files can be removed. E.g. unnecessary cached files,
+  Xcode platforms, etc.
+* Once you are satisfied with the amount of free space, enable trim with `sudo trimforce enable`, and reboot.
+* Zero out the empty space on the disk with `dd if=/dev/zero of=./empty && rm -f empty`
+* Shut down the VM and copy out the qcow image with `docker cp stoppedcontainer:/home/arch/OSX-KVM/mac_hdd_ng.img .`
+* Run `qemu-img check -r all mac_hdd_ng.img` to fix any errors.
+* Run `qemu-img convert -O qcow2 mac_hdd_ng.img deduped.img` and check for errors again
+* OPTIONAL: Run `qemu-img -c -O qcow2 deduped.img compressed.img` to further compress the image. This may reduce the runtime speed though, but it should reduce the size by roughly 25%.
+* Check for errors again, and build a fresh docker image. E.g. with this Dockerfile
+
+```
+FROM sickcodes/docker-osx
+USER arch
+COPY --chown=arch ./deduped.img /home/arch/OSX-KVM/mac_hdd_ng.img
+```
+
+## How to run in headless mode
+First make sure [autoboot is enabled](#autoboot-into-osx-after-youve-installed-everything)
+
+Next, you will want to set up SSH to be automatically started.
+
+```bash
+sudo systemsetup -setremotelogin on
+```
+
+Make sure to commit the new docker image and save it, or rebuild as described in the [section on reducing disk space](#how-to-reduce-the-size-of-the-image).
+
+Then run it with these arguments.
+
+```bash
+# Run with the -nographic flag, and enable a telnet interface
+  docker run \
+    --device /dev/kvm \
+    -p 50922:10022 \
+    -e "DISPLAY=${DISPLAY:-:0.0}" \
+    -e EXTRA="-monitor telnet::45454,server,nowait -nographic -serial null" \
+    mycustomimage
+```
+
+Optionally, you can enable the SPICE protocol, which allows you to use `remote-viewer` to access it rather than VNC.
+
+Note: `-disable-ticketing` will allow unauthenticated access to the VM. See the [spice manual](https://www.spice-space.org/spice-user-manual.html) for help setting up authenticated access ("Ticketing").
+
+```bash
+  docker run \
+    --device /dev/kvm \
+    -p 50922:10022 \
+    -e "DISPLAY=${DISPLAY:-:0.0}" \
+    -e EXTRA="-monitor telnet::45454,server,nowait -nographic -serial null -spice disable-ticketing,port=3001" \
+    mycustomimage
+```
+
+Then simply do `remote-viewer spice://localhost:3001` and add `--spice-debug` for debugging.
+
+
 
 
 # Custom Build
@@ -398,6 +458,61 @@ docker run \
     docker-osx:latest
 
 ```
+
+# Allow USB passthrough
+
+The simplest way to do this is the following:
+
+First of all, in order to do this, QEMU must be started as root. It is also potentially possible to do this by changing the permissions of the device in the container.
+See [here](https://www.linuxquestions.org/questions/slackware-14/qemu-usb-permissions-744557/#post3628691).
+
+For example, create a new Dockerfile with the following
+
+```bash
+FROM sickcodes/docker-osx
+USER arch
+RUN sed -i -e s/exec\ qemu/exec\ sudo\ qemu/ ./Launch.sh
+COPY --chown=arch ./new_image.img /home/arch/OSX-KVM/mac_hdd_ng.img
+```
+
+Where `new_image.img` is the qcow2 image you extracted. Then rebuild with `docker build .`
+
+Find out the bus and port numbers of your USB device which you want to pass through to the VM.
+
+```bash
+lsusb -t
+/:  Bus 02.Port 1: Dev 1, Class=root_hub, Driver=xhci_hcd/6p, 5000M
+/:  Bus 01.Port 1: Dev 1, Class=root_hub, Driver=xhci_hcd/12p, 480M
+    |__ Port 2: Dev 5, If 0, Class=Human Interface Device, Driver=usbhid, 12M
+    |__ Port 2: Dev 5, If 1, Class=Chip/SmartCard, Driver=, 12M
+    |__ Port 3: Dev 2, If 0, Class=Wireless, Driver=, 12M
+    |__ Port 3: Dev 2, If 1, Class=Wireless, Driver=, 12M
+    |__ Port 5: Dev 3, If 0, Class=Video, Driver=uvcvideo, 480M
+    |__ Port 5: Dev 3, If 1, Class=Video, Driver=uvcvideo, 480M
+```
+
+In this example, we want to pass through a smartcard device. The device we want is on bus 1 and port 2.
+
+There may also be differences if your device is usb 2.0 (ehci) vs usb 3.0 (xhci).
+See [here](https://unix.stackexchange.com/a/452946/101044) for more details.
+
+
+```bash
+# hostbus and hostport correspond to the numbers from lsusb
+# runs in privileged mode to enable access to the usb devices.
+docker run \
+  --privileged \
+  --device /dev/kvm \
+  -e RAM=4 \
+  -p 50922:10022 \
+  -e "DISPLAY=${DISPLAY:-:0.0}" \
+  -e EXTRA="-device virtio-serial-pci -device usb-host,hostbus=1,hostport=2" \
+  mycustomimage
+```
+
+You should see the device show up when you do `system_profiler SPUSBDataType` in the MacOS shell.
+
+Important Note: this will cause the host system to lose access to the USB device while the VM is running!
 
 ## What is `${DISPLAY:-:0.0}`?
 
