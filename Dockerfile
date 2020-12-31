@@ -55,6 +55,8 @@ FROM archlinux:latest
 
 MAINTAINER 'https://sick.codes' <https://sick.codes>
 
+SHELL ["/bin/bash", "-c"]
+
 # change disk size here or add during build, e.g. --build-arg VERSION=10.14.5 --build-arg SIZE=50G
 ARG SIZE=200G
 ARG VERSION=10.15.6
