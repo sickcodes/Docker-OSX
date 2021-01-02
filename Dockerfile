@@ -1,42 +1,40 @@
 #!/usr/bin/docker
 #     ____             __             ____  ______  __
 #    / __ \____  _____/ /_____  _____/ __ \/ ___/ |/ /
-#   / / / / __ \/ ___/ //_/ _ \/ ___/ / / /\__ \|   / 
-#  / /_/ / /_/ / /__/ ,< /  __/ /  / /_/ /___/ /   |  
-# /_____/\____/\___/_/|_|\___/_/   \____//____/_/|_|  
-# 
+#   / / / / __ \/ ___/ //_/ _ \/ ___/ / / /\__ \|   /
+#  / /_/ / /_/ / /__/ ,< /  __/ /  / /_/ /___/ /   |
+# /_____/\____/\___/_/|_|\___/_/   \____//____/_/|_|
+#
 # Repo:             https://github.com/sickcodes/Docker-OSX/
 # Title:            Mac on Docker (Docker-OSX)
-# Author:           Sick.Codes https://sick.codes/ 
+# Author:           Sick.Codes https://sick.codes/
 # Version:          2.6
 # License:          GPLv3+
-# 
+#
 # All credits for OSX-KVM and the rest at @Kholia's repo: https://github.com/kholia/osx-kvm
-# OpenCore support go to https://github.com/Leoyzen/KVM-Opencore 
+# OpenCore support go to https://github.com/Leoyzen/KVM-Opencore
 # and https://github.com/thenickdude/KVM-Opencore/
-# 
+#
 # This Dockerfile automates the installation of Docker-OSX
 # It will build a 200GB container. You can change the size using build arguments.
 # This Dockerfile builds on top of the work done by Dhiru Kholia, and many others.
-#       
+#
 # Build:
 #
 #       docker build -t docker-osx .
 #       docker build -t docker-osx --build-arg VERSION=10.15.5 --build-arg SIZE=200G .
-#       
+#
 # Basic Run:
-#       
+#
 #       docker run --device /dev/kvm --device /dev/snd -v /tmp/.X11-unix:/tmp/.X11-unix -e "DISPLAY=${DISPLAY:-:0.0}" sickcodes/docker-osx:latest
 #
-#
 # Run with SSH:
-# 
-# 
+#
 #       docker run --device /dev/kvm --device /dev/snd -e RAM=6 -p 50922:10022 -v /tmp/.X11-unix:/tmp/.X11-unix -e "DISPLAY=${DISPLAY:-:0.0}" sickcodes/docker-osx:latest
 #       # ssh fullname@localhost -p 50922
-# 
+#
 # Optargs:
-#       
+#
 #       SIZE=200G
 #       VERSION=10.15.6
 #       ENV RAM=5
@@ -49,7 +47,6 @@
 #
 #       docker run ... -e EXTRA="-usb -device usb-host,hostbus=1,hostaddr=8" ...
 #       # you will also need to pass the device to the container
-#
 
 FROM archlinux:latest
 
@@ -130,10 +127,10 @@ WORKDIR /home/arch/OSX-KVM/gibMacOS
 
 # this command takes a while!
 RUN perl -p -i -e 's/print("Succeeded:")/exit()/' ./gibMacOS.command \
-	&& { python gibMacOS.command -v "${VERSION}" -d || echo Done; } \
-	&& qemu-img convert /home/arch/OSX-KVM/gibMacOS/macOS\ Downloads/publicrelease/*/BaseSystem.dmg -O qcow2 -p -c /home/arch/OSX-KVM/BaseSystem.img \
-	&& qemu-img create -f qcow2 /home/arch/OSX-KVM/mac_hdd_ng.img "${SIZE}" \
-	&& rm /home/arch/OSX-KVM/gibMacOS/macOS\ Downloads/publicrelease/*/BaseSystem.dmg
+    && { python gibMacOS.command -v "${VERSION}" -d || echo Done; } \
+    && qemu-img convert /home/arch/OSX-KVM/gibMacOS/macOS\ Downloads/publicrelease/*/BaseSystem.dmg -O qcow2 -p -c /home/arch/OSX-KVM/BaseSystem.img \
+    && qemu-img create -f qcow2 /home/arch/OSX-KVM/mac_hdd_ng.img "${SIZE}" \
+    && rm /home/arch/OSX-KVM/gibMacOS/macOS\ Downloads/publicrelease/*/BaseSystem.dmg
 
 # > Launch.sh
 # > Docker-OSX.xml
