@@ -1,8 +1,35 @@
 # Docker-OSX
 ## [Follow @sickcodes on Twitter](https://twitter.com/sickcodes)
 
-### V2.6
-# Features In Docker-OSX v2.6
+![Running mac osx in a docker container](/running-mac-inside-docker-qemu.png?raw=true "OSX KVM DOCKER")
+
+Run Mac in a Docker container! Run near native OSX-KVM in Docker! X11 Forwarding!
+
+Author: Sick.Codes https://sick.codes/ & https://twitter.com/sickcodes
+
+PR & Contributor Credits: https://github.com/sickcodes/Docker-OSX/blob/master/CREDITS.md
+
+Docker Hub: https://hub.docker.com/r/sickcodes/docker-osx
+
+# Quick Start Docker-OSX
+```bash
+
+docker run \
+    --device /dev/kvm \
+    -p 50922:10022 \
+    -v /tmp/.X11-unix:/tmp/.X11-unix \
+    -e "DISPLAY=${DISPLAY:-:0.0}" \
+    sickcodes/docker-osx:latest
+
+# Wait 2-3 minutes until you see the logo.
+
+```
+
+# Features Coming in v3.0
+- Fully automated installation.
+- Ready-to-go instances.
+
+# Features In Docker-OSX v2.7
 - CI/CD weaponization thru vnc and xdotool
 - OSX-KVM
 - X11 Forwarding
@@ -12,21 +39,13 @@
 - Create an ARMY using `docker commit`
 - XFVB HEADLESS (use vnc)
 
-### Pull Requests Welcome!
+### All Pull Requests Welcome!
 
-![Running mac osx in a docker container](/running-mac-inside-docker-qemu.png?raw=true "OSX KVM DOCKER")
-
-Run Mac in a Docker container! Run near native OSX-KVM in Docker! X11 Forwarding!
-
-Author: Sick.Codes https://sick.codes/ & https://twitter.com/sickcodes
-
-PR & Contributor Credits: https://github.com/sickcodes/Docker-OSX/blob/master/CREDITS.md
+Docker-OSX is a GPLv3+ Dockerfile and we need contributors just like you :).
 
 Upstream: https://github.com/kholia/OSX-KVM && the great guy [@kholia](https://twitter.com/kholia)
 
 Upstream Credits (OSX-KVM project) among many others: https://github.com/kholia/OSX-KVM/blob/master/CREDITS.md
-
-Docker Hub: https://hub.docker.com/r/sickcodes/docker-osx
 
 ### Other cool Docker-QEMU based projects:
 
@@ -432,13 +451,19 @@ Note: `-disable-ticketing` will allow unauthenticated access to the VM. See the 
 Then simply do `remote-viewer spice://localhost:3001` and add `--spice-debug` for debugging.
 
 
+# Custom Build or Local Development
 
+If you are building Docker-OSX locally, you will want to use Arch Linux mirrors.
 
-# Custom Build
+Mirror locations can be found here (use 2 letter country codes): https://archlinux.org/mirrorlist/all/
+
 ```bash
 docker build -t docker-osx:latest \
-    --build-arg VERSION=10.14.6 \
-    --build-arg SIZE=200G
+    --build-arg RANKMIRRORS=yes \
+    --build-arg MIRROR_COUNTRY=US \
+    --build-arg MIRROR_COUNT=10 \
+    --build-arg VERSION=10.15.6 \
+    --build-arg SIZE=200G .
 ```
 
 # Custom QEMU Arguments (passthrough devices)

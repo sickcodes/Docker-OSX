@@ -7,7 +7,7 @@
 # 
 # Title:            Mac on Docker (Docker-OSX) [VNC EDITION]
 # Author:           Sick.Codes https://sick.codes/        
-# Version:          2.6
+# Version:          2.7
 # License:          GPLv3+
 # 
 # All credits for OSX-KVM and the rest at Kholia's repo: https://github.com/kholia/osx-kvm
@@ -72,14 +72,21 @@ MAINTAINER 'https://twitter.com/sickcodes' <https://sick.codes>
 
 USER root
 
-RUN tee -a /etc/pacman.d/mirrorlist <<< 'Server = http://mirrors.evowise.com/archlinux/$repo/os/$arch' \
-    && tee -a /etc/pacman.d/mirrorlist <<< 'Server = http://mirror.rackspace.com/archlinux/$repo/os/$arch' \
-    && tee -a /etc/pacman.d/mirrorlist <<< 'Server = https://mirror.rackspace.com/archlinux/$repo/os/$arch'
+ARG RANKMIRRORS=no
+ARG MIRROR_COUNTRY=US
+ARG MIRROR_COUNT=10
 
-# ARG MIRROR_COUNTRY=US
-# RUN curl -s "https://www.archlinux.org/mirrorlist/?country=${MIRROR_COUNTRY}&protocol=https&use_mirror_status=on" | \
-# sed -e 's/^#Server/Server/' -e '/^#/d' | \
-# rankmirrors -n 5 - > /etc/pacman.d/mirrorlist
+# Arch Linux server mirrors for faster builds
+RUN if [[ "${RANKMIRRORS}" = yes ]]; then { pacman -Sy wget --noconfirm || pacman -Syu wget --noconfirm ; } \
+    ; wget -O ./rankmirrors "https://raw.githubusercontent.com/sickcodes/Docker-OSX/master/rankmirrors" \
+    ; wget -O- "https://www.archlinux.org/mirrorlist/?country=${MIRROR_COUNTRY:-US}&protocol=https&use_mirror_status=on" \
+    | sed -e 's/^#Server/Server/' -e '/^#/d' \
+    | head -n "$((${MIRROR_COUNT:-10}+1))" \
+    | bash ./rankmirrors --verbose --max-time 5 - > /etc/pacman.d/mirrorlist \
+    && tee -a /etc/pacman.d/mirrorlist <<< 'Server = http://mirrors.evowise.com/archlinux/$repo/os/$arch' \
+    && tee -a /etc/pacman.d/mirrorlist <<< 'Server = http://mirror.rackspace.com/archlinux/$repo/os/$arch' \
+    && tee -a /etc/pacman.d/mirrorlist <<< 'Server = https://mirror.rackspace.com/archlinux/$repo/os/$arch' \
+    && cat /etc/pacman.d/mirrorlist; fi
 
 USER arch
 

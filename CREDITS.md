@@ -41,3 +41,6 @@ These credits refer to the contributors to this repository:
 [@PeterDaveHello](https://github.com/PeterDaveHello) -  Reduce Dockerfile instructions and Docker image layers #112
 
 [@weskerfoot](https://github.com/weskerfoot) Docs updates: usb passthrough, headless mode, disk space reduction guide #113
+
+[@PeterDaveHello](https://github.com/PeterDaveHello) - Improve Dockerfile #121 
+

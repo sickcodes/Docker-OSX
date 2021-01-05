@@ -8,7 +8,7 @@
 # Repo:             https://github.com/sickcodes/Docker-OSX/
 # Title:            Mac on Docker (Docker-OSX)
 # Author:           Sick.Codes https://sick.codes/
-# Version:          2.6
+# Version:          2.7
 # License:          GPLv3+
 #
 # All credits for OSX-KVM and the rest at @Kholia's repo: https://github.com/kholia/osx-kvm
@@ -133,20 +133,20 @@ RUN touch enable-ssh.sh \
 
 # default env vars, RUNTIME ONLY, not for editing in build time.
 
-RUN sudo pacman -Syu qemu libvirt dnsmasq virt-manager bridge-utils flex bison ebtables edk2-ovmf netctl libvirt-dbus libguestfs --noconfirm && yes | sudo pacman -Scc
+# RUN yes | sudo pacman -Syu qemu libvirt dnsmasq virt-manager bridge-utils edk2-ovmf netctl libvirt-dbus --overwrite --noconfirm
+
+RUN yes | sudo pacman -Syu qemu libvirt dnsmasq virt-manager bridge-utils openresolv jack iptables-nft edk2-ovmf netctl libvirt-dbus --overwrite --noconfirm \
+    ; yes | sudo pacman -Scc
+
 # RUN sudo systemctl enable libvirtd.service
 # RUN sudo systemctl enable virtlogd.service
 
-RUN git clone --depth 1 https://github.com/corpnewt/gibMacOS.git /home/arch/OSX-KVM/gibMacOS
+WORKDIR /home/arch/OSX-KVM
 
-WORKDIR /home/arch/OSX-KVM/gibMacOS
-
-# this command takes a while!
-RUN perl -p -i -e 's/print("Succeeded:")/exit()/' ./gibMacOS.command \
-    && { python gibMacOS.command -v "${VERSION}" -d || echo Done; } \
-    && qemu-img convert /home/arch/OSX-KVM/gibMacOS/macOS\ Downloads/publicrelease/*/BaseSystem.dmg -O qcow2 -p -c /home/arch/OSX-KVM/BaseSystem.img \
-    && qemu-img create -f qcow2 /home/arch/OSX-KVM/mac_hdd_ng.img "${SIZE}" \
-    && rm /home/arch/OSX-KVM/gibMacOS/macOS\ Downloads/publicrelease/*/BaseSystem.dmg
+RUN python fetch-macOS.py --version "${VERSION}" \
+    && qemu-img convert BaseSystem.dmg -O qcow2 -p -c BaseSystem.img \
+    && qemu-img create -f qcow2 mac_hdd_ng.img "${SIZE}" \
+    && rm -f BaseSystem.dmg
 
 # > Launch.sh
 # > Docker-OSX.xml
