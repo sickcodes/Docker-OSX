@@ -1,5 +1,6 @@
 |Version|Date|Notes|
 |---|---|---|
+|   |2021-01-07|Fix sounds errors and sshd missing on latest build.|
 |2.7|2021-01-05|Add rankmirrors. Remove gibMacOS. Replace iptables with iptables-nft. Remove libguestfs.|
 |   |2020-12-17|Remove unnecessary WORKDIR commands.|
 |   |2020-12-16|Reduce image size by cloning OSX-KVM to only 1 depth level. Simplify mkdir && chown to mkdir -m|

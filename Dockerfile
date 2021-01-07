@@ -81,7 +81,7 @@ RUN tee -a /etc/pacman.conf <<< '[community-testing]' \
     && tee -a /etc/pacman.conf <<< 'Include = /etc/pacman.d/mirrorlist'
 
 RUN pacman -Syu --noconfirm \
-    && pacman -S sudo git vim nano --noconfirm \
+    && pacman -S sudo git vim nano alsa-utils openssh --noconfirm \
     && yes | pacman -Scc \
     && ln -s /bin/vim /bin/vi \
     && useradd arch -p arch \
