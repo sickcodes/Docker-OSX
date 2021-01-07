@@ -174,7 +174,7 @@ RUN touch Launch.sh \
     && tee -a Launch.sh <<< '-device ide-hd,bus=sata.2,drive=OpenCoreBoot \' \
     && tee -a Launch.sh <<< '-device ide-hd,bus=sata.3,drive=InstallMedia \' \
     && tee -a Launch.sh <<< '-drive id=InstallMedia,if=none,file=/home/arch/OSX-KVM/BaseSystem.img,format=qcow2 \' \
-    && tee -a Launch.sh <<< '-drive id=MacHDD,if=none,file=/home/arch/OSX-KVM/mac_hdd_ng.img,format=qcow2 \' \
+    && tee -a Launch.sh <<< '-drive id=MacHDD,if=none,file=${IMAGE_PATH:-/home/arch/OSX-KVM/mac_hdd_ng.img},format=qcow2 \' \
     && tee -a Launch.sh <<< '-device ide-hd,bus=sata.4,drive=MacHDD \' \
     && tee -a Launch.sh <<< '-netdev user,id=net0,hostfwd=tcp::${INTERNAL_SSH_PORT:-10022}-:22,hostfwd=tcp::${SCREEN_SHARE_PORT:-5900}-:5900, -device e1000-82545em,netdev=net0,id=net0,mac=52:54:00:09:49:17 \' \
     && tee -a Launch.sh <<< '-monitor stdio \' \
@@ -193,6 +193,8 @@ ENV DISPLAY=:0.0
 USER arch
 
 VOLUME ["/tmp/.X11-unix"]
+
+ENV IMAGE_PATH=/home/arch/OSX-KVM/mac_hdd_ng.img
 
 CMD ./enable-ssh.sh && envsubst < ./Launch.sh | bash
 
