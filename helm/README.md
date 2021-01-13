@@ -6,6 +6,8 @@ This installs `docker-osx` in Kubernetes.
 
 ## Requirements
 
+*) Install [host machine requirements](https://github.com/cephasara/Docker-OSX#requirements-kvm-on-the-host)
+    *) Ensure you are running QEMU 5.X
 *) Kubernetes
 *) Helm
 *) `sickcodes/docker-osx-vnc` Docker image
