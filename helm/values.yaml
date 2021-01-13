@@ -1,0 +1,106 @@
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+image:
+  repository: sickcodes/docker-osx-vnc
+  tag: latest
+  pullPolicy: IfNotPresent
+
+# Please note, this must be a directory name within `/system_image` mounted at the bottom in extraVolumeMounts
+serverName: server
+
+# SMBIOS settings (please be sure to update these as to use something unique for iServices)
+configPlist:
+  SystemProductName: iMacPro1,1
+  MLB: D25338500GUF8YLJA
+  SystemSerialNumber: D25LF7ZEF8JC
+  SystemUUID: 139C94D6-A533-47D2-874F-D365BFD8B047
+
+# This defines QEMU and virtlo parameters
+qemu:
+  cpu: Penryn,vendor=GenuineIntel,+hypervisor,+invtsc,kvm=on,+fma,+avx,+avx2,+aes,+ssse3,+sse4_2,+popcnt,+sse4a,+bmi1,+bmi2
+  diskSize: 128G
+  audio:
+    enabled: true
+    driver: alsa
+  netdev:
+    extraArgs: 
+
+# Password for accessing vm over vnc
+vnc:
+  password: updateme
+
+nameOverride: ""
+fullnameOverride: ""
+
+service:
+  type: LoadBalancer
+  ip: 192.168.1.10
+  targetPort: 50922
+  port: 10022
+
+ingress:
+  enabled: false
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+  # kubernetes.io/tls-acme: "true"
+  paths:
+  - /
+  hosts:
+  - docker-osx.local
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+# Note: seems that host needs around x5 the cpu and x8 memory limits allocated to MacOS
+#  when under load. This may be due to my personal hardware or inefficencies such as
+#  software GPU rendering. Otherwise the pod will be killed due to OOMing.
+#
+#  Warning: do not perform unit conversion on cpu and memory requests, as these units
+#   are tied qemu and virtio settings. Also, only use intergers for cpu requests.
+resources:
+  limits:
+   cpu: 10
+   memory: 33554Mi
+  requests:
+   cpu: 2
+   memory: 4096Mi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+persistence:
+  data:
+    enabled: false
+    ## configuration data Persistent Volume Storage Class
+    ## If defined, storageClassName: <storageClass>
+    ## If set to "-", storageClassName: "", which disables dynamic provisioning
+    ## If undefined (the default) or set to null, no storageClassName spec is
+    ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
+    ##   GKE, AWS & OpenStack)
+    ##
+    # storageClass: "-"
+    ##
+    ## If you want to reuse an existing claim, you can pass the name of the PVC using
+    ## the existingClaim variable
+    existingClaim: docker-osx
+    accessMode: ReadWriteOnce
+    size: 5Gi
+
+# Any extra volumes to define for the pod
+extraVolumes:
+  - name: data
+    hostPath:
+      path: /mnt/data/default/docker_osx/
+      type: DirectoryOrCreate
+
+# Any extra volume mounts to define for the containers
+extraVolumeMounts:
+  - name: data
+    mountPath: /system_image

@@ -1,0 +1,7 @@
+apiVersion: v1
+appVersion: "0.10.554.0"
+description: default
+name: docker-osx
+version: 0.1.0
+keywords:
+- docker-osx
