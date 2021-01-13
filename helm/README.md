@@ -4,6 +4,24 @@
 
 This installs `docker-osx` in Kubernetes.
 
+## Features
+
+### What works
+1) Setting cpu/memory options
+1) Setting VNC password
+1) Persistance
+1) Setting SMBIOS
+1) QEMU/virtio cpu changes
+1) Toggling Audio
+1) Additional port forwarding
+1) Kubernetes resource requests/limits
+1) Defining install partition size
+
+### What doesn't/isn't defined
+1) Defining a different version of macOS
+1) Additional QEMU parameters
+1) GPU support
+
 ## Requirements
 
 *) Install [host machine requirements](https://github.com/cephasara/Docker-OSX#requirements-kvm-on-the-host)
