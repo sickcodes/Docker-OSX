@@ -1,0 +1,1175 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "docker-osx.fullname" . }}-boot-components
+data:
+  config.plist: |-
+    <?xml version="1.0" encoding="UTF-8"?>
+    <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+    <plist version="1.0">
+    <dict>
+      <key>ACPI</key>
+      <dict>
+        <key>Add</key>
+        <array>
+          <dict>
+            <key>Comment</key>
+            <string>add DTGP method</string>
+            <key>Enabled</key>
+            <true/>
+            <key>Path</key>
+            <string>SSDT-DTGP.aml</string>
+          </dict>
+          <dict>
+            <key>Comment</key>
+            <string>Fake EC and USBX Power</string>
+            <key>Enåabled</key>
+            <true/>
+            <key>Path</key>
+            <string>SSDT-EC.aml</string>
+          </dict>
+          <dict>
+            <key>Comment</key>
+            <string>USB 2.0 Injection</string>
+            <key>Enabled</key>
+            <true/>
+            <key>Path</key>
+            <string>SSDT-EHCI.aml</string>
+          </dict>
+          <dict>
+            <key>Comment</key>
+            <string>CPU AGPM Plugin=1</string>
+            <key>Enabled</key>
+            <true/>
+            <key>Path</key>
+            <string>SSDT-PLUG.aml</string>
+          </dict>
+        </array>
+        <key>Delete</key>
+        <array>
+          <dict>
+            <key>All</key>
+            <false/>
+            <key>Comment</key>
+            <string>Delete CpuPm</string>
+            <key>Enabled</key>
+            <false/>
+            <key>OemTableId</key>
+            <data>Q3B1UG0AAAA=</data>
+            <key>TableLength</key>
+            <integer>0</integer>
+            <key>TableSignature</key>
+            <data>U1NEVA==</data>
+          </dict>
+          <dict>
+            <key>All</key>
+            <false/>
+            <key>Comment</key>
+            <string>Delete Cpu0Ist</string>
+            <key>Enabled</key>
+            <false/>
+            <key>OemTableId</key>
+            <data>Q3B1MElzdAA=</data>
+            <key>TableLength</key>
+            <integer>0</integer>
+            <key>TableSignature</key>
+            <data>U1NEVA==</data>
+          </dict>
+        </array>
+        <key>Patch</key>
+        <array>
+          <dict>
+            <key>Comment</key>
+            <string>_Q11 to XQ11</string>
+            <key>Count</key>
+            <integer>1</integer>
+            <key>Enabled</key>
+            <false/>
+            <key>Find</key>
+            <data>X1ExMQ==</data>
+            <key>Limit</key>
+            <integer>0</integer>
+            <key>Mask</key>
+            <data></data>
+            <key>OemTableId</key>
+            <data></data>
+            <key>Replace</key>
+            <data>WFExMQ==</data>
+            <key>ReplaceMask</key>
+            <data></data>
+            <key>Skip</key>
+            <integer>0</integer>
+            <key>TableLength</key>
+            <integer>0</integer>
+            <key>TableSignature</key>
+            <data></data>
+          </dict>
+          <dict>
+            <key>Comment</key>
+            <string>_Q12 to XQ12</string>
+            <key>Count</key>
+            <integer>1</integer>
+            <key>Enabled</key>
+            <false/>
+            <key>Find</key>
+            <data>X1ExMg==</data>
+            <key>Limit</key>
+            <integer>0</integer>
+            <key>Mask</key>
+            <data></data>
+            <key>OemTableId</key>
+            <data></data>
+            <key>Replace</key>
+            <data>WFExMg==</data>
+            <key>ReplaceMask</key>
+            <data></data>
+            <key>Skip</key>
+            <integer>0</integer>
+            <key>TableLength</key>
+            <integer>0</integer>
+            <key>TableSignature</key>
+            <data></data>
+          </dict>
+        </array>
+        <key>Quirks</key>
+        <dict>
+          <key>FadtEnableReset</key>
+          <false/>
+          <key>NormalizeHeaders</key>
+          <false/>
+          <key>RebaseRegions</key>
+          <false/>
+          <key>ResetHwSig</key>
+          <false/>
+          <key>ResetLogoStatus</key>
+          <false/>
+        </dict>
+      </dict>
+      <key>Booter</key>
+      <dict>
+        <key>MmioWhitelist</key>
+        <array/>
+        <key>Quirks</key>
+        <dict>
+          <key>AvoidRuntimeDefrag</key>
+          <true/>
+          <key>DevirtualiseMmio</key>
+          <false/>
+          <key>DisableSingleUser</key>
+          <false/>
+          <key>DisableVariableWrite</key>
+          <false/>
+          <key>DiscardHibernateMap</key>
+          <false/>
+          <key>EnableSafeModeSlide</key>
+          <true/>
+          <key>EnableWriteUnprotector</key>
+          <true/>
+          <key>ForceExitBootServices</key>
+          <false/>
+          <key>ProtectMemoryRegions</key>
+          <false/>
+          <key>ProtectSecureBoot</key>
+          <false/>
+          <key>ProtectUefiServices</key>
+          <false/>
+          <key>ProvideCustomSlide</key>
+          <true/>
+          <key>ProvideMaxSlide</key>
+          <integer>0</integer>
+          <key>RebuildAppleMemoryMap</key>
+          <false/>
+          <key>SetupVirtualMap</key>
+          <false/>
+          <key>SignalAppleOS</key>
+          <false/>
+          <key>SyncRuntimePermissions</key>
+          <false/>
+        </dict>
+      </dict>
+      <key>DeviceProperties</key>
+      <dict>
+        <key>Add</key>
+        <dict>
+          <key>PciRoot(0x1)/Pci(0x1F,0x0)</key>
+          <dict>
+            <key>compatible</key>
+            <string>pci8086,2916</string>
+            <key>device-id</key>
+            <data>
+            FikA
+            </data>
+            <key>name</key>
+            <string>pci8086,2916</string>
+          </dict>
+        </dict>
+        <key>Delete</key>
+        <dict>
+          <key>PciRoot(0x0)/Pci(0x1b,0x0)</key>
+          <array>
+            <string>MaximumBootBeepVolume</string>
+          </array>
+        </dict>
+      </dict>
+      <key>Kernel</key>
+      <dict>
+        <key>Add</key>
+        <array>
+          <dict>
+            <key>Arch</key>
+            <string>x86_64</string>
+            <key>BundlePath</key>
+            <string>VoodooHDA.kext</string>
+            <key>Comment</key>
+            <string>Patch engine</string>
+            <key>Enabled</key>
+            <false/>
+            <key>ExecutablePath</key>
+            <string>Contents/MacOS/VoodooHDA</string>
+            <key>MaxKernel</key>
+            <string></string>
+            <key>MinKernel</key>
+            <string>12.0.0</string>
+            <key>PlistPath</key>
+            <string>Contents/Info.plist</string>
+          </dict>
+          <dict>
+            <key>Arch</key>
+            <string>x86_64</string>
+            <key>BundlePath</key>
+            <string>Lilu.kext</string>
+            <key>Comment</key>
+            <string>Patch engine</string>
+            <key>Enabled</key>
+            <true/>
+            <key>ExecutablePath</key>
+            <string>Contents/MacOS/Lilu</string>
+            <key>MaxKernel</key>
+            <string></string>
+            <key>MinKernel</key>
+            <string>12.0.0</string>
+            <key>PlistPath</key>
+            <string>Contents/Info.plist</string>
+          </dict>
+          <dict>
+            <key>Arch</key>
+            <string>x86_64</string>
+            <key>BundlePath</key>
+            <string>VirtualSMC.kext</string>
+            <key>Comment</key>
+            <string>SMC emulator</string>
+            <key>Enabled</key>
+            <false/>
+            <key>ExecutablePath</key>
+            <string>Contents/MacOS/VirtualSMC</string>
+            <key>MaxKernel</key>
+            <string></string>
+            <key>MinKernel</key>
+            <string>12.0.0</string>
+            <key>PlistPath</key>
+            <string>Contents/Info.plist</string>
+          </dict>
+          <dict>
+            <key>Arch</key>
+            <string>x86_64</string>
+            <key>BundlePath</key>
+            <string>WhateverGreen.kext</string>
+            <key>Comment</key>
+            <string>Video patches</string>
+            <key>Enabled</key>
+            <true/>
+            <key>ExecutablePath</key>
+            <string>Contents/MacOS/WhateverGreen</string>
+            <key>MaxKernel</key>
+            <string></string>
+            <key>MinKernel</key>
+            <string>12.0.0</string>
+            <key>PlistPath</key>
+            <string>Contents/Info.plist</string>
+          </dict>
+          <dict>
+            <key>Arch</key>
+            <string>x86_64</string>
+            <key>BundlePath</key>
+            <string>AppleALC.kext</string>
+            <key>Comment</key>
+            <string>Audio patches</string>
+            <key>Enabled</key>
+            <true/>
+            <key>ExecutablePath</key>
+            <string>Contents/MacOS/AppleALC</string>
+            <key>MaxKernel</key>
+            <string></string>
+            <key>MinKernel</key>
+            <string>12.0.0</string>
+            <key>PlistPath</key>
+            <string>Contents/Info.plist</string>
+          </dict>
+          <dict>
+            <key>BundlePath</key>
+            <string>AGPMInjector.kext</string>
+            <key>Comment</key>
+            <string></string>
+            <key>Enabled</key>
+            <true/>
+            <key>ExecutablePath</key>
+            <string></string>
+            <key>MaxKernel</key>
+            <string></string>
+            <key>MinKernel</key>
+            <string></string>
+            <key>PlistPath</key>
+            <string>Contents/Info.plist</string>
+          </dict>
+          <dict>
+            <key>BundlePath</key>
+            <string>USBPorts.kext</string>
+            <key>Comment</key>
+            <string></string>
+            <key>Enabled</key>
+            <true/>
+            <key>ExecutablePath</key>
+            <string></string>
+            <key>MaxKernel</key>
+            <string></string>
+            <key>MinKernel</key>
+            <string></string>
+            <key>PlistPath</key>
+            <string>Contents/Info.plist</string>
+          </dict>
+          <dict>
+            <key>Arch</key>
+            <string>x86_64</string>
+            <key>BundlePath</key>
+            <string>MCEReporterDisabler.kext</string>
+            <key>Comment</key>
+            <string>AppleMCEReporter disabler</string>
+            <key>Enabled</key>
+            <true/>
+            <key>ExecutablePath</key>
+            <string></string>
+            <key>MaxKernel</key>
+            <string></string>
+            <key>MinKernel</key>
+            <string>19.0.0</string>
+            <key>PlistPath</key>
+            <string>Contents/Info.plist</string>
+          </dict>
+        </array>
+        <key>Block</key>
+        <array>
+          <dict>
+            <key>Arch</key>
+            <string>Any</string>
+            <key>Comment</key>
+            <string></string>
+            <key>Enabled</key>
+            <false/>
+            <key>Identifier</key>
+            <string>com.apple.driver.AppleTyMCEDriver</string>
+            <key>MaxKernel</key>
+            <string></string>
+            <key>MinKernel</key>
+            <string></string>
+          </dict>
+        </array>
+        <key>Emulate</key>
+        <dict>
+          <key>Cpuid1Data</key>
+          <data>
+          VAYFAAAAAAAAAAAAAAAAAA==
+          </data>
+          <key>Cpuid1Mask</key>
+          <data>
+          ////AAAAAAAAAAAAAAAAAA==
+          </data>
+        </dict>
+        <key>Force</key>
+        <array>
+          <dict>
+            <key>Arch</key>
+            <string>Any</string>
+            <key>BundlePath</key>
+            <string>System/Library/Extensions/IONetworkingFamily.kext</string>
+            <key>Comment</key>
+            <string>Patch engine</string>
+            <key>Enabled</key>
+            <false/>
+            <key>Identifier</key>
+            <string>com.apple.iokit.IONetworkingFamily</string>
+            <key>ExecutablePath</key>
+            <string>Contents/MacOS/IONetworkingFamily</string>
+            <key>MaxKernel</key>
+            <string>13.99.99</string>
+            <key>MinKernel</key>
+            <string></string>
+            <key>PlistPath</key>
+            <string>Contents/Info.plist</string>
+          </dict>
+        </array>
+        <key>Patch</key>
+        <array>
+          <dict>
+            <key>Base</key>
+            <string>_cpu_topology_sort</string>
+            <key>Comment</key>
+            <string>algrey - cpu_topology_sort -disable _x86_validate_topology</string>
+            <key>Count</key>
+            <integer>1</integer>
+            <key>Enabled</key>
+            <true/>
+            <key>Find</key>
+            <data>
+            6AAA//8=
+            </data>
+            <key>Identifier</key>
+            <string>kernel</string>
+            <key>Limit</key>
+            <integer>0</integer>
+            <key>Mask</key>
+            <data>
+            /wAA//8=
+            </data>
+            <key>MaxKernel</key>
+            <string>20.99.99</string>
+            <key>MinKernel</key>
+            <string>17.0.0</string>
+            <key>Replace</key>
+            <data>
+            Dx9EAAA=
+            </data>
+            <key>ReplaceMask</key>
+            <data>
+            </data>
+            <key>Skip</key>
+            <integer>0</integer>
+          </dict>
+          <dict>
+            <key>Base</key>
+            <string></string>
+            <key>Comment</key>
+            <string>algrey - cpuid_set_cpufamily - force CPUFAMILY_INTEL_PENRYN</string>
+            <key>Count</key>
+            <integer>1</integer>
+            <key>Enabled</key>
+            <true/>
+            <key>Find</key>
+            <data>
+            MduAPQAAAAAGdQA=
+            </data>
+            <key>Identifier</key>
+            <string>kernel</string>
+            <key>Limit</key>
+            <integer>0</integer>
+            <key>Mask</key>
+            <data>
+            /////wAAAP///wA=
+            </data>
+            <key>MaxKernel</key>
+            <string>20.99.99</string>
+            <key>MinKernel</key>
+            <string>17.0.0</string>
+            <key>Replace</key>
+            <data>
+            u7xP6njpXQAAAJA=
+            </data>
+            <key>ReplaceMask</key>
+            <data>
+            </data>
+            <key>Skip</key>
+            <integer>0</integer>
+          </dict>
+        </array>
+        <key>Quirks</key>
+        <dict>
+          <key>AppleCpuPmCfgLock</key>
+          <false/>
+          <key>AppleXcpmCfgLock</key>
+          <false/>
+          <key>AppleXcpmExtraMsrs</key>
+          <false/>
+          <key>AppleXcpmForceBoost</key>
+          <false/>
+          <key>CustomSMBIOSGuid</key>
+          <false/>
+          <key>DisableIoMapper</key>
+          <false/>
+          <key>DisableLinkeditJettison</key>
+          <true/>
+          <key>DisableRtcChecksum</key>
+          <false/>
+          <key>DummyPowerManagement</key>
+          <true/>
+          <key>ExternalDiskIcons</key>
+          <false/>
+          <key>IncreasePciBarSize</key>
+          <false/>
+          <key>LapicKernelPanic</key>
+          <false/>
+          <key>PanicNoKextDump</key>
+          <false/>
+          <key>PowerTimeoutKernelPanic</key>
+          <false/>
+          <key>ThirdPartyDrives</key>
+          <false/>
+          <key>XhciPortLimit</key>
+          <false/>
+        </dict>
+        <key>Scheme</key>
+        <dict>
+          <key>FuzzyMatch</key>
+          <true/>
+          <key>KernelArch</key>
+          <string>x86_64</string>
+          <key>KernelCache</key>
+          <string>Auto</string>
+        </dict>
+      </dict>
+      <key>Misc</key>
+      <dict>
+        <key>BlessOverride</key>
+        <array/>
+        <key>Boot</key>
+        <dict>
+          <key>ConsoleAttributes</key>
+          <integer>0</integer>
+          <key>HibernateMode</key>
+          <string>Auto</string>
+          <key>HideAuxiliary</key>
+          <false/>
+          <key>PickerAttributes</key>
+          <integer>1</integer>
+          <key>PickerAudioAssist</key>
+          <false/>
+          <key>PickerMode</key>
+          <string>External</string>
+          <key>PollAppleHotKeys</key>
+          <true/>
+          <key>ShowPicker</key>
+          <true/>
+          <key>TakeoffDelay</key>
+          <integer>0</integer>
+          <key>Timeout</key>
+          <integer>0</integer>
+        </dict>
+        <key>Debug</key>
+        <dict>
+          <key>AppleDebug</key>
+          <false/>
+          <key>ApplePanic</key>
+          <false/>
+          <key>DisableWatchDog</key>
+          <false/>
+          <key>DisplayDelay</key>
+          <integer>0</integer>
+          <key>DisplayLevel</key>
+          <integer>2147483650</integer>
+          <key>SerialInit</key>
+          <false/>
+          <key>SysReport</key>
+          <false/>
+          <key>Target</key>
+          <integer>3</integer>
+        </dict>
+        <key>Entries</key>
+        <array/>
+        <key>Security</key>
+        <dict>
+          <key>AllowNvramReset</key>
+          <true/>
+          <key>AllowSetDefault</key>
+          <false/>
+          <key>ApECID</key>
+          <integer>0</integer>
+          <key>AuthRestart</key>
+          <false/>
+          <key>BootProtect</key>
+          <string>None</string>
+          <key>DmgLoading</key>
+          <string>Signed</string>
+          <key>EnablePassword</key>
+          <false/>
+          <key>ExposeSensitiveData</key>
+          <integer>6</integer>
+          <key>HaltLevel</key>
+          <integer>2147483648</integer>
+          <key>PasswordHash</key>
+          <data></data>
+          <key>PasswordSalt</key>
+          <data></data>
+          <key>ScanPolicy</key>
+          <integer>0</integer>
+          <key>SecureBootModel</key>
+          <string>Disabled</string>
+          <key>Vault</key>
+          <string>Optional</string>
+        </dict>
+        <key>Tools</key>
+        <array>
+          <dict>
+            <key>Arguments</key>
+            <string></string>
+            <key>Auxiliary</key>
+            <false/>
+            <key>Comment</key>
+            <string>Not signed for security reasons</string>
+            <key>Enabled</key>
+            <true/>
+            <key>Name</key>
+            <string>UEFI Shell</string>
+            <key>Path</key>
+            <string>OpenShell.efi</string>
+          </dict>
+          <dict>
+            <key>Arguments</key>
+            <string>Shutdown</string>
+            <key>Auxiliary</key>
+            <true/>
+            <key>Comment</key>
+            <string>Perform shutdown</string>
+            <key>Enabled</key>
+            <true/>
+            <key>Name</key>
+            <string>Shutdown</string>
+            <key>Path</key>
+            <string>ResetSystem.efi</string>
+          </dict>
+        </array>
+      </dict>
+      <key>NVRAM</key>
+      <dict>
+        <key>Add</key>
+        <dict>
+          <key>4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14</key>
+          <dict>
+            <key>DefaultBackgroundColor</key>
+            <data>AAAAAA==</data>
+            <key>UIScale</key>
+            <data>AQ==</data>
+          </dict>
+          <key>4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102</key>
+          <dict>
+            <key>rtc-blacklist</key>
+            <data></data>
+          </dict>
+          <key>7C436110-AB2A-4BBB-A880-FE41995C9F82</key>
+          <dict>
+            <key>SystemAudioVolume</key>
+            <data>Rg==</data>
+            <key>boot-args</key>
+            <string>-v keepsyms=1 tlbto_us=0 vti=9</string>
+            <key>run-efi-updater</key>
+            <string>No</string>
+            <key>csr-active-config</key>
+            <data>ZwAAAA==</data>
+            <key>prev-lang:kbd</key>
+            <data>ZW4tVVM6MA==</data>
+          </dict>
+        </dict>
+        <key>Delete</key>
+        <dict>
+          <key>4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14</key>
+          <array>
+            <string>UIScale</string>
+            <string>DefaultBackgroundColor</string>
+          </array>
+          <key>4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102</key>
+          <array>
+            <string>rtc-blacklist</string>
+          </array>
+          <key>7C436110-AB2A-4BBB-A880-FE41995C9F82</key>
+          <array>
+            <string>boot-args</string>
+          </array>
+        </dict>
+        <key>LegacyEnable</key>
+        <false/>
+        <key>LegacyOverwrite</key>
+        <false/>
+        <key>LegacySchema</key>
+        <dict>
+          <key>7C436110-AB2A-4BBB-A880-FE41995C9F82</key>
+          <array>
+            <string>EFILoginHiDPI</string>
+            <string>EFIBluetoothDelay</string>
+            <string>LocationServicesEnabled</string>
+            <string>SystemAudioVolume</string>
+            <string>SystemAudioVolumeDB</string>
+            <string>SystemAudioVolumeSaved</string>
+            <string>bluetoothActiveControllerInfo</string>
+            <string>bluetoothInternalControllerInfo</string>
+            <string>flagstate</string>
+            <string>fmm-computer-name</string>
+            <string>nvda_drv</string>
+            <string>prev-lang:kbd</string>
+          </array>
+          <key>8BE4DF61-93CA-11D2-AA0D-00E098032B8C</key>
+          <array>
+            <string>Boot0080</string>
+            <string>Boot0081</string>
+            <string>Boot0082</string>
+            <string>BootNext</string>
+            <string>BootOrder</string>
+          </array>
+        </dict>
+        <key>WriteFlash</key>
+        <true/>
+      </dict>
+      <key>PlatformInfo</key>
+      <dict>
+        <key>Automatic</key>
+        <true/>
+        <key>Generic</key>
+        <dict>
+          <key>AdviseWindows</key>
+          <false/>
+          <key>MLB</key>
+          <string>{{ .Values.configPlist.MLB }}</string>
+          <key>ROM</key>
+          <data>
+          m7zhIYfl
+          </data>
+          <key>SpoofVendor</key>
+          <true/>
+          <key>SystemProductName</key>
+          <string>{{ .Values.configPlist.SystemProductName }}</string>
+          <key>SystemSerialNumber</key>
+          <string>{{ .Values.configPlist.SystemSerialNumber }}</string>
+          <key>SystemUUID</key>
+          <string>{{ .Values.configPlist.SystemUUID }}</string>
+        </dict>
+        <key>UpdateDataHub</key>
+        <true/>
+        <key>UpdateNVRAM</key>
+        <true/>
+        <key>UpdateSMBIOS</key>
+        <true/>
+        <key>UpdateSMBIOSMode</key>
+        <string>Create</string>
+      </dict>
+      <key>UEFI</key>
+      <dict>
+        <key>APFS</key>
+        <dict>
+          <key>EnableJumpstart</key>
+          <true/>
+          <key>GlobalConnect</key>
+          <false/>
+          <key>HideVerbose</key>
+          <true/>
+          <key>JumpstartHotPlug</key>
+          <false/>
+          <key>MinDate</key>
+          <integer>-1</integer>
+          <key>MinVersion</key>
+          <integer>-1</integer>
+        </dict>
+        <key>Audio</key>
+        <dict>
+          <key>AudioCodec</key>
+          <integer>0</integer>
+          <key>AudioDevice</key>
+          <string>PciRoot(0x1)/Pci(0x1,0x0)/Pci(0x0,0x1)</string>
+          <key>AudioOut</key>
+          <integer>0</integer>
+          <key>AudioSupport</key>
+          <false/>
+          <key>MinimumVolume</key>
+          <integer>20</integer>
+          <key>PlayChime</key>
+          <false/>
+          <key>VolumeAmplifier</key>
+          <integer>0</integer>
+        </dict>
+        <key>ConnectDrivers</key>
+        <true/>
+        <key>Drivers</key>
+        <array>
+          <string>VBoxHfs.efi</string>
+          <string>OpenRuntime.efi</string>
+          <string>OpenCanopy.efi</string>
+          <string>#AudioDxe.efi</string>
+          <string>#OpenUsbKbDxe.efi</string>
+          <string>#UsbMouseDxe.efi</string>
+          <string>#Ps2KeyboardDxe.efi</string>
+          <string>#Ps2MouseDxe.efi</string>
+          <string>#HiiDatabase.efi</string>
+          <string>#NvmExpressDxe.efi</string>
+          <string>#XhciDxe.efi</string>
+          <string>#ExFatDxe.efi</string>
+          <string>#PartitionDxe.efi</string>
+          <string>#CrScreenshotDxe.efi</string>
+        </array>
+        <key>Input</key>
+        <dict>
+          <key>KeyFiltering</key>
+          <false/>
+          <key>KeyForgetThreshold</key>
+          <integer>5</integer>
+          <key>KeyMergeThreshold</key>
+          <integer>2</integer>
+          <key>KeySupport</key>
+          <true/>
+          <key>KeySupportMode</key>
+          <string>Auto</string>
+          <key>KeySwap</key>
+          <false/>
+          <key>PointerSupport</key>
+          <false/>
+          <key>PointerSupportMode</key>
+          <string>ASUS</string>
+          <key>TimerResolution</key>
+          <integer>50000</integer>
+        </dict>
+        <key>Output</key>
+        <dict>
+          <key>ClearScreenOnModeSwitch</key>
+          <false/>
+          <key>ConsoleMode</key>
+          <string></string>
+          <key>DirectGopRendering</key>
+          <false/>
+          <key>IgnoreTextInGraphics</key>
+          <false/>
+          <key>ProvideConsoleGop</key>
+          <true/>
+          <key>ReconnectOnResChange</key>
+          <false/>
+          <key>ReplaceTabWithSpace</key>
+          <false/>
+          <key>Resolution</key>
+          <string>1920x1080@32</string>
+          <key>SanitiseClearScreen</key>
+          <false/>
+          <key>TextRenderer</key>
+          <string>BuiltinGraphics</string>
+          <key>UgaPassThrough</key>
+          <false/>
+        </dict>
+        <key>ProtocolOverrides</key>
+        <dict>
+          <key>AppleAudio</key>
+          <false/>
+          <key>AppleBootPolicy</key>
+          <false/>
+          <key>AppleDebugLog</key>
+          <false/>
+          <key>AppleEvent</key>
+          <false/>
+          <key>AppleFramebufferInfo</key>
+          <false/>
+          <key>AppleImageConversion</key>
+          <false/>
+          <key>AppleImg4Verification</key>
+          <false/>
+          <key>AppleKeyMap</key>
+          <false/>
+          <key>AppleRtcRam</key>
+          <false/>
+          <key>AppleSecureBoot</key>
+          <false/>
+          <key>AppleSmcIo</key>
+          <false/>
+          <key>AppleUserInterfaceTheme</key>
+          <false/>
+          <key>DataHub</key>
+          <false/>
+          <key>DeviceProperties</key>
+          <false/>
+          <key>FirmwareVolume</key>
+          <false/>
+          <key>HashServices</key>
+          <false/>
+          <key>OSInfo</key>
+          <false/>
+          <key>UnicodeCollation</key>
+          <false/>
+        </dict>
+        <key>Quirks</key>
+        <dict>
+          <key>DeduplicateBootOrder</key>
+          <true/>
+          <key>ExitBootServicesDelay</key>
+          <integer>0</integer>
+          <key>IgnoreInvalidFlexRatio</key>
+          <false/>
+          <key>ReleaseUsbOwnership</key>
+          <false/>
+          <key>RequestBootVarRouting</key>
+          <true/>
+          <key>TscSyncTimeout</key>
+          <integer>0</integer>
+          <key>UnblockFsConnect</key>
+          <false/>
+        </dict>
+      </dict>
+    </dict>
+    </plist>
+  macOS-libvirt-Catalina.xml: |-
+    <?xml version='1.0' encoding='UTF-8'?>
+    <domain type='kvm' xmlns:qemu='http://libvirt.org/schemas/domain/qemu/1.0'>
+    <!--
+      macOS libvirt XML configuration.
+
+      Run "virt-xml-validate macOS-libvirt-Catalina.xml" to validate this file.
+
+      To install this file, you may place it at ~/.config/libvirt/qemu/
+      and run: virsh define macOS-libvirt.xml.
+
+      This configuration has been tested in Ubuntu 20.04 with stock QEMU-KVM.
+
+      Move/rename images and loader/nvmram files and paths as you wish.
+
+      !!! Don't forget to replace CHANGEME with your values !!!
+
+      Adjust memory and currentMemory to 3145728 if you want only 3 GiB.
+
+      Consider removing some cpu features if your hardware lacks support.
+
+      Replace spice with vnc if you prefer it.
+
+      Current network configuration is a local bridge (192.157.12x.x).
+      Change it to if you prefer a public bridge instead:
+        Change interface to <interface type='user'>
+        and remove the <source bridge='virbr0'/>
+        Or use virt-manager to edit this line instead of virsh edit.
+
+      Note: Default configuration caused severe clock problems
+      under Fedora 27 w/ i7-5820K. This is because Darwin uses
+      tsc (time since last tick) for time, and for me did not
+      fall back to rtc in the event of a clock mismatch with
+      libvirt's default time source. Therefore we must explicitly
+      give the clock a tsc timer for kvm to pass to the guest.
+      See comments on the <kvm> and <clock> attributes.
+    -->
+      <name>macOS</name>
+      <uuid>2aca0dd6-cec9-4717-9ab2-0b7b13d111c3</uuid>
+      <title>macOS</title>
+      <memory unit='MB'>{{ .Values.resources.requests.memory | trimSuffix "Mi" }}</memory>
+      <currentMemory unit='MB'>{{ .Values.resources.requests.memory | trimSuffix "Mi" }}</currentMemory>
+      <vcpu placement='static'>{{ .Values.resources.requests.cpu }}</vcpu>
+      <os>
+        <type arch='x86_64' machine='pc-q35-4.2'>hvm</type>
+        <!-- We don't need patched OVMF anymore when using latest OpenCore, stock one is okay -->
+        <loader readonly='yes' type='pflash'>/home/CHANGEME/OSX-KVM/OVMF_CODE.fd</loader>
+        <nvram>/home/CHANGEME/OSX-KVM/OVMF_VARS-1024x768.fd</nvram>
+      </os>
+      <features>
+        <acpi/>
+        <apic/>
+      </features>
+      <clock offset='utc'>
+        <timer name='rtc' tickpolicy='catchup'/>
+        <timer name='pit' tickpolicy='delay'/>
+        <timer name='hpet' present='no'/>
+      </clock>
+      <on_poweroff>destroy</on_poweroff>
+      <on_reboot>restart</on_reboot>
+      <on_crash>restart</on_crash>
+      <devices>
+        <emulator>/usr/bin/qemu-system-x86_64</emulator>
+        <disk type='file' device='disk'>
+          <driver name='qemu' type='qcow2' cache='writeback' io='threads'/>
+          <source file='/home/CHANGEME/OSX-KVM/OpenCore-Catalina/OpenCore.qcow2'/>
+          <target dev='sda' bus='sata'/>
+          <boot order='2'/>
+          <address type='drive' controller='0' bus='0' target='0' unit='0'/>
+        </disk>
+        <disk type='file' device='disk'>
+          <driver name='qemu' type='qcow2' cache='writeback' io='threads'/>
+          <source file="/system_image/{{ .Values.serverName }}/mac_hdd_ng.img"/>
+          <target dev='sdb' bus='sata'/>
+          <boot order='1'/>
+          <address type='drive' controller='0' bus='0' target='0' unit='1'/>
+        </disk>
+        <controller type='sata' index='0'>
+          <address type='pci' domain='0x0000' bus='0x00' slot='0x1f' function='0x2'/>
+        </controller>
+        <controller type='pci' index='0' model='pcie-root'/>
+        <controller type='pci' index='1' model='pcie-root-port'>
+          <model name='pcie-root-port'/>
+          <target chassis='1' port='0x8'/>
+          <address type='pci' domain='0x0000' bus='0x00' slot='0x01' function='0x0' multifunction='on'/>
+        </controller>
+        <controller type='pci' index='2' model='pcie-root-port'>
+          <model name='pcie-root-port'/>
+          <target chassis='2' port='0x9'/>
+          <address type='pci' domain='0x0000' bus='0x00' slot='0x01' function='0x1'/>
+        </controller>
+        <controller type='pci' index='3' model='pcie-root-port'>
+          <model name='pcie-root-port'/>
+          <target chassis='3' port='0xa'/>
+          <address type='pci' domain='0x0000' bus='0x00' slot='0x01' function='0x2'/>
+        </controller>
+        <controller type='pci' index='4' model='pcie-root-port'>
+          <model name='pcie-root-port'/>
+          <target chassis='4' port='0xb'/>
+          <address type='pci' domain='0x0000' bus='0x00' slot='0x01' function='0x3'/>
+        </controller>
+        <controller type='pci' index='5' model='pcie-root-port'>
+          <model name='pcie-root-port'/>
+          <target chassis='5' port='0xc'/>
+          <address type='pci' domain='0x0000' bus='0x00' slot='0x01' function='0x4'/>
+        </controller>
+        <controller type='pci' index='6' model='pcie-root-port'>
+          <model name='pcie-root-port'/>
+          <target chassis='6' port='0xd'/>
+          <address type='pci' domain='0x0000' bus='0x00' slot='0x01' function='0x5'/>
+        </controller>
+        <controller type='pci' index='7' model='pcie-root-port'>
+          <model name='pcie-root-port'/>
+          <target chassis='7' port='0xe'/>
+          <address type='pci' domain='0x0000' bus='0x00' slot='0x01' function='0x6'/>
+        </controller>
+        <controller type='virtio-serial' index='0'>
+          <address type='pci' domain='0x0000' bus='0x02' slot='0x00' function='0x0'/>
+        </controller>
+        <controller type='usb' index='0' model='ich9-ehci1'>
+          <address type='pci' domain='0x0000' bus='0x00' slot='0x07' function='0x7'/>
+        </controller>
+        <controller type='usb' index='0' model='ich9-uhci1'>
+          <master startport='0'/>
+          <address type='pci' domain='0x0000' bus='0x00' slot='0x07' function='0x0' multifunction='on'/>
+        </controller>
+        <controller type='usb' index='0' model='ich9-uhci2'>
+          <master startport='2'/>
+          <address type='pci' domain='0x0000' bus='0x00' slot='0x07' function='0x1'/>
+        </controller>
+        <controller type='usb' index='0' model='ich9-uhci3'>
+          <master startport='4'/>
+          <address type='pci' domain='0x0000' bus='0x00' slot='0x07' function='0x2'/>
+        </controller>
+        <!-- Make sure you put your nic in bus 0x0 and slot 0x0y(y is numeric), this will make nic built-in and apple-store work-->
+        <interface type='bridge'>
+          <mac address='52:54:00:8e:e2:66'/>
+          <source bridge='virbr0'/>
+          <target dev='tap0'/>
+          <model type='vmxnet3'/>
+        </interface>
+        <serial type='pty'>
+          <target type='isa-serial' port='0'>
+            <model name='isa-serial'/>
+          </target>
+        </serial>
+        <console type='pty'>
+          <target type='serial' port='0'/>
+        </console>
+        <channel type='unix'>
+          <target type='virtio' name='org.qemu.guest_agent.0'/>
+          <address type='virtio-serial' controller='0' bus='0' port='1'/>
+        </channel>
+        <input type='tablet' bus='usb'>
+          <alias name='input0'/>
+          <address type='usb' bus='0' port='1'/>
+        </input>
+        <!-- Mouse sets to usb will make unexpected behaviors when using VNC, so we use ps2 here.-->
+        <input type='mouse' bus='ps2'>
+          <alias name='input1'/>
+        </input>
+        <!-- This is required to make Keyboard work during installation when using VNC -->
+        <input type='keyboard' bus='usb'>
+          <alias name='input2'/>
+          <address type='usb' bus='0' port='3'/>
+        </input>
+        <graphics type='spice' autoport='yes'>
+          <listen type='address'/>
+        </graphics>
+        <input type='keyboard' bus='ps2'>
+          <alias name='input3'/>
+        </input>
+        <!-- We use video model none here, so we can later set video device to vmware-svga for better graphics -->
+        <video>
+          <model type='none'/>
+        </video>
+        <!-- If you wanna passthrough GPU, make sure the gfx and audio are in the same bus (like 0x01) but different function (0x00 and 0x01)-->
+        <!-- <hostdev mode='subsystem' type='pci' managed='yes'>
+          <driver name='vfio'/>
+          <source>
+            <address domain='0x0000' bus='0x2d' slot='0x00' function='0x0'/>
+          </source>
+          <rom file='/mnt/disks/backups/BIOS/RX580/Ellesmere.rom'/>
+          <address type='pci' domain='0x0000' bus='0x01' slot='0x00' function='0x0' multifunction='on'/>
+        </hostdev>
+        <hostdev mode='subsystem' type='pci' managed='yes'>
+          <driver name='vfio'/>
+          <source>
+            <address domain='0x0000' bus='0x2d' slot='0x00' function='0x1'/>
+          </source>
+          <address type='pci' domain='0x0000' bus='0x01' slot='0x00' function='0x1'/>
+        </hostdev> -->
+        <!-- If you wanna passthrough onboard audio(like 30:00.4), make sure you put it in bus 0x00 and slot 0x0y(y is numeric), otherwise AppleALC won't recognized it -->
+        <!-- <hostdev mode='subsystem' type='pci' managed='yes'>
+          <driver name='vfio'/>
+          <source>
+            <address domain='0x0000' bus='0x30' slot='0x00' function='0x4'/>
+          </source>
+          <address type='pci' domain='0x0000' bus='0x00' slot='0x08' function='0x0'/>
+        </hostdev> -->
+        <memballoon model='none'/>
+      </devices>
+      <!-- Note: Enable the next line when SELinux is enabled -->
+      <!-- seclabel type='dynamic' model='selinux' relabel='yes'/> -->
+      <qemu:commandline>
+        <qemu:arg value='-device'/>
+        <qemu:arg value='isa-applesmc,osk=ourhardworkbythesewordsguardedpleasedontsteal(c)AppleComputerInc'/>
+        <qemu:arg value='-smbios'/>
+        <qemu:arg value='type=2'/>
+        <qemu:arg value='-device'/>
+        <qemu:arg value='vmware-svga'/>
+        <qemu:arg value='-cpu'/>
+        <qemu:arg value='{{ .Values.qemu.cpu }}'/>
+        <!-- <qemu:arg value='Penryn,vendor=GenuineIntel,+hypervisor,+invtsc,kvm=on,+fma,+avx,+avx2,+aes,+ssse3,+sse4_2,+popcnt,+sse4a,+bmi1,+bmi2'/> -->
+        <!-- <qemu:arg value='Haswell,kvm=off,vendor=GenuineIntel,+invtsc,vmware-cpuid-freq=on,+pcid,+ssse3,+sse4.2,+popcnt,+avx,+avx2,+aes,+xsave,+xsaveopt,check'/> -->
+        <!-- If you wanna use cpu host-passthrough mode, uncomments below-->
+        <!-- <qemu:arg value='host,kvm=on,+fma,+avx,+avx2,+aes,+ssse3,+sse4_2,+popcnt,+sse4a,+bmi1,+bmi2'/> -->
+        <!-- If you wanna use cpu emulating mode like Skylake-Server, uncomments below-->
+        <!-- <qemu:arg value='Skylake-Server,vendor=GenuineIntel,+hypervisor,+invtsc,kvm=off,+fma,+avx,+avx2,+aes,+ssse3,+sse4_2,+popcnt,+sse4a,+bmi1,+bmi2'/> -->
+      </qemu:commandline>
+    </domain>
+  Launch_custom.sh: |-
+    #/bin/sh
+
+    if ! [ -f "/system_image/{{ .Values.serverName }}/mac_hdd_ng.img" ]; then
+      echo "Creating a ${SIZE} /system_image/{{ .Values.serverName }}/mac_hdd_ng.img for system partition.."
+      qemu-img create -f qcow2 /system_image/{{ .Values.serverName }}/mac_hdd_ng.img "{{ .Values.qemu.diskSize }}"
+      rm -f BaseSystem.dmg
+    else
+      echo 'Image already created. Skipping creation..'
+    fi
+
+    sudo rm -f /tmp/.X99-lock
+
+    export DISPLAY=:99
+
+    vncpasswd -f < vncpasswd_file > ${HOME}/.vnc/passwd
+    /usr/bin/Xvnc -geometry 1920x1080 -rfbauth "${HOME}/.vnc/passwd" :99 &
+    #!/bin/sh
+    set -eu
+    sudo chown    $(id -u):$(id -g) /dev/kvm 2>/dev/null || true
+    sudo chown -R $(id -u):$(id -g) /dev/snd 2>/dev/null || true
+    exec qemu-system-x86_64 -m {{ .Values.resources.requests.memory | trimSuffix "i" }} \
+      -cpu {{ .Values.qemu.cpu }} \
+      -machine q35,accel=kvm:tcg \
+      -smp {{ .Values.resources.requests.cpu }},cores={{ .Values.resources.requests.cpu }} \
+      -usb -device usb-kbd -device usb-tablet \
+      -device isa-applesmc,osk=ourhardworkbythesewordsguardedpleasedontsteal\(c\)AppleComputerInc \
+      -drive if=pflash,format=raw,readonly,file=/home/arch/OSX-KVM/OVMF_CODE.fd \
+      -drive if=pflash,format=raw,file=/home/arch/OSX-KVM/OVMF_VARS-1024x768.fd \
+      -smbios type=2 \
+      {{- if .Values.qemu.audio.enabled }}
+      -audiodev {{ .Values.qemu.audo.driver }},id=hda -device ich9-intel-hda -device hda-duplex,audiodev=hda \ \
+      {{- end }}
+      -device ich9-ahci,id=sata \
+      -drive id=OpenCoreBoot,if=none,snapshot=on,format=qcow2,file=/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore.qcow2 \
+      -device ide-hd,bus=sata.2,drive=OpenCoreBoot \
+      -device ide-hd,bus=sata.3,drive=InstallMedia \
+      -drive id=InstallMedia,if=none,file=/home/arch/OSX-KVM/BaseSystem.img,format=qcow2 \
+      -drive id=MacHDD,if=none,file=/system_image/{{ .Values.serverName }}/mac_hdd_ng.img,format=qcow2 \
+      -device ide-hd,bus=sata.4,drive=MacHDD \
+      -netdev user,id=net0,hostfwd=tcp::${INTERNAL_SSH_PORT:-10022}-:22,hostfwd=tcp::${SCREEN_SHARE_PORT:-5900}-:5900,{{ .Values.qemu.netdev.extraArgs }} -device e1000-82545em,netdev=net0,id=net0,mac=52:54:00:09:49:17 \
+      -monitor stdio \
+      -vga vmware \
+      ${EXTRA:-}
+  vncpasswd_file: |-
+    {{ .Values.vnc.password }}
+

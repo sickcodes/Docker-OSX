@@ -1,0 +1,124 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "docker-osx.fullname" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "docker-osx.name" . }}
+    helm.sh/chart: {{ include "docker-osx.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "docker-osx.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "docker-osx.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      containers:
+      - name: {{ .Chart.Name }}
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        securityContext:
+          allowPrivilegeEscalation: true
+          readOnlyRootFilesystem: false
+          privileged: true
+          capabilities:
+            add:
+            - net_raw
+            - NET_ADMIN
+        ports:
+        - name: http
+          containerPort: {{ .Values.service.port }}
+          protocol: TCP
+        livenessProbe:
+          tcpSocket:
+            port: http
+        readinessProbe:
+          tcpSocket:
+            port: http
+        env:
+        - name: CORES
+          value: "{{ .Values.resources.requests.cpu }}"
+        - name: SMP
+          value: "{{ .Values.resources.requests.cpu }}"
+        - name: RAM
+          value: "{{ .Values.resources.requests.memory | trimSuffix "Mi" }}"
+        - name: TZ
+          value: "{{ .Values.tz }}"
+        resources:
+{{ toYaml .Values.resources | indent 10 }}
+        volumeMounts:
+        - mountPath: /home/arch/OSX-KVM/config.plist
+          subPath: config.plist
+          name: boot-components
+        - mountPath: /home/arch/OSX-KVM/macOS-libvirt-Catalina.xml
+          subPath: macOS-libvirt-Catalina.xml
+          name: boot-components
+        - mountPath: /home/arch/OSX-KVM/Launch_custom.sh
+          subPath: Launch_custom.sh
+          name: boot-components
+        - mountPath: /home/arch/OSX-KVM/vncpasswd_file
+          subPath: vncpasswd_file
+          name: boot-components
+        - mountPath: /dev/kvm
+          name: kvm
+        - mountPath: /dev/net/tun
+          name: tun
+        - mountPath: /dev/vfio/vfio
+          name: vfio
+        - mountPath: /dev/snd
+          name: snd
+        - mountPath: /tmp/.X11-unix
+          name: x11
+        {{- if .Values.persistence.data.enabled }}
+        - name: data
+          mountPath: /mnt/data
+        {{- end }}
+        {{- if .Values.extraVolumeMounts }}{{ toYaml .Values.extraVolumeMounts | trim | nindent 8 }}{{ end }}
+        # args:
+        # - 
+      volumes:
+      - name: boot-components
+        configMap: 
+          name: {{ template "docker-osx.fullname" . }}-boot-components
+          items:
+          - key: config.plist
+            path: config.plist
+          - key: macOS-libvirt-Catalina.xml
+            path: macOS-libvirt-Catalina.xml
+          - key: Launch_custom.sh
+            path: Launch_custom.sh
+          - key: vncpasswd_file
+            path: vncpasswd_file
+      - name: kvm
+        hostPath:
+          path: /dev/kvm
+      - name: tun
+        hostPath:
+          path: /dev/net/tun
+      - name: vfio
+        hostPath:
+          path: /dev/vfio/vfio
+      - name: snd
+        hostPath:
+          path: /dev/snd
+      - name: x11
+        hostPath:
+          path: /dev/ssd_data/default/{{ .Release.Name }}/.X11-unix
+      {{- if .Values.persistence.data.enabled }}
+      - name: data
+        persistentVolumeClaim:
+          claimName: {{ if .Values.persistence.data.existingClaim }}{{ .Values.persistence.data.existingClaim }}{{- else }}{{ template "docker-osx.fullname" . }}-data{{- end }}
+      {{- else }}
+          emptyDir: {}
+      {{- end }}
+      {{- if .Values.extraVolumes  }}{{ toYaml .Values.extraVolumes | trim | nindent 6 }}{{ end }}
+{{- if .Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.nodeSelector | indent 8 }}
+{{- end }}

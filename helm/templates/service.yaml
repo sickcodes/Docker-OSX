@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "docker-osx.fullname" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "docker-osx.name" . }}
+    helm.sh/chart: {{ include "docker-osx.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: {{ .Values.service.targetPort }}
+      protocol: TCP
+      name: http
+    - port: 8888
+      targetPort: 5999
+      protocol: TCP
+      name: vnc
+    - port: 1359
+      targetPort: 1359
+      protocol: TCP
+      name: airmessage
+  selector:
+    app.kubernetes.io/name: {{ include "docker-osx.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+  {{- if .Values.service.ip }}
+  loadBalancerIP: {{ .Values.service.ip }}
+  {{- end }}
