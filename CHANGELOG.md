@@ -1,5 +1,7 @@
 |Version|Date|Notes|
 |---|---|---|
+|   |2021-01-14|Add Helm Chart for Kubernetes support.|
+|   |2021-01-08|Use IMAGE_PATH as a variable during envsubst for the full path of mac_hdd_ng.img. In preparation for full auto.|
 |   |2021-01-07|Fix sounds errors and sshd missing on latest build.|
 |2.7|2021-01-05|Add rankmirrors. Remove gibMacOS. Replace iptables with iptables-nft. Remove libguestfs.|
 |   |2020-12-17|Remove unnecessary WORKDIR commands.|

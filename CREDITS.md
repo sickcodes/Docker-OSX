@@ -44,3 +44,4 @@ These credits refer to the contributors to this repository:
 
 [@PeterDaveHello](https://github.com/PeterDaveHello) - Improve Dockerfile #121 
 
+[@cephasara](https://github.com/cephasara) -  Add helm chart #124 

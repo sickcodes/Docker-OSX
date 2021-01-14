@@ -30,7 +30,7 @@ docker run \
 - Ready-to-go instances.
 
 # Features In Docker-OSX v2.7
-- CI/CD weaponization thru vnc and xdotool
+- Kubernetes Helm Chart. [See ./helm](https://github.com/sickcodes/Docker-OSX/tree/master/helm)
 - OSX-KVM
 - X11 Forwarding
 - SSH on localhost:50922 
