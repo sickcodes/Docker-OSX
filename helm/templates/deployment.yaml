@@ -38,9 +38,15 @@ spec:
         livenessProbe:
           tcpSocket:
             port: http
+          {{- if .Values.qemu.systemInstaller.downloadDelay }}
+          initialDelaySeconds: {{ .Values.qemu.systemInstaller.downloadDelay }}
+          {{- end }}
         readinessProbe:
           tcpSocket:
             port: http
+          {{- if .Values.qemu.systemInstaller.downloadDelay }}
+          initialDelaySeconds: {{ .Values.qemu.systemInstaller.downloadDelay }}
+          {{- end }}
         env:
         - name: CORES
           value: "{{ .Values.resources.requests.cpu }}"
@@ -65,11 +71,14 @@ spec:
         - mountPath: /home/arch/OSX-KVM/vncpasswd_file
           subPath: vncpasswd_file
           name: boot-components
+        - mountPath: /etc/security/limits.conf
+          subPath: limits.conf
+          name: boot-components
         - mountPath: /dev/kvm
           name: kvm
         - mountPath: /dev/net/tun
           name: tun
-        - mountPath: /dev/vfio/vfio
+        - mountPath: /dev/vfio
           name: vfio
         - mountPath: /dev/snd
           name: snd
@@ -95,6 +104,8 @@ spec:
             path: Launch_custom.sh
           - key: vncpasswd_file
             path: vncpasswd_file
+          - key: limits.conf
+            path: limits.conf
       - name: kvm
         hostPath:
           path: /dev/kvm
@@ -103,7 +114,7 @@ spec:
           path: /dev/net/tun
       - name: vfio
         hostPath:
-          path: /dev/vfio/vfio
+          path: /dev/vfio
       - name: snd
         hostPath:
           path: /dev/snd

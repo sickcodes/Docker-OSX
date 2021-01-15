@@ -1115,7 +1115,7 @@ data:
         <qemu:arg value='-smbios'/>
         <qemu:arg value='type=2'/>
         <qemu:arg value='-device'/>
-        <qemu:arg value='vmware-svga'/>
+        <qemu:arg value='{{ .Values.qemu.softwareGpu }}'/>
         <qemu:arg value='-cpu'/>
         <qemu:arg value='{{ .Values.qemu.cpu }}'/>
         <!-- <qemu:arg value='Penryn,vendor=GenuineIntel,+hypervisor,+invtsc,kvm=on,+fma,+avx,+avx2,+aes,+ssse3,+sse4_2,+popcnt,+sse4a,+bmi1,+bmi2'/> -->
@@ -1129,27 +1129,61 @@ data:
   Launch_custom.sh: |-
     #/bin/sh
 
-    if ! [ -f "/system_image/{{ .Values.serverName }}/mac_hdd_ng.img" ]; then
-      echo "Creating a ${SIZE} /system_image/{{ .Values.serverName }}/mac_hdd_ng.img for system partition.."
-      qemu-img create -f qcow2 /system_image/{{ .Values.serverName }}/mac_hdd_ng.img "{{ .Values.qemu.diskSize }}"
+    if ! [ -d "/system_image/installers" ]; then
+      mkdir -p /system_image/installers
+    fi
+
+    if ! [ -d "/system_image/{{ .Values.serverName }}" ]; then
+      mkdir -p "/system_image/{{ .Values.serverName }}"
+    fi
+
+    # Download and build installer image if no system drive found..
+    if ! [ -f "/system_image/installers/BaseSystem{{ .Values.qemu.systemInstaller.version }}.img" ]; then
+      echo "Downloading {{ .Values.qemu.systemInstaller.version }} base image.."
+      python fetch-macOS.py --version {{ .Values.qemu.systemInstaller.version }}
+      echo 'Converting downloaded BaseSystem.dmg into BaseSystem.img'
+      qemu-img convert BaseSystem.dmg -O qcow2 -p -c /system_image/installers/BaseSystem{{ .Values.qemu.systemInstaller.version }}.img
       rm -f BaseSystem.dmg
+    else
+      echo 'Base Image downloaded and converted into img already..'
+    fi
+
+    if ! [ -f "/system_image/{{ .Values.serverName }}/mac_hdd_ng.img" ]; then
+      echo "Creating a {{ .Values.qemu.diskSize }} /system_image/{{ .Values.serverName }}/mac_hdd_ng.img for system partition.."
+      qemu-img create -f qcow2 /system_image/{{ .Values.serverName }}/mac_hdd_ng.img "{{ .Values.qemu.diskSize }}"
+      echo 'Finished creating system partition!'
     else
       echo 'Image already created. Skipping creation..'
     fi
 
+    # Start VNC..
     sudo rm -f /tmp/.X99-lock
-
     export DISPLAY=:99
-
     vncpasswd -f < vncpasswd_file > ${HOME}/.vnc/passwd
-    /usr/bin/Xvnc -geometry 1920x1080 -rfbauth "${HOME}/.vnc/passwd" :99 &
-    #!/bin/sh
+    /usr/bin/Xvnc -geometry 1920x1080 -rfbauth "${HOME}/.vnc/passwd" :99 &\
+
+    {{- if .Values.qemu.gpu.enabled }}
+    ulimit -l $(( 8*1048576+100000 ))
+    user hard memlock $(( 8*1048576+100000 ))
+    user soft memlock $(( 8*1048576+100000 ))
+    {{- end }}
+
+    # Start QEMU..
     set -eu
     sudo chown    $(id -u):$(id -g) /dev/kvm 2>/dev/null || true
     sudo chown -R $(id -u):$(id -g) /dev/snd 2>/dev/null || true
     exec qemu-system-x86_64 -m {{ .Values.resources.requests.memory | trimSuffix "i" }} \
       -cpu {{ .Values.qemu.cpu }} \
       -machine q35,accel=kvm:tcg \
+      {{- if .Values.qemu.gpu.enabled }}
+      -vga none \
+      -device pcie-root-port,bus=pcie.0,multifunction=on,port=1,chassis=1,id=port.1 \
+      -device vfio-pci,host={{ .Values.qemu.gpu.hardwareId }}.0,multifunction=on,x-vga=on,rombar=1 \
+      -device vfio-pci,host={{ .Values.qemu.gpu.hardwareId }}.1,bus=port.1 \
+      -display none \
+      {{- else -}}
+      -vga {{ .Values.qemu.softwareGpu }} \
+      {{- end }}
       -smp {{ .Values.resources.requests.cpu }},cores={{ .Values.resources.requests.cpu }} \
       -usb -device usb-kbd -device usb-tablet \
       -device isa-applesmc,osk=ourhardworkbythesewordsguardedpleasedontsteal\(c\)AppleComputerInc \
@@ -1163,13 +1197,73 @@ data:
       -drive id=OpenCoreBoot,if=none,snapshot=on,format=qcow2,file=/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore.qcow2 \
       -device ide-hd,bus=sata.2,drive=OpenCoreBoot \
       -device ide-hd,bus=sata.3,drive=InstallMedia \
-      -drive id=InstallMedia,if=none,file=/home/arch/OSX-KVM/BaseSystem.img,format=qcow2 \
+      -drive id=InstallMedia,if=none,file=/system_image/installers/BaseSystem{{ .Values.qemu.systemInstaller.version }}.img,format=qcow2 \
       -drive id=MacHDD,if=none,file=/system_image/{{ .Values.serverName }}/mac_hdd_ng.img,format=qcow2 \
       -device ide-hd,bus=sata.4,drive=MacHDD \
       -netdev user,id=net0,hostfwd=tcp::${INTERNAL_SSH_PORT:-10022}-:22,hostfwd=tcp::${SCREEN_SHARE_PORT:-5900}-:5900,{{ .Values.qemu.netdev.extraArgs }} -device e1000-82545em,netdev=net0,id=net0,mac=52:54:00:09:49:17 \
       -monitor stdio \
-      -vga vmware \
       ${EXTRA:-}
   vncpasswd_file: |-
     {{ .Values.vnc.password }}
+  limits.conf: |-
+    #This file sets the resource limits for the users logged in via PAM.
+    #It does not affect resource limits of the system services.
+    #
+    #Also note that configuration files in /etc/security/limits.d directory,
+    #which are read in alphabetical order, override the settings in this
+    #file in case the domain is the same or more specific.
+    #That means, for example, that setting a limit for wildcard domain here
+    #can be overriden with a wildcard setting in a config file in the
+    #subdirectory, but a user specific setting here can be overriden only
+    #with a user specific setting in the subdirectory.
+    #
+    #Each line describes a limit for a user in the form:
+    #
+    #<domain>        <type>  <item>  <value>
+    #
+    #Where:
+    #<domain> can be:
+    #        - a user name
+    #        - a group name, with @group syntax
+    #        - the wildcard *, for default entry
+    #        - the wildcard %, can be also used with %group syntax,
+    #                 for maxlogin limit
+    #
+    #<type> can have the two values:
+    #        - "soft" for enforcing the soft limits
+    #        - "hard" for enforcing hard limits
+    #
+    #<item> can be one of the following:
+    #        - core - limits the core file size (KB)
+    #        - data - max data size (KB)
+    #        - fsize - maximum filesize (KB)
+    #        - memlock - max locked-in-memory address space (KB)
+    #        - nofile - max number of open file descriptors
+    #        - rss - max resident set size (KB)
+    #        - stack - max stack size (KB)
+    #        - cpu - max CPU time (MIN)
+    #        - nproc - max number of processes
+    #        - as - address space limit (KB)
+    #        - maxlogins - max number of logins for this user
+    #        - maxsyslogins - max number of logins on the system
+    #        - priority - the priority to run user process with
+    #        - locks - max number of file locks the user can hold
+    #        - sigpending - max number of pending signals
+    #        - msgqueue - max memory used by POSIX message queues (bytes)
+    #        - nice - max nice priority allowed to raise to values: [-20, 19]
+    #        - rtprio - max realtime priority
+    #
+    #<domain>      <type>  <item>         <value>
+    #
 
+    #*               soft    core            0
+    #*               hard    rss             10000
+    #@student        hard    nproc           20
+    #@faculty        soft    nproc           20
+    #@faculty        hard    nproc           50
+    #ftp             hard    nproc           0
+    #@student        -       maxlogins       4
+    @arch            soft    memlock         unlimited
+    @arch            hard    memlock         unlimited
+
+    # End of file
