@@ -42,3 +42,27 @@ This installs `docker-osx` in Kubernetes.
     ```
 
 _Do not worry about passing `CPU`, `RAM`, etc as they are handled in `values.yaml` now._
+
+### Installation
+
+In `values.yaml`..
+
+1) Set a unique password for `vnc.password`.
+1) Re-generate SMBIOS `MLB`, `SystemSerialNumber`, and `SystemUUID` for iServices to work.
+1) Update `serverName` to reflect the unique name (in the case more than one deployment is required).
+1) Configure `downloadDelay` (in a period of seconds) that reflects how long your internet connection will download
+    around 500MB (BaseSystem.dmg) + uncompress the file (which took about the same time for me to download on a 1gig internet connection).
+1) Set `service.ip` to reflect an IP address of your choice, or use ingress.
+1) Update `extraVolumes.hostPath.path` to something useful for you.
+
+Afterwards..
+
+1) Launch your VNC viewer of choice and connect to the IP/hostname you defined + the port `8888` with the password specified
+    for `vnc.password`.
+1) Install macOS like usual.
+
+_Please note, after you have installed macOS feel free to set `downloadDelay` to nothing, as BaseSystem.dmg will be stored in the path defined for `extraVolumes.hostPath.path`_
+
+#### Resources
+
+Please note, resource limits may vary based on hardware. The ones currently defined are ones that worked for me personally.
