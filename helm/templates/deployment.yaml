@@ -56,30 +56,35 @@ spec:
           value: "{{ .Values.resources.requests.memory | trimSuffix "Mi" }}"
         - name: TZ
           value: "{{ .Values.tz }}"
+        - name: DISPLAY
+          value: ':0.0'
         resources:
 {{ toYaml .Values.resources | indent 10 }}
         volumeMounts:
-        - mountPath: /home/arch/OSX-KVM/config.plist
+        - mountPath: /home/{{ .Values.image.userName }}/OSX-KVM/OpenCore-Catalina/config.plist
           subPath: config.plist
           name: boot-components
-        - mountPath: /home/arch/OSX-KVM/macOS-libvirt-Catalina.xml
-          subPath: macOS-libvirt-Catalina.xml
-          name: boot-components
-        - mountPath: /home/arch/OSX-KVM/Launch_custom.sh
+        - mountPath: /home/{{ .Values.image.userName }}/OSX-KVM/Launch_custom.sh
           subPath: Launch_custom.sh
           name: boot-components
-        - mountPath: /home/arch/OSX-KVM/vncpasswd_file
+        - mountPath: /home/{{ .Values.image.userName }}/OSX-KVM/vncpasswd_file
           subPath: vncpasswd_file
-          name: boot-components
-        - mountPath: /etc/security/limits.conf
-          subPath: limits.conf
           name: boot-components
         - mountPath: /dev/kvm
           name: kvm
         - mountPath: /dev/net/tun
           name: tun
-        - mountPath: /dev/vfio
+        {{- if .Values.qemu.hardwareGpu.enabled }}
+        - mountPath: /etc/security/limits.conf
+          subPath: limits.conf
+          name: boot-components
+        - mountPath: /dev/vfio/vfio
           name: vfio
+        - mountPath: /dev/vfio/{{ .Values.qemu.hardwareGpu.vfioGroup }}
+          name: vfio-group
+        - mountPath: /lib/modules
+          name: lib-modules
+        {{- end }}
         - mountPath: /dev/snd
           name: snd
         - mountPath: /tmp/.X11-unix
@@ -98,23 +103,31 @@ spec:
           items:
           - key: config.plist
             path: config.plist
-          - key: macOS-libvirt-Catalina.xml
-            path: macOS-libvirt-Catalina.xml
           - key: Launch_custom.sh
             path: Launch_custom.sh
           - key: vncpasswd_file
             path: vncpasswd_file
+          {{- if .Values.qemu.hardwareGpu.enabled }}
           - key: limits.conf
             path: limits.conf
-      - name: kvm
-        hostPath:
-          path: /dev/kvm
+          {{- end }}
       - name: tun
         hostPath:
           path: /dev/net/tun
+      - name: kvm
+        hostPath:
+          path: /dev/kvm
+      {{- if .Values.qemu.hardwareGpu.enabled }}
       - name: vfio
         hostPath:
-          path: /dev/vfio
+          path: /dev/vfio/vfio
+      - name: vfio-group
+        hostPath:
+          path: /dev/vfio/{{ .Values.qemu.hardwareGpu.vfioGroup }}
+      - name: lib-modules
+        hostPath:
+          path: /lib/modules
+      {{- end }}
       - name: snd
         hostPath:
           path: /dev/snd

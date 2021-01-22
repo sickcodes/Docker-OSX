@@ -7,9 +7,26 @@ image:
   repository: sickcodes/docker-osx-vnc
   tag: latest
   pullPolicy: IfNotPresent
+  userName: ubuntu
 
 # Please note, this must be a directory name within `/system_image` mounted at the bottom in extraVolumeMounts
 serverName: server
+
+# add kexts to EFI/OC/kexts and update config.plist
+#  make sure your kexts are in kexts.path
+kexts:
+  add: false
+  path: /system_image/kexts
+  kextsToAdd: {}
+  # - name: BrcmBluetoothInjector.kext
+  #   executablePath: Contents/MacOS/BrcmBluetoothInjector
+  #   plistPath: Contents/Info.plist
+  # - name: BrcmFirmwareData.kext
+  #   executablePath: Contents/MacOS/BrcmFirmwareData
+  #   plistPath: Contents/Info.plist
+  # - name: BrcmPatchRAM3.kext
+  #   executablePath: Contents/MacOS/BrcmPatchRAM3
+  #   plistPath: Contents/Info.plist
 
 # SMBIOS settings
 configPlist:
@@ -17,36 +34,91 @@ configPlist:
   MLB: D25338500GUF8YLJA
   SystemSerialNumber: D25LF7ZEF8JC
   SystemUUID: 139C94D6-A533-47D2-874F-D365BFD8B047
+  bootArgs: '-v keepsyms=1 tlbto_us=0 vti=9 -wegoff agdpmod=pikera'
 
-# This defines QEMU and virtlo parameters
+openCore:
+  # Rebuild OpenCore.qcow2: this can be disabled if none of the above parameters in kexts, configPlist changes, and changing the
+  #  resolution are not desired, utilizing gpu passthrough and a few other things. Disabling is not recommended
+  rebuild: true
+  boot:
+    # set to zero to have OpenCore stay at boot menu
+    timeout: 0
+
+# This section defines QEMU and virtlo parameters
 #
 # Note:
 #  *) Increase downloadDelay if the pod gets killed for readiness/liveliness check. The first time the pod is started,
 #       it will download the BaseSystem image and create a data partition to install the OS. If this value is really long,
 #       the pod will take very long to allow VNC connections if it is rebooted/killed.
-#  *) Big Sur (11.X) is currently broken, as it seems to need the BaseSystem extracted from the InstallAssistant.pkg file it downloads
-#  *) GPU support is considered broken still, but WIP
+#  *) Big Sur (11.X) is currently broken, as it seems Apple reworked the packaging so that will have to be something fixed in
+#       https://github.com/kholia/OSX-KVM/blob/master/fetch-macOS-v2.py
+#  *) VNC and IOMMU GPU passthrough do not play together well. Disable one if using the other. This is a limitation of QEMU
+#       unfortunately, so this means VNC from macOS will have to be used to view the VM when not using a physical GPU.
+#  *) If using GPU passthrough, it is recommended to configure it first, as the installer will take way longer (several hours)
+#       to install macOS with a software GPU configured.
 #
 qemu:
-  cpu:  Penryn,vendor=GenuineIntel,+hypervisor,+invtsc,kvm=on,+fma,+avx,+avx2,+aes,+ssse3,+sse4_2,+popcnt,+sse4a,+bmi1,+bmi2
+  cpu: Penryn,kvm=on,vendor=GenuineIntel,+invtsc,vmware-cpuid-freq=on,+pcid,+ssse3,+sse4.2,+popcnt,+avx,+avx2,+aes,+xsave,+xsaveopt,check
   softwareGpu: vmware
-  gpu:
-    # if disabled, will rely on softwareGpu instead
+  hardwareGpu:
+    # when enabled, qemu.softwareGpu will be disabled automatically. disabling this will rely on softwareGpu instead
     enabled: false
-    hardwareId: '03:00'
+    hardwareId: 09:00
+    # slot can be found with `lspci -v -s <hardware-id>`
+    slot: 05
+    # vfioGroup can be found with lsgroup.sh:
+    #  https://github.com/kholia/OSX-KVM/blob/master/scripts/lsgroup.sh
+    vfioGroup: 50
+    # leave romfile blank if not using one to disable
+    romfile: /system_image/vbios/Sapphire.RX480.8192.160603.rom
   systemInstaller:
+    # if using more than one deployment, a write lock will be put on the system installer dmg, so this will need to be disabled
+    #  for other pods
+    enabled: false
     version: 10.15.7
-    downloadDelay: 300
-  diskSize: 128G
+    path: /system_image/installers
+    downloadDelay: 15
+    # can be `writethrough`, `writeback`, or `none`
+    cache: none
+    # can be `native` or `threads`
+    io: threads
+  systemDisk:
+    size: 128G
+    # can be `writethrough`, `writeback`, or `none`
+    cache: writeback
+    # can be `native` or `threads`
+    io: threads
   audio:
-    enabled: true
+    # this enables onboard audio, hdmi audio is handled with qemu.hardwareGpu
+    enabled: false
     driver: alsa
   netdev:
-    extraArgs: 
+    extraPortForwarding: hostfwd=tcp::5901-:5900
+  # for usb, pass host adapters like such:
+  # usb:
+  #   - vendorId: 0a5c
+  #     productId: 21e8
+  #
+  # please use lsgroup.sh to find your host ids:
+  #  https://github.com/kholia/OSX-KVM/blob/master/scripts/lsgroup.sh
+  #
+  # for usb, may need to fix permissions:
+  #   sudo chmod 666 /dev/bus/usb/<bus>/<device>
+  #
+  # if need to add a usb controller via vfio-pci, use qemu.extraArgs
+  #
+  usb: {}
+  # use the following formatting
+  # extraArgs:
+  # - -parallel none
+  # - -boot order=dc
+  extraArgs: {}
 
 # Password for accessing vm over vnc
 vnc:
-  password: updateme
+  enabled: true
+  resolution: 1920x1080
+  password: a5aeQbaPd4$jR80Q43
 
 nameOverride: ""
 fullnameOverride: ""
@@ -56,6 +128,11 @@ service:
   ip: 192.168.1.10
   targetPort: 50922
   port: 10022
+  extraPorts:
+  - port: 5901
+    targetPort: 5901
+    protocol: TCP
+    name: os-level-vnc
 
 ingress:
   enabled: false
@@ -71,19 +148,21 @@ ingress:
   #    hosts:
   #      - chart-example.local
 
-# Note: seems that host needs around x5 the cpu and x9 memory limits allocated to MacOS
-#  when under load. This may be due to my personal hardware or inefficencies such as
-#  software GPU rendering. Otherwise the pod will be killed due to OOMing.
+# Note: Resources can vary dramatically depending on disk caching and software GPU rendering. With disk
+#  caching and software rendering up to x5 the cpu and x9 memory can be consumed. With disk cache off
+#  and GPU passthrough enabled up to x3 the cpu and x1.5 memory can be consumed. Therefore, these settings
+#  really depend on hardware and configuration choices. Note, these values used a 1080p video resolution
+#  as well. 
 #
 #  Warning: do not perform unit conversion on cpu and memory requests, as these units
 #   are tied qemu and virtio settings. Also, only use intergers for cpu requests.
 resources:
   limits:
-   cpu: 10
-   memory: 36864Mi
+   cpu: 15
+   memory: 32768Mi
   requests:
-   cpu: 2
-   memory: 4096Mi
+   cpu: 4
+   memory: 16384Mi
 
 nodeSelector: {}
 

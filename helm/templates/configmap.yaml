@@ -215,6 +215,24 @@ data:
       <dict>
         <key>Add</key>
         <array>
+          {{- if .Values.qemu.hardwareGpu.enabled }}
+          <dict>
+            <key>BundlePath</key>
+            <string>mXHCD.kext</string>
+            <key>Comment</key>
+            <string>Hello There</string>
+            <key>Enabled</key>
+            <true/>
+            <key>ExecutablePath</key>
+            <string>Contents/MacOS/mXHCD</string>
+            <key>MaxKernel</key>
+            <string></string>
+            <key>MinKernel</key>
+            <string></string>
+            <key>PlistPath</key>
+            <string>Contents/Info.plist</string>
+          </dict>
+          {{- end }}
           <dict>
             <key>Arch</key>
             <string>x86_64</string>
@@ -222,7 +240,11 @@ data:
             <string>VoodooHDA.kext</string>
             <key>Comment</key>
             <string>Patch engine</string>
+            {{- if .Values.qemu.audio.enabled }}
             <key>Enabled</key>
+            {{- else -}}
+            <key>Disabled</key>
+            {{- end }}
             <false/>
             <key>ExecutablePath</key>
             <string>Contents/MacOS/VoodooHDA</string>
@@ -355,6 +377,28 @@ data:
             <key>PlistPath</key>
             <string>Contents/Info.plist</string>
           </dict>
+          {{- if .Values.kexts.add }} 
+          {{- range .Values.kexts.kextsToAdd }}
+          <dict>
+            <key>Arch</key>
+            <string>Any</string>
+            <key>BundlePath</key>
+            <string>{{ .name }}</string>
+            <key>Comment</key>
+            <string></string>
+            <key>Enabled</key>
+            <true/>
+            <key>ExecutablePath</key>
+            <string>{{ .executablePath }}</string>
+            <key>MaxKernel</key>
+            <string></string>
+            <key>MinKernel</key>
+            <string></string>
+            <key>PlistPath</key>
+            <string>{{ .plistPath }}</string>
+          </dict>
+          {{- end }}
+          {{- end }}
         </array>
         <key>Block</key>
         <array>
@@ -375,6 +419,16 @@ data:
         </array>
         <key>Emulate</key>
         <dict>
+          {{- if .Values.qemu.hardwareGpu.enabled }}
+          <key>Cpuid1Data</key>
+          <data>
+          VwYFAAAAAAAAAAAAAAAAAA==
+          </data>
+          <key>Cpuid1Mask</key>
+          <data>
+          /////wAAAAAAAAAAAAAAAA==
+          </data>
+          {{- else -}}
           <key>Cpuid1Data</key>
           <data>
           VAYFAAAAAAAAAAAAAAAAAA==
@@ -383,9 +437,40 @@ data:
           <data>
           ////AAAAAAAAAAAAAAAAAA==
           </data>
+          {{- end }}
         </dict>
         <key>Force</key>
         <array>
+          {{- if .Values.qemu.hardwareGpu.enabled }}
+          <dict>
+            <key>Base</key>
+            <string></string>
+            <key>Comment</key>
+            <string>algrey - cpuid_set_generic_info - disable check to allow leaf7</string>
+            <key>Count</key>
+            <integer>1</integer>
+            <key>Enabled</key>
+            <true/>
+            <key>Find</key>
+            <data>ADoPgg==</data>
+            <key>Identifier</key>
+            <string>kernel</string>
+            <key>Limit</key>
+            <integer>0</integer>
+            <key>Mask</key>
+            <data></data>
+            <key>MaxKernel</key>
+            <string>19.99.99</string>
+            <key>MinKernel</key>
+            <string>17.0.0</string>
+            <key>Replace</key>
+            <data>AAAPgg==</data>
+            <key>ReplaceMask</key>
+            <data></data>
+            <key>Skip</key>
+            <integer>0</integer>
+          </dict>
+          {{- else -}}
           <dict>
             <key>Arch</key>
             <string>Any</string>
@@ -406,9 +491,40 @@ data:
             <key>PlistPath</key>
             <string>Contents/Info.plist</string>
           </dict>
+          {{- end }}
         </array>
         <key>Patch</key>
         <array>
+          {{- if .Values.qemu.hardwareGpu.enabled }}
+          <dict>
+            <key>Base</key>
+            <string>_cpu_topology_sort</string>
+            <key>Comment</key>
+            <string>algrey - cpu_topology_sort -disable _x86_validate_topology</string>
+            <key>Count</key>
+            <integer>1</integer>
+            <key>Enabled</key>
+            <true/>
+            <key>Find</key>
+            <data>6AAA//8=</data>
+            <key>Identifier</key>
+            <string>kernel</string>
+            <key>Limit</key>
+            <integer>0</integer>
+            <key>Mask</key>
+            <data>/wAA//8=</data>
+            <key>MaxKernel</key>
+            <string>19.99.99</string>
+            <key>MinKernel</key>
+            <string>17.0.0</string>
+            <key>Replace</key>
+            <data>Dx9EAAA=</data>
+            <key>ReplaceMask</key>
+            <data></data>
+            <key>Skip</key>
+            <integer>0</integer>
+          </dict>
+          {{- else -}}
           <dict>
             <key>Base</key>
             <string>_cpu_topology_sort</string>
@@ -444,6 +560,7 @@ data:
             <key>Skip</key>
             <integer>0</integer>
           </dict>
+          {{- end }}
           <dict>
             <key>Base</key>
             <string></string>
@@ -453,6 +570,7 @@ data:
             <integer>1</integer>
             <key>Enabled</key>
             <true/>
+            {{- if .Values.qemu.hardwareGpu.enabled }}
             <key>Find</key>
             <data>
             MduAPQAAAAAGdQA=
@@ -465,6 +583,20 @@ data:
             <data>
             /////wAAAP///wA=
             </data>
+            {{- else -}}
+            <key>Find</key>
+            <data>
+            MduAPQAAAAAGdQA=
+            </data>
+            <key>Identifier</key>
+            <string>kernel</string>
+            <key>Limit</key>
+            <integer>0</integer>
+            <key>Mask</key>
+            <data>
+            /////wAAAP///wA=
+            </data>
+            {{- end }}
             <key>MaxKernel</key>
             <string>20.99.99</string>
             <key>MinKernel</key>
@@ -479,6 +611,64 @@ data:
             <key>Skip</key>
             <integer>0</integer>
           </dict>
+          {{- if .Values.qemu.hardwareGpu.enabled }}
+          <dict>
+            <key>Base</key>
+            <string></string>
+            <key>Comment</key>
+            <string>algrey - - skip cpuid_cores_per_package test -10.15</string>
+            <key>Count</key>
+            <integer>0</integer>
+            <key>Enabled</key>
+            <true/>
+            <key>Find</key>
+            <data>gz0AAAAAAA8AAAAAAItdvA==</data>
+            <key>Identifier</key>
+            <string>kernel</string>
+            <key>Limit</key>
+            <integer>0</integer>
+            <key>Mask</key>
+            <data>//8AAAD///8AAAAA/////w==</data>
+            <key>MaxKernel</key>
+            <string>19.99.99</string>
+            <key>MinKernel</key>
+            <string>19.0.0</string>
+            <key>Replace</key>
+            <data>AAAAAAAAAQAAAAAAAAAAAA==</data>
+            <key>ReplaceMask</key>
+            <data>AAAAAAAADwAAAAAAAAAAAA==</data>
+            <key>Skip</key>
+            <integer>0</integer>
+          </dict>
+          <dict>
+            <key>Base</key>
+            <string></string>
+            <key>Comment</key>
+            <string>algrey - - skip cpuid_cores_per_package test</string>
+            <key>Count</key>
+            <integer>0</integer>
+            <key>Enabled</key>
+            <true/>
+            <key>Find</key>
+            <data>gz0AAAAAAHQAi128</data>
+            <key>Identifier</key>
+            <string>kernel</string>
+            <key>Limit</key>
+            <integer>0</integer>
+            <key>Mask</key>
+            <data>//8AAAD///8A////</data>
+            <key>MaxKernel</key>
+            <string>18.99.99</string>
+            <key>MinKernel</key>
+            <string>17.0.0</string>
+            <key>Replace</key>
+            <data>AAAAAAAAAQAAAAAA</data>
+            <key>ReplaceMask</key>
+            <data>AAAAAAAADwAAAAAA</data>
+            <key>Skip</key>
+            <integer>0</integer>
+          </dict>
+          {{- end }}
         </array>
         <key>Quirks</key>
         <dict>
@@ -516,6 +706,7 @@ data:
           <false/>
         </dict>
         <key>Scheme</key>
+        {{- if not .Values.qemu.hardwareGpu.enabled }}
         <dict>
           <key>FuzzyMatch</key>
           <true/>
@@ -524,6 +715,7 @@ data:
           <key>KernelCache</key>
           <string>Auto</string>
         </dict>
+        {{- end }}
       </dict>
       <key>Misc</key>
       <dict>
@@ -539,6 +731,8 @@ data:
           <false/>
           <key>PickerAttributes</key>
           <integer>1</integer>
+          <key>PickerVariant</key>
+          <string>Modern</string>
           <key>PickerAudioAssist</key>
           <false/>
           <key>PickerMode</key>
@@ -550,7 +744,7 @@ data:
           <key>TakeoffDelay</key>
           <integer>0</integer>
           <key>Timeout</key>
-          <integer>0</integer>
+          <integer>{{ .Values.openCore.boot.timeout }}</integer>
         </dict>
         <key>Debug</key>
         <dict>
@@ -657,7 +851,7 @@ data:
             <key>SystemAudioVolume</key>
             <data>Rg==</data>
             <key>boot-args</key>
-            <string>-v keepsyms=1 tlbto_us=0 vti=9</string>
+            <string>{{ .Values.configPlist.bootArgs }}</string>
             <key>run-efi-updater</key>
             <string>No</string>
             <key>csr-active-config</key>
@@ -838,7 +1032,7 @@ data:
           <key>ReplaceTabWithSpace</key>
           <false/>
           <key>Resolution</key>
-          <string>1920x1080@32</string>
+          <string>{{ .Values.vnc.resolution }}</string>
           <key>SanitiseClearScreen</key>
           <false/>
           <key>TextRenderer</key>
@@ -905,232 +1099,37 @@ data:
       </dict>
     </dict>
     </plist>
-  macOS-libvirt-Catalina.xml: |-
-    <?xml version='1.0' encoding='UTF-8'?>
-    <domain type='kvm' xmlns:qemu='http://libvirt.org/schemas/domain/qemu/1.0'>
-    <!--
-      macOS libvirt XML configuration.
-
-      Run "virt-xml-validate macOS-libvirt-Catalina.xml" to validate this file.
-
-      To install this file, you may place it at ~/.config/libvirt/qemu/
-      and run: virsh define macOS-libvirt.xml.
-
-      This configuration has been tested in Ubuntu 20.04 with stock QEMU-KVM.
-
-      Move/rename images and loader/nvmram files and paths as you wish.
-
-      !!! Don't forget to replace CHANGEME with your values !!!
-
-      Adjust memory and currentMemory to 3145728 if you want only 3 GiB.
-
-      Consider removing some cpu features if your hardware lacks support.
-
-      Replace spice with vnc if you prefer it.
-
-      Current network configuration is a local bridge (192.157.12x.x).
-      Change it to if you prefer a public bridge instead:
-        Change interface to <interface type='user'>
-        and remove the <source bridge='virbr0'/>
-        Or use virt-manager to edit this line instead of virsh edit.
-
-      Note: Default configuration caused severe clock problems
-      under Fedora 27 w/ i7-5820K. This is because Darwin uses
-      tsc (time since last tick) for time, and for me did not
-      fall back to rtc in the event of a clock mismatch with
-      libvirt's default time source. Therefore we must explicitly
-      give the clock a tsc timer for kvm to pass to the guest.
-      See comments on the <kvm> and <clock> attributes.
-    -->
-      <name>macOS</name>
-      <uuid>2aca0dd6-cec9-4717-9ab2-0b7b13d111c3</uuid>
-      <title>macOS</title>
-      <memory unit='MB'>{{ .Values.resources.requests.memory | trimSuffix "Mi" }}</memory>
-      <currentMemory unit='MB'>{{ .Values.resources.requests.memory | trimSuffix "Mi" }}</currentMemory>
-      <vcpu placement='static'>{{ .Values.resources.requests.cpu }}</vcpu>
-      <os>
-        <type arch='x86_64' machine='pc-q35-4.2'>hvm</type>
-        <!-- We don't need patched OVMF anymore when using latest OpenCore, stock one is okay -->
-        <loader readonly='yes' type='pflash'>/home/CHANGEME/OSX-KVM/OVMF_CODE.fd</loader>
-        <nvram>/home/CHANGEME/OSX-KVM/OVMF_VARS-1024x768.fd</nvram>
-      </os>
-      <features>
-        <acpi/>
-        <apic/>
-      </features>
-      <clock offset='utc'>
-        <timer name='rtc' tickpolicy='catchup'/>
-        <timer name='pit' tickpolicy='delay'/>
-        <timer name='hpet' present='no'/>
-      </clock>
-      <on_poweroff>destroy</on_poweroff>
-      <on_reboot>restart</on_reboot>
-      <on_crash>restart</on_crash>
-      <devices>
-        <emulator>/usr/bin/qemu-system-x86_64</emulator>
-        <disk type='file' device='disk'>
-          <driver name='qemu' type='qcow2' cache='writeback' io='threads'/>
-          <source file='/home/CHANGEME/OSX-KVM/OpenCore-Catalina/OpenCore.qcow2'/>
-          <target dev='sda' bus='sata'/>
-          <boot order='2'/>
-          <address type='drive' controller='0' bus='0' target='0' unit='0'/>
-        </disk>
-        <disk type='file' device='disk'>
-          <driver name='qemu' type='qcow2' cache='writeback' io='threads'/>
-          <source file="/system_image/{{ .Values.serverName }}/mac_hdd_ng.img"/>
-          <target dev='sdb' bus='sata'/>
-          <boot order='1'/>
-          <address type='drive' controller='0' bus='0' target='0' unit='1'/>
-        </disk>
-        <controller type='sata' index='0'>
-          <address type='pci' domain='0x0000' bus='0x00' slot='0x1f' function='0x2'/>
-        </controller>
-        <controller type='pci' index='0' model='pcie-root'/>
-        <controller type='pci' index='1' model='pcie-root-port'>
-          <model name='pcie-root-port'/>
-          <target chassis='1' port='0x8'/>
-          <address type='pci' domain='0x0000' bus='0x00' slot='0x01' function='0x0' multifunction='on'/>
-        </controller>
-        <controller type='pci' index='2' model='pcie-root-port'>
-          <model name='pcie-root-port'/>
-          <target chassis='2' port='0x9'/>
-          <address type='pci' domain='0x0000' bus='0x00' slot='0x01' function='0x1'/>
-        </controller>
-        <controller type='pci' index='3' model='pcie-root-port'>
-          <model name='pcie-root-port'/>
-          <target chassis='3' port='0xa'/>
-          <address type='pci' domain='0x0000' bus='0x00' slot='0x01' function='0x2'/>
-        </controller>
-        <controller type='pci' index='4' model='pcie-root-port'>
-          <model name='pcie-root-port'/>
-          <target chassis='4' port='0xb'/>
-          <address type='pci' domain='0x0000' bus='0x00' slot='0x01' function='0x3'/>
-        </controller>
-        <controller type='pci' index='5' model='pcie-root-port'>
-          <model name='pcie-root-port'/>
-          <target chassis='5' port='0xc'/>
-          <address type='pci' domain='0x0000' bus='0x00' slot='0x01' function='0x4'/>
-        </controller>
-        <controller type='pci' index='6' model='pcie-root-port'>
-          <model name='pcie-root-port'/>
-          <target chassis='6' port='0xd'/>
-          <address type='pci' domain='0x0000' bus='0x00' slot='0x01' function='0x5'/>
-        </controller>
-        <controller type='pci' index='7' model='pcie-root-port'>
-          <model name='pcie-root-port'/>
-          <target chassis='7' port='0xe'/>
-          <address type='pci' domain='0x0000' bus='0x00' slot='0x01' function='0x6'/>
-        </controller>
-        <controller type='virtio-serial' index='0'>
-          <address type='pci' domain='0x0000' bus='0x02' slot='0x00' function='0x0'/>
-        </controller>
-        <controller type='usb' index='0' model='ich9-ehci1'>
-          <address type='pci' domain='0x0000' bus='0x00' slot='0x07' function='0x7'/>
-        </controller>
-        <controller type='usb' index='0' model='ich9-uhci1'>
-          <master startport='0'/>
-          <address type='pci' domain='0x0000' bus='0x00' slot='0x07' function='0x0' multifunction='on'/>
-        </controller>
-        <controller type='usb' index='0' model='ich9-uhci2'>
-          <master startport='2'/>
-          <address type='pci' domain='0x0000' bus='0x00' slot='0x07' function='0x1'/>
-        </controller>
-        <controller type='usb' index='0' model='ich9-uhci3'>
-          <master startport='4'/>
-          <address type='pci' domain='0x0000' bus='0x00' slot='0x07' function='0x2'/>
-        </controller>
-        <!-- Make sure you put your nic in bus 0x0 and slot 0x0y(y is numeric), this will make nic built-in and apple-store work-->
-        <interface type='bridge'>
-          <mac address='52:54:00:8e:e2:66'/>
-          <source bridge='virbr0'/>
-          <target dev='tap0'/>
-          <model type='vmxnet3'/>
-        </interface>
-        <serial type='pty'>
-          <target type='isa-serial' port='0'>
-            <model name='isa-serial'/>
-          </target>
-        </serial>
-        <console type='pty'>
-          <target type='serial' port='0'/>
-        </console>
-        <channel type='unix'>
-          <target type='virtio' name='org.qemu.guest_agent.0'/>
-          <address type='virtio-serial' controller='0' bus='0' port='1'/>
-        </channel>
-        <input type='tablet' bus='usb'>
-          <alias name='input0'/>
-          <address type='usb' bus='0' port='1'/>
-        </input>
-        <!-- Mouse sets to usb will make unexpected behaviors when using VNC, so we use ps2 here.-->
-        <input type='mouse' bus='ps2'>
-          <alias name='input1'/>
-        </input>
-        <!-- This is required to make Keyboard work during installation when using VNC -->
-        <input type='keyboard' bus='usb'>
-          <alias name='input2'/>
-          <address type='usb' bus='0' port='3'/>
-        </input>
-        <graphics type='spice' autoport='yes'>
-          <listen type='address'/>
-        </graphics>
-        <input type='keyboard' bus='ps2'>
-          <alias name='input3'/>
-        </input>
-        <!-- We use video model none here, so we can later set video device to vmware-svga for better graphics -->
-        <video>
-          <model type='none'/>
-        </video>
-        <!-- If you wanna passthrough GPU, make sure the gfx and audio are in the same bus (like 0x01) but different function (0x00 and 0x01)-->
-        <!-- <hostdev mode='subsystem' type='pci' managed='yes'>
-          <driver name='vfio'/>
-          <source>
-            <address domain='0x0000' bus='0x2d' slot='0x00' function='0x0'/>
-          </source>
-          <rom file='/mnt/disks/backups/BIOS/RX580/Ellesmere.rom'/>
-          <address type='pci' domain='0x0000' bus='0x01' slot='0x00' function='0x0' multifunction='on'/>
-        </hostdev>
-        <hostdev mode='subsystem' type='pci' managed='yes'>
-          <driver name='vfio'/>
-          <source>
-            <address domain='0x0000' bus='0x2d' slot='0x00' function='0x1'/>
-          </source>
-          <address type='pci' domain='0x0000' bus='0x01' slot='0x00' function='0x1'/>
-        </hostdev> -->
-        <!-- If you wanna passthrough onboard audio(like 30:00.4), make sure you put it in bus 0x00 and slot 0x0y(y is numeric), otherwise AppleALC won't recognized it -->
-        <!-- <hostdev mode='subsystem' type='pci' managed='yes'>
-          <driver name='vfio'/>
-          <source>
-            <address domain='0x0000' bus='0x30' slot='0x00' function='0x4'/>
-          </source>
-          <address type='pci' domain='0x0000' bus='0x00' slot='0x08' function='0x0'/>
-        </hostdev> -->
-        <memballoon model='none'/>
-      </devices>
-      <!-- Note: Enable the next line when SELinux is enabled -->
-      <!-- seclabel type='dynamic' model='selinux' relabel='yes'/> -->
-      <qemu:commandline>
-        <qemu:arg value='-device'/>
-        <qemu:arg value='isa-applesmc,osk=ourhardworkbythesewordsguardedpleasedontsteal(c)AppleComputerInc'/>
-        <qemu:arg value='-smbios'/>
-        <qemu:arg value='type=2'/>
-        <qemu:arg value='-device'/>
-        <qemu:arg value='{{ .Values.qemu.softwareGpu }}'/>
-        <qemu:arg value='-cpu'/>
-        <qemu:arg value='{{ .Values.qemu.cpu }}'/>
-        <!-- <qemu:arg value='Penryn,vendor=GenuineIntel,+hypervisor,+invtsc,kvm=on,+fma,+avx,+avx2,+aes,+ssse3,+sse4_2,+popcnt,+sse4a,+bmi1,+bmi2'/> -->
-        <!-- <qemu:arg value='Haswell,kvm=off,vendor=GenuineIntel,+invtsc,vmware-cpuid-freq=on,+pcid,+ssse3,+sse4.2,+popcnt,+avx,+avx2,+aes,+xsave,+xsaveopt,check'/> -->
-        <!-- If you wanna use cpu host-passthrough mode, uncomments below-->
-        <!-- <qemu:arg value='host,kvm=on,+fma,+avx,+avx2,+aes,+ssse3,+sse4_2,+popcnt,+sse4a,+bmi1,+bmi2'/> -->
-        <!-- If you wanna use cpu emulating mode like Skylake-Server, uncomments below-->
-        <!-- <qemu:arg value='Skylake-Server,vendor=GenuineIntel,+hypervisor,+invtsc,kvm=off,+fma,+avx,+avx2,+aes,+ssse3,+sse4_2,+popcnt,+sse4a,+bmi1,+bmi2'/> -->
-      </qemu:commandline>
-    </domain>
   Launch_custom.sh: |-
     #/bin/sh
 
-    if ! [ -d "/system_image/installers" ]; then
-      mkdir -p /system_image/installers
+    # Add extra kexts to EFI/OC/kexts
+    {{- if .Values.kexts.add }}
+    {{- range .Values.kexts.kextsToAdd }}
+    {{- $rangeItem := . -}}
+    {{- with $ }}
+    echo 'Installing kext {{ $rangeItem.name }}..'
+    cp -r "{{ .Values.kexts.path }}/{{ $rangeItem.name }}" /home/{{ .Values.image.userName }}/OSX-KVM/OpenCore-Catalina/EFI/OC/Kexts/
+    sudo chmod 755 /home/{{ .Values.image.userName }}/OSX-KVM/OpenCore-Catalina/EFI/OC/Kexts/{{ $rangeItem.name }} 
+    {{- end }}
+    {{- end }}
+    {{- end }}
+
+    # Rebuild Opencore.qcow2 after making changes to config.plist and etc..
+    {{- if .Values.openCore.rebuild }}
+    echo 'Building new Opencore.qcow2..'
+    sudo apt install {{ .Values.openCore.kernel }} -y
+    pushd OpenCore-Catalina/
+    mkdir -p EFI/OC/Resources
+    rm -f OpenCore.qcow2
+    sudo ./opencore-image-ng.sh \
+      --cfg config.plist \
+      --img OpenCore.qcow2
+    sudo chown {{ .Values.image.userName }}:{{ .Values.image.userName }} OpenCore.qcow2
+    popd
+    {{- end }}
+
+    if ! [ -d "{{ .Values.qemu.systemInstaller.path }}" ]; then
+      mkdir -p {{ .Values.qemu.systemInstaller.path }}
     fi
 
     if ! [ -d "/system_image/{{ .Values.serverName }}" ]; then
@@ -1138,70 +1137,102 @@ data:
     fi
 
     # Download and build installer image if no system drive found..
-    if ! [ -f "/system_image/installers/BaseSystem{{ .Values.qemu.systemInstaller.version }}.img" ]; then
+    if ! [ -f "{{ .Values.qemu.systemInstaller.path }}/BaseSystem{{ .Values.qemu.systemInstaller.version }}.img" ]; then
       echo "Downloading {{ .Values.qemu.systemInstaller.version }} base image.."
       python fetch-macOS.py --version {{ .Values.qemu.systemInstaller.version }}
-      echo 'Converting downloaded BaseSystem.dmg into BaseSystem.img'
-      qemu-img convert BaseSystem.dmg -O qcow2 -p -c /system_image/installers/BaseSystem{{ .Values.qemu.systemInstaller.version }}.img
+      echo 'Converting downloaded BaseSystem.dmg into BaseSystem{{ .Values.qemu.systemInstaller.version }}.img and saving in {{ .Values.qemu.systemInstaller.path }}'
+      qemu-img convert BaseSystem.dmg -O qcow2 -p -c {{ .Values.qemu.systemInstaller.path }}/BaseSystem{{ .Values.qemu.systemInstaller.version }}.img
       rm -f BaseSystem.dmg
     else
       echo 'Base Image downloaded and converted into img already..'
     fi
 
     if ! [ -f "/system_image/{{ .Values.serverName }}/mac_hdd_ng.img" ]; then
-      echo "Creating a {{ .Values.qemu.diskSize }} /system_image/{{ .Values.serverName }}/mac_hdd_ng.img for system partition.."
-      qemu-img create -f qcow2 /system_image/{{ .Values.serverName }}/mac_hdd_ng.img "{{ .Values.qemu.diskSize }}"
+      echo "Creating a {{ .Values.qemu.systemDisk.size }} /system_image/{{ .Values.serverName }}/mac_hdd_ng.img for system partition.."
+      qemu-img create -f qcow2 /system_image/{{ .Values.serverName }}/mac_hdd_ng.img "{{ .Values.qemu.systemDisk.size }}"
       echo 'Finished creating system partition!'
     else
       echo 'Image already created. Skipping creation..'
     fi
 
+    # # Fix permissions on usb devices..
+    # {{- if .Values.qemu.usb }}
+    # {{- range .Values.qemu.usb }}
+    # echo "Updating permissions to r/w for /dev/bus/usb/$(lsusb | grep {{ .vendorId}}:{{ .productId }} | grep -o -P 'Bus.{0,4}' | tail -c 4)/$(lsusb | grep {{ .vendorId}}:{{ .productId }} | grep -o -P 'Device.{0,4}' | tail -c 4).."
+    # sudo chmod 666 /dev/bus/usb/$(lsusb | grep {{ .vendorId}}:{{ .productId }} | grep -o -P 'Bus.{0,4}' | tail -c 4)/$(lsusb | grep {{ .vendorId}}:{{ .productId }} | grep -o -P 'Device.{0,4}' | tail -c 4)
+    # {{- end }}
+    # {{- end }}
+
     # Start VNC..
+    {{- if .Values.vnc.enabled }}
+    echo 'geometry={{ .Values.vnc.resolution }}
+    localhost
+    alwaysshared' > ~/.vnc/config
+
     sudo rm -f /tmp/.X99-lock
     export DISPLAY=:99
     vncpasswd -f < vncpasswd_file > ${HOME}/.vnc/passwd
-    /usr/bin/Xvnc -geometry 1920x1080 -rfbauth "${HOME}/.vnc/passwd" :99 &\
+    /usr/bin/Xvnc -geometry {{ .Values.vnc.resolution }} -rfbauth "${HOME}/.vnc/passwd" :99 &\
+    sudo chmod 600 ~/.vnc/passwd
+    {{- end }}
 
-    {{- if .Values.qemu.gpu.enabled }}
-    ulimit -l $(( 8*1048576+100000 ))
-    user hard memlock $(( 8*1048576+100000 ))
-    user soft memlock $(( 8*1048576+100000 ))
+    sudo chown {{ .Values.image.userName }}:{{ .Values.image.userName }} /dev/kvm
+    {{- if .Values.qemu.hardwareGpu.enabled }}
+    sudo chown {{ .Values.image.userName }}:{{ .Values.image.userName }} -R /dev/vfio
     {{- end }}
 
     # Start QEMU..
+    echo 'Starting QEMU..'
     set -eu
     sudo chown    $(id -u):$(id -g) /dev/kvm 2>/dev/null || true
     sudo chown -R $(id -u):$(id -g) /dev/snd 2>/dev/null || true
     exec qemu-system-x86_64 -m {{ .Values.resources.requests.memory | trimSuffix "i" }} \
       -cpu {{ .Values.qemu.cpu }} \
       -machine q35,accel=kvm:tcg \
-      {{- if .Values.qemu.gpu.enabled }}
-      -vga none \
-      -device pcie-root-port,bus=pcie.0,multifunction=on,port=1,chassis=1,id=port.1 \
-      -device vfio-pci,host={{ .Values.qemu.gpu.hardwareId }}.0,multifunction=on,x-vga=on,rombar=1 \
-      -device vfio-pci,host={{ .Values.qemu.gpu.hardwareId }}.1,bus=port.1 \
-      -display none \
-      {{- else -}}
-      -vga {{ .Values.qemu.softwareGpu }} \
+      {{- if .Values.qemu.hardwareGpu.enabled }}
+          -device pcie-root-port,bus=pcie.0,multifunction=on,port=1,chassis=1,id=port.1 \
+          {{- if .Values.qemu.hardwareGpu.romfile }}
+            -device vfio-pci,host={{ .Values.qemu.hardwareGpu.hardwareId }}.0,bus=port.1,multifunction=on,romfile={{ .Values.qemu.hardwareGpu.romfile}} \
+          {{- else -}}
+            -device vfio-pci,host={{ .Values.qemu.hardwareGpu.hardwareId }}.0,multifunction=on \
+          {{- end }}
+          -device vfio-pci,host={{ .Values.qemu.hardwareGpu.hardwareId }}.1,bus=port.1 \
+        {{- else -}}
+          -vga {{ .Values.qemu.softwareGpu }} \
       {{- end }}
       -smp {{ .Values.resources.requests.cpu }},cores={{ .Values.resources.requests.cpu }} \
-      -usb -device usb-kbd -device usb-tablet \
+      {{- if .Values.vnc.enabled }}
+        -usb -device usb-kbd -device usb-tablet \
+      {{- else -}}
+        -vga none \
+        -display none \
+      {{- end }}
       -device isa-applesmc,osk=ourhardworkbythesewordsguardedpleasedontsteal\(c\)AppleComputerInc \
-      -drive if=pflash,format=raw,readonly,file=/home/arch/OSX-KVM/OVMF_CODE.fd \
-      -drive if=pflash,format=raw,file=/home/arch/OSX-KVM/OVMF_VARS-1024x768.fd \
+      -drive if=pflash,format=raw,readonly,file=/home/{{ .Values.image.userName }}/OSX-KVM/OVMF_CODE.fd \
+      -drive if=pflash,format=raw,file=/home/{{ .Values.image.userName }}/OSX-KVM/OVMF_VARS-1024x768.fd \
       -smbios type=2 \
       {{- if .Values.qemu.audio.enabled }}
-      -audiodev {{ .Values.qemu.audo.driver }},id=hda -device ich9-intel-hda -device hda-duplex,audiodev=hda \ \
+        -audiodev {{ .Values.qemu.audio.driver }},id=hda \
+        -device ich9-intel-hda \
+        -device hda-duplex,audiodev=hda \
       {{- end }}
       -device ich9-ahci,id=sata \
-      -drive id=OpenCoreBoot,if=none,snapshot=on,format=qcow2,file=/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore.qcow2 \
+      -drive id=OpenCoreBoot,if=none,snapshot=on,format=qcow2,file=/home/{{ .Values.image.userName }}/OSX-KVM/OpenCore-Catalina/OpenCore.qcow2 \
       -device ide-hd,bus=sata.2,drive=OpenCoreBoot \
-      -device ide-hd,bus=sata.3,drive=InstallMedia \
-      -drive id=InstallMedia,if=none,file=/system_image/installers/BaseSystem{{ .Values.qemu.systemInstaller.version }}.img,format=qcow2 \
+      {{- if .Values.qemu.systemInstaller.enabled }}
+        -device ide-hd,bus=sata.3,drive=InstallMedia \
+        -drive id=InstallMedia,if=none,file={{ .Values.qemu.systemInstaller.path }}/BaseSystem{{ .Values.qemu.systemInstaller.version }}.img,format=qcow2 \
+      {{- end }}
       -drive id=MacHDD,if=none,file=/system_image/{{ .Values.serverName }}/mac_hdd_ng.img,format=qcow2 \
       -device ide-hd,bus=sata.4,drive=MacHDD \
-      -netdev user,id=net0,hostfwd=tcp::${INTERNAL_SSH_PORT:-10022}-:22,hostfwd=tcp::${SCREEN_SHARE_PORT:-5900}-:5900,{{ .Values.qemu.netdev.extraArgs }} -device e1000-82545em,netdev=net0,id=net0,mac=52:54:00:09:49:17 \
-      -monitor stdio \
+      -netdev user,id=net0,hostfwd=tcp::${INTERNAL_SSH_PORT:-10022}-:22,hostfwd=tcp::${SCREEN_SHARE_PORT:-5900}-:5900,{{ .Values.qemu.netdev.extraPortForwarding }} \
+      -device e1000-82545em,netdev=net0,id=net0,mac=52:54:00:09:49:17 \
+      {{- range .Values.qemu.usb }}
+        -usb -device usb-host,productid=0x{{ .productId }},vendorid=0x{{ .vendorId }} \
+      {{- end }}
+      {{- range .Values.qemu.extraArgs }}
+        {{ . }} \
+      {{- end }}
       ${EXTRA:-}
   vncpasswd_file: |-
     {{ .Values.vnc.password }}
@@ -1263,7 +1294,7 @@ data:
     #@faculty        hard    nproc           50
     #ftp             hard    nproc           0
     #@student        -       maxlogins       4
-    @arch            soft    memlock         unlimited
-    @arch            hard    memlock         unlimited
+    @{{ .Values.image.userName }}            soft    memlock         unlimited
+    @{{ .Values.image.userName }}            hard    memlock         unlimited
 
     # End of file
