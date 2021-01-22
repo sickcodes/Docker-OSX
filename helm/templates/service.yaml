@@ -18,10 +18,12 @@ spec:
       targetPort: 5999
       protocol: TCP
       name: vnc
-    - port: 1359
-      targetPort: 1359
-      protocol: TCP
-      name: airmessage
+    {{- range .Values.service.extraPorts }}
+    - port: {{ .port }}
+      targetPort: {{ .targetPort }}
+      protocol: {{ .protocol }}
+      name: {{ .name }}
+    {{- end }}
   selector:
     app.kubernetes.io/name: {{ include "docker-osx.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}

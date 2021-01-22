@@ -17,15 +17,16 @@ This installs `docker-osx` in Kubernetes.
 1) Kubernetes resource requests/limits
 1) Defining version of macOS to install
 1) Defining install partition size
-
-### What doesn't/isn't defined
 1) Defining a different version of macOS
 1) Additional QEMU parameters
 1) GPU support
 
+### What doesn't
+1) Simultaneous VNC + GPU IOMMU (this is a limitation of QEMU :( unfortunately)
+
 ## Requirements
 
-*) Install [host machine requirements](https://github.com/cephasara/Docker-OSX#requirements-kvm-on-the-host)
+*) Install [host machine requirements](#INSTALL-QEMU-AND-GPU-IOMMU.md)
     *) Ensure you are running QEMU 5.X
 *) Kubernetes
 *) Helm v2
@@ -39,12 +40,16 @@ This installs `docker-osx` in Kubernetes.
     ```
     docker build \
         -t sickcodes/docker-osx-vnc:latest \
-        -f vnc-version/Dockerfile .
+        -f helm/Dockerfile .
     ```
+
+    _Please ensure you are using the Dockerfile in the `helm` folder_
 
 _Do not worry about passing `CPU`, `RAM`, etc as they are handled in `values.yaml` now._
 
 ### Installation
+
+If planning on using a GPU with IOMMU passthrough it is recommended to configure it first and install macOS--otherwise installing may take a very long time depending on your hardware. Please see `qemu.systemInstaller.downloadDelay`, `qemu.systemInstaller.cache`, `qemu.systemDisk.downloadDelay`, and `qemu.systemDisk.cache` for possibly reducing installation time. It has taken me over three hours to install on some occasions with a NVMe secondary disk without GPU passthrough configured.. 
 
 In `values.yaml`..
 
@@ -55,6 +60,12 @@ In `values.yaml`..
     around 500MB (BaseSystem.dmg) + uncompress the file (which took about the same time for me to download on a 1gig internet connection).
 1) Set `service.ip` to reflect an IP address of your choice, or use ingress.
 1) Update `extraVolumes.hostPath.path` to something useful for you.
+
+Optionally..
+1) Install kexts to `kexts.path` and enable.
+1) Adjust `openCore.boot.timeout` if desire for macOS to load automatically.
+1) Add usb devices with `qemu.usb` or `qemu.extraArgs` if desired.
+1) Add more ports for portforwarding services if needed.
 
 Afterwards..
 
