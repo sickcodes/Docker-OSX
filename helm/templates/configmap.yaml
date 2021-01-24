@@ -377,8 +377,8 @@ data:
             <key>PlistPath</key>
             <string>Contents/Info.plist</string>
           </dict>
-          {{- if .Values.kexts.add }} 
-          {{- range .Values.kexts.kextsToAdd }}
+          {{- if .Values.macos.kexts.add }} 
+          {{- range .Values.macos.kexts.kextsToAdd }}
           <dict>
             <key>Arch</key>
             <string>Any</string>
@@ -744,7 +744,7 @@ data:
           <key>TakeoffDelay</key>
           <integer>0</integer>
           <key>Timeout</key>
-          <integer>{{ .Values.openCore.boot.timeout }}</integer>
+          <integer>{{ .Values.macos.openCore.boot.timeout }}</integer>
         </dict>
         <key>Debug</key>
         <dict>
@@ -851,7 +851,7 @@ data:
             <key>SystemAudioVolume</key>
             <data>Rg==</data>
             <key>boot-args</key>
-            <string>{{ .Values.configPlist.bootArgs }}</string>
+            <string>{{ .Values.macos.configPlist.bootArgs }}</string>
             <key>run-efi-updater</key>
             <string>No</string>
             <key>csr-active-config</key>
@@ -918,7 +918,7 @@ data:
           <key>AdviseWindows</key>
           <false/>
           <key>MLB</key>
-          <string>{{ .Values.configPlist.MLB }}</string>
+          <string>{{ .Values.macos.configPlist.MLB }}</string>
           <key>ROM</key>
           <data>
           m7zhIYfl
@@ -926,11 +926,11 @@ data:
           <key>SpoofVendor</key>
           <true/>
           <key>SystemProductName</key>
-          <string>{{ .Values.configPlist.SystemProductName }}</string>
+          <string>{{ .Values.macos.configPlist.SystemProductName }}</string>
           <key>SystemSerialNumber</key>
-          <string>{{ .Values.configPlist.SystemSerialNumber }}</string>
+          <string>{{ .Values.macos.configPlist.SystemSerialNumber }}</string>
           <key>SystemUUID</key>
-          <string>{{ .Values.configPlist.SystemUUID }}</string>
+          <string>{{ .Values.macos.configPlist.SystemUUID }}</string>
         </dict>
         <key>UpdateDataHub</key>
         <true/>
@@ -1103,21 +1103,20 @@ data:
     #/bin/sh
 
     # Add extra kexts to EFI/OC/kexts
-    {{- if .Values.kexts.add }}
-    {{- range .Values.kexts.kextsToAdd }}
+    {{- if .Values.macos.kexts.add }}
+    {{- range .Values.macos.kexts.kextsToAdd }}
     {{- $rangeItem := . -}}
     {{- with $ }}
     echo 'Installing kext {{ $rangeItem.name }}..'
-    cp -r "{{ .Values.kexts.path }}/{{ $rangeItem.name }}" /home/{{ .Values.image.userName }}/OSX-KVM/OpenCore-Catalina/EFI/OC/Kexts/
+    cp -r "{{ .Values.macos.kexts.path }}/{{ $rangeItem.name }}" /home/{{ .Values.image.userName }}/OSX-KVM/OpenCore-Catalina/EFI/OC/Kexts/
     sudo chmod 755 /home/{{ .Values.image.userName }}/OSX-KVM/OpenCore-Catalina/EFI/OC/Kexts/{{ $rangeItem.name }} 
     {{- end }}
     {{- end }}
     {{- end }}
 
     # Rebuild Opencore.qcow2 after making changes to config.plist and etc..
-    {{- if .Values.openCore.rebuild }}
+    {{- if .Values.macos.openCore.rebuild }}
     echo 'Building new Opencore.qcow2..'
-    sudo apt install {{ .Values.openCore.kernel }} -y
     pushd OpenCore-Catalina/
     mkdir -p EFI/OC/Resources
     rm -f OpenCore.qcow2
@@ -1128,8 +1127,8 @@ data:
     popd
     {{- end }}
 
-    if ! [ -d "{{ .Values.qemu.systemInstaller.path }}" ]; then
-      mkdir -p {{ .Values.qemu.systemInstaller.path }}
+    if ! [ -d "{{ .Values.macos.installerSettings.path }}" ]; then
+      mkdir -p {{ .Values.macos.installerSettings.path }}
     fi
 
     if ! [ -d "/system_image/{{ .Values.serverName }}" ]; then
@@ -1137,11 +1136,11 @@ data:
     fi
 
     # Download and build installer image if no system drive found..
-    if ! [ -f "{{ .Values.qemu.systemInstaller.path }}/BaseSystem{{ .Values.qemu.systemInstaller.version }}.img" ]; then
-      echo "Downloading {{ .Values.qemu.systemInstaller.version }} base image.."
-      python fetch-macOS.py --version {{ .Values.qemu.systemInstaller.version }}
-      echo 'Converting downloaded BaseSystem.dmg into BaseSystem{{ .Values.qemu.systemInstaller.version }}.img and saving in {{ .Values.qemu.systemInstaller.path }}'
-      qemu-img convert BaseSystem.dmg -O qcow2 -p -c {{ .Values.qemu.systemInstaller.path }}/BaseSystem{{ .Values.qemu.systemInstaller.version }}.img
+    if ! [ -f "{{ .Values.macos.installerSettings.path }}/BaseSystem{{ .Values.macos.installerSettings.version }}.img" ]; then
+      echo "Downloading {{ .Values.macos.installerSettings.version }} base image.."
+      python fetch-macOS.py --version {{ .Values.macos.installerSettings.version }}
+      echo 'Converting downloaded BaseSystem.dmg into BaseSystem{{ .Values.macos.installerSettings.version }}.img and saving in {{ .Values.qemu.systemInstaller.path }}'
+      qemu-img convert BaseSystem.dmg -O qcow2 -p -c {{ .Values.macos.installerSettings.path }}/BaseSystem{{ .Values.qemu.systemInstaller.version }}.img
       rm -f BaseSystem.dmg
     else
       echo 'Base Image downloaded and converted into img already..'
@@ -1221,7 +1220,7 @@ data:
       -device ide-hd,bus=sata.2,drive=OpenCoreBoot \
       {{- if .Values.qemu.systemInstaller.enabled }}
         -device ide-hd,bus=sata.3,drive=InstallMedia \
-        -drive id=InstallMedia,if=none,file={{ .Values.qemu.systemInstaller.path }}/BaseSystem{{ .Values.qemu.systemInstaller.version }}.img,format=qcow2 \
+        -drive id=InstallMedia,if=none,file={{ .Values.macos.installerSettings.path }}/BaseSystem{{ .Values.macos.installerSettings.version }}.img,format=qcow2 \
       {{- end }}
       -drive id=MacHDD,if=none,file=/system_image/{{ .Values.serverName }}/mac_hdd_ng.img,format=qcow2 \
       -device ide-hd,bus=sata.4,drive=MacHDD \
