@@ -63,7 +63,7 @@ RUN if [[ "${RANKMIRRORS}" ]]; then { pacman -Sy wget --noconfirm || pacman -Syu
     && tee -a /etc/pacman.d/mirrorlist <<< 'Server = https://mirror.rackspace.com/archlinux/$repo/os/$arch' \
     && cat /etc/pacman.d/mirrorlist ; fi
 
-RUN pacman -Syu xorg-server-xvfb xterm xorg-xhost xorg-xrandr xdotool sshpass scrot base-devel --noconfirm
+RUN pacman -Syu xorg-server-xvfb wget xterm xorg-xhost xorg-xrandr xdotool sshpass scrot base-devel --noconfirm
 
 RUN git clone https://github.com/stolk/imcat.git \
     && cd imcat \
@@ -87,7 +87,7 @@ RUN mkdir -p ~/.ssh \
 
 WORKDIR /home/arch/OSX-KVM
 
-ARG COMPLETE
+ARG COMPLETE=true
 
 # Feel free to take a copy of this image and then host it internally
 ARG IMAGE_URL='https://images2.sick.codes/mac_hdd_ng_auto.img'
