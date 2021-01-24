@@ -56,8 +56,8 @@ MAINTAINER 'https://sick.codes' <https://sick.codes>
 SHELL ["/bin/bash", "-c"]
 
 # change disk size here or add during build, e.g. --build-arg VERSION=10.14.5 --build-arg SIZE=50G
-ARG SIZE 200G
-ARG VERSION 10.15.6
+ARG SIZE=200G
+ARG VERSION=10.15.6
 
 # OPTIONAL: Arch Linux server mirrors for super fast builds
 # set RANKMIRRORS to any value other that nothing, e.g. -e RANKMIRRORS=true
@@ -189,7 +189,7 @@ RUN grep -v InstallMedia ./Launch.sh > ./Launch-nopicker.sh \
 
 ENV USER arch
 
-ENV DISPLAY :0.0
+ENV DISPLAY=:0.0
 
 USER arch
 
