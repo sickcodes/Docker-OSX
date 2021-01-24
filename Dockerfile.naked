@@ -79,8 +79,6 @@ RUN mkdir -p ~/.ssh \
 
 WORKDIR /home/arch/OSX-KVM
 
-ARG COMPLETE
-
 ARG NOPICKER=true
 
 RUN [[ "${NOPICKER}" = true ]] && mv ./Launch-nopicker.sh ./Launch.sh

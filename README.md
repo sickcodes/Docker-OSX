@@ -25,7 +25,7 @@ Docker Hub: https://hub.docker.com/r/sickcodes/docker-osx
 
 ```bash
 
-docker run \
+docker run -it \
     --device /dev/kvm \
     -p 50922:10022 \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
@@ -43,7 +43,7 @@ docker run \
 You will need around 50GB of space: half for the base image + half for your runtime image.
 ```bash
 # boot straight to OSX shell with no display (19GB)
-docker run \
+docker run -it \
     --device /dev/kvm \
     -p 50922:10022 \
     sickcodes/docker-osx:auto
@@ -53,7 +53,7 @@ docker run \
 ```bash
 
 # boot to OSX shell + display (19GB)
-docker run \
+docker run -it \
     --device /dev/kvm \
     -p 50922:10022 \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
@@ -140,7 +140,7 @@ docker run -it \
 
 docker pull sickcodes/docker-osx:latest
 
-docker run \
+docker run -it \
     --device /dev/kvm \
     --device /dev/snd \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
@@ -158,7 +158,7 @@ docker run \
 # Run but allow SSH into OSX (Original Version)!
 
 ```bash
-docker run \
+docker run -it \
     --device /dev/kvm \
     --device /dev/snd \
     -e RAM=4 \
