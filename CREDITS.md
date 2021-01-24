@@ -44,4 +44,11 @@ These credits refer to the contributors to this repository:
 
 [@PeterDaveHello](https://github.com/PeterDaveHello) - Improve Dockerfile #121 
 
-[@cephasara](https://github.com/cephasara) -  Add helm chart #124 
+[@cephasara](https://github.com/cephasara) - Add helm chart #124 
+
+[@cephasara](https://github.com/cephasara) - Fix helm initial disk creation process and add installation instructions #125
+
+[@cephasara](https://github.com/cephasara) - Add gpu passthrough support as well as dynamic OpenCore chainloader regeneration #132
+
+[@cephasara](https://github.com/cephasara) - Fix helm installation failure and cleanup values organization #134
+

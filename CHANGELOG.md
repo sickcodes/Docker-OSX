@@ -1,5 +1,8 @@
 |Version|Date|Notes|
 |---|---|---|
+|3.0|2021-01-23|Add fast mode boot straight to shell. And -v $PWD/disk.img:/image for all Dockerfiles|
+|   |2021-01-22|Add additional helm chart instructions and files.|
+|   |2021-01-15|Fix helm initial disk creation process and add installation instructions.|
 |   |2021-01-14|Add Helm Chart for Kubernetes support.|
 |   |2021-01-08|Use IMAGE_PATH as a variable during envsubst for the full path of mac_hdd_ng.img. In preparation for full auto.|
 |   |2021-01-07|Fix sounds errors and sshd missing on latest build.|

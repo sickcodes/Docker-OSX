@@ -1,0 +1,156 @@
+#!/usr/bin/docker
+#     ____             __             ____  ______  __
+#    / __ \____  _____/ /_____  _____/ __ \/ ___/ |/ /
+#   / / / / __ \/ ___/ //_/ _ \/ ___/ / / /\__ \|   / 
+#  / /_/ / /_/ / /__/ ,< /  __/ /  / /_/ /___/ /   |  
+# /_____/\____/\___/_/|_|\___/_/   \____//____/_/|_|  AUTOINSTALL
+# 
+# Title:            Mac on Docker (Docker-OSX) [AUTOINSTALL]
+# Author:           Sick.Codes https://twitter.com/sickcodes       
+# Version:          3.0
+# License:          GPLv3+
+# Repository:       https://github.com/sickcodes/Docker-OSX
+# 
+# This Dockerfile is a pre-installed naked installation of Docker-OSX!
+# 
+#   Default username: user
+#   Default password: alpine
+# 
+# Take screenshots in the Arch container and display in terminal: scrotcat
+# readme: 
+# timezone: UTC/GMT
+# 
+# Future versions will navigate the installation process, inside the Dockerfile.
+# 
+#
+# Build:
+#
+#       docker build -t docker-osx:auto -f Dockerfile.auto .
+# 
+# Run:
+# 
+#       docker run -it --device /dev/kvm -p 50922:10022 -v ${PWD}/mac_hdd_ng_auto.img:/image     docker-osx-auto:latest
+# 
+# SSH:
+#       From inside the container:
+#           ssh -i ~/.ssh/id_docker_osx user@127.0.0.1 -p 10022
+# 
+#       From outside the container:
+#           ssh localhost user@127.0.0.1 -p 50922
+#           docker exec -it containerid ssh -i ~/.ssh/id_docker_osx user@127.0.0.1 -p 10022
+
+FROM sickcodes/docker-osx:latest
+
+MAINTAINER 'https://twitter.com/sickcodes' <https://sick.codes>
+
+USER root
+
+WORKDIR /root
+
+# OPTIONAL: Arch Linux server mirrors for super fast builds
+# set RANKMIRRORS to any value other that nothing, e.g. -e RANKMIRRORS=true
+ARG RANKMIRRORS
+ARG MIRROR_COUNTRY=US
+ARG MIRROR_COUNT=10
+RUN if [[ "${RANKMIRRORS}" ]]; then { pacman -Sy wget --noconfirm || pacman -Syu wget --noconfirm ; } \
+    ; wget -O ./rankmirrors "https://raw.githubusercontent.com/sickcodes/Docker-OSX/master/rankmirrors" \
+    ; wget -O- "https://www.archlinux.org/mirrorlist/?country=${MIRROR_COUNTRY:-US}&protocol=https&use_mirror_status=on" \
+    | sed -e 's/^#Server/Server/' -e '/^#/d' \
+    | head -n "$((${MIRROR_COUNT:-10}+1))" \
+    | bash ./rankmirrors --verbose --max-time 5 - > /etc/pacman.d/mirrorlist \
+    && tee -a /etc/pacman.d/mirrorlist <<< 'Server = http://mirrors.evowise.com/archlinux/$repo/os/$arch' \
+    && tee -a /etc/pacman.d/mirrorlist <<< 'Server = http://mirror.rackspace.com/archlinux/$repo/os/$arch' \
+    && tee -a /etc/pacman.d/mirrorlist <<< 'Server = https://mirror.rackspace.com/archlinux/$repo/os/$arch' \
+    && cat /etc/pacman.d/mirrorlist ; fi
+
+RUN pacman -Syu xorg-server-xvfb xterm xorg-xhost xorg-xrandr xdotool sshpass scrot base-devel --noconfirm
+
+RUN git clone https://github.com/stolk/imcat.git \
+    && cd imcat \
+    && make \
+    && sudo cp imcat /usr/bin/imcat \
+    && touch /usr/bin/scrotcat \
+    && tee -a /usr/bin/scrotcat <<< '/usr/bin/imcat <(scrot -o /dev/stdout)' \
+    && chmod +x /usr/bin/scrotcat
+
+USER arch
+
+RUN mkdir -p ~/.ssh \
+    && touch ~/.ssh/authorized_keys \
+    && touch ~/.ssh/config \
+    && chmod 700 ~/.ssh \
+    && chmod 600 ~/.ssh/config \
+    && chmod 600 ~/.ssh/authorized_keys \
+    && tee -a ~/.ssh/config <<< 'Host *' \
+    && tee -a ~/.ssh/config <<< '    StrictHostKeyChecking no' \
+    && tee -a ~/.ssh/config <<< '    UserKnownHostsFile=/dev/null'
+
+WORKDIR /home/arch/OSX-KVM
+
+ARG COMPLETE
+
+# Feel free to take a copy of this image and then host it internally
+ARG IMAGE_URL='https://images2.sick.codes/mac_hdd_ng_auto.img'
+
+# use the COMPLETE arg, for a complete image, ready to boot.
+# otherwise use your own image: -v "$PWD/disk.img":/image
+RUN if [[ "${COMPLETE}" ]]; then \
+    echo "Downloading 20GB+ image... Press Ctrl+C to abort." \
+    ; wget --no-dns-cache \
+        --no-check-certificate \
+        --output-document=/home/arch/OSX-KVM/mac_hdd_ng.img \
+        "${IMAGE_URL}" \
+    ; fi
+
+RUN mv ./Launch-nopicker.sh ./Launch.sh
+
+VOLUME /image
+
+ENV DISPLAY=:99
+
+ENV IMAGE_PATH=/home/arch/OSX-KVM/mac_hdd_ng.img
+
+ENV TERMS_OF_USE=i_agree
+
+ENV BOILERPLATE="By using this Dockerfile, you hereby agree that you are a security reseacher or developer and agree to use this Dockerfile to make the world a safer place. Examples include: making your apps safer, finding your mobile phone, compiling security products, etc. You understand that Docker-OSX is an Open Source project, which is released to the public under the GNU Pulic License version 3 and above. You acknowledge that the Open Source project is absolutely unaffiliated with any third party, in any form whatsoever. Any trademarks or intelectual property which happen to be mentioned anywhere in or around the project are owned by their respective owners. By using this Dockerfile, you agree to agree to the EULA of each piece of upstream or downstream software. The following code is released for the sole purpose of security research, under the GNU Public License version 3. If you are concerned about the licensing, please note that this project is not AGPL. A copy of the license is available online: https://github.com/sickcodes/Docker-OSX/blob/master/LICENSE. In order to use the following Dockerfile you must read and understand the terms. Once you have read the terms, use the -e TERMS_OF_USE=i_agree or -e TERMS_OF_USE=i_disagree"
+
+CMD echo "${BOILERPLATE}" \
+    && [[ "${TERMS_OF_USE}" = i_agree ]] || exit 1 \
+    ; [[ "${DISPLAY}" = ':99' ]] && { nohup Xvfb :99 -screen 0 1920x1080x16 \
+    & until [[ "$(xrandr --query 2>/dev/null)" ]]; do sleep 0.1 ; done ; } \
+    ; case "$(file --brief /image)" in \
+        QEMU*) export IMAGE_PATH=/image;; \
+        directory*) export IMAGE_PATH=/home/arch/OSX-KVM/mac_hdd_ng.img;; \
+    esac \
+    ; stat "${IMAGE_PATH}" \
+    ; echo "Large image is being copied between layers, please wait a minute..." \
+    ; sudo chown "$(id -u)":"$(id -g)" "${IMAGE_PATH}" 2>/dev/null || true \
+    ; ./enable-ssh.sh \
+    ; /usr/bin/ssh-keygen -t rsa -f ~/.ssh/id_docker_osx -q -N "" \
+    ; chmod 600 ~/.ssh/id_docker_osx \
+    ; envsubst < ./Launch.sh | bash \
+    & echo "Booting Docker-OSX in the background. Please wait..." \
+    ; until [[ "$(sshpass -palpine ssh-copy-id -f -i ~/.ssh/id_docker_osx.pub -p 10022 user@127.0.0.1)" ]]; do \
+        scrotcat \
+        ; echo "Waiting to copy SSH key into OSX..." \
+        ; sleep 1 \
+    ; done \
+    ; tee -a ~/.ssh/config <<< 'Host 127.0.0.1' \
+    ; tee -a ~/.ssh/config <<< '    User user' \
+    ; tee -a ~/.ssh/config <<< '    Port 10022' \
+    ; tee -a ~/.ssh/config <<< '    IdentityFile ~/.ssh/id_docker_osx' \
+    ; tee -a ~/.ssh/config <<< '    StrictHostKeyChecking no' \
+    ; tee -a ~/.ssh/config <<< '    UserKnownHostsFile=/dev/null' \
+    ; echo 'Default username: user' \
+    ; echo 'Default password: alpine' \
+    ; echo 'Change it immediately using the command: passwd' \
+    ; ssh -i ~/.ssh/id_docker_osx user@127.0.0.1 -p 10022
+
+# username: user
+# password: alpine
+# screenshot: docker exec -it containerid scrotcat
+# readme: https://github.com/sickcodes/Docker-OSX
+# timezone: UTC/GMT
+
+# Future case option when supplying IMAGE_PATH:
+#   Zstandard*) zstd -d /image && export IMAGE_PATH=/image;; \

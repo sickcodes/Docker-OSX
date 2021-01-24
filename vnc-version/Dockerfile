@@ -7,7 +7,7 @@
 # 
 # Title:            Mac on Docker (Docker-OSX) [VNC EDITION]
 # Author:           Sick.Codes https://sick.codes/        
-# Version:          2.7
+# Version:          3.0
 # License:          GPLv3+
 # 
 # All credits for OSX-KVM and the rest at Kholia's repo: https://github.com/kholia/osx-kvm
@@ -29,6 +29,10 @@
 #       docker run --device /dev/kvm --device /dev/snd -p 8888:5999 -p 50922:10022 -d --privileged docker-osx-vnc:latest
 #
 #
+# Optional:
+# 
+#       -v $PWD/disk.img:/image
+# 
 # Connect locally (safe):
 #
 #       VNC Host:     localhost:8888
@@ -72,12 +76,12 @@ MAINTAINER 'https://twitter.com/sickcodes' <https://sick.codes>
 
 USER root
 
-ARG RANKMIRRORS=no
+# OPTIONAL: Arch Linux server mirrors for super fast builds
+# set RANKMIRRORS to any value other that nothing, e.g. -e RANKMIRRORS=true
+ARG RANKMIRRORS
 ARG MIRROR_COUNTRY=US
 ARG MIRROR_COUNT=10
-
-# Arch Linux server mirrors for faster builds
-RUN if [[ "${RANKMIRRORS}" = yes ]]; then { pacman -Sy wget --noconfirm || pacman -Syu wget --noconfirm ; } \
+RUN if [[ "${RANKMIRRORS}" ]]; then { pacman -Sy wget --noconfirm || pacman -Syu wget --noconfirm ; } \
     ; wget -O ./rankmirrors "https://raw.githubusercontent.com/sickcodes/Docker-OSX/master/rankmirrors" \
     ; wget -O- "https://www.archlinux.org/mirrorlist/?country=${MIRROR_COUNTRY:-US}&protocol=https&use_mirror_status=on" \
     | sed -e 's/^#Server/Server/' -e '/^#/d' \
@@ -86,7 +90,7 @@ RUN if [[ "${RANKMIRRORS}" = yes ]]; then { pacman -Sy wget --noconfirm || pacma
     && tee -a /etc/pacman.d/mirrorlist <<< 'Server = http://mirrors.evowise.com/archlinux/$repo/os/$arch' \
     && tee -a /etc/pacman.d/mirrorlist <<< 'Server = http://mirror.rackspace.com/archlinux/$repo/os/$arch' \
     && tee -a /etc/pacman.d/mirrorlist <<< 'Server = https://mirror.rackspace.com/archlinux/$repo/os/$arch' \
-    && cat /etc/pacman.d/mirrorlist; fi
+    && cat /etc/pacman.d/mirrorlist ; fi
 
 USER arch
 
@@ -117,4 +121,10 @@ RUN printf '\n\n\n\n%s\n%s\n\n\n\n' '===========VNC_PASSWORD========== ' "$(<vnc
 
 WORKDIR /home/arch/OSX-KVM
 
-CMD ./enable-ssh.sh && envsubst < ./Launch_custom.sh | bash
+VOLUME /image
+
+CMD case "$(file --brief /image)" in \
+        QEMU*) export IMAGE_PATH=/image;; \
+        directory*) export IMAGE_PATH=/home/arch/OSX-KVM/mac_hdd_ng.img;; \
+    esac \
+    ; ./enable-ssh.sh && envsubst < ./Launch_custom.sh | bash

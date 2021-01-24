@@ -11,7 +11,18 @@ PR & Contributor Credits: https://github.com/sickcodes/Docker-OSX/blob/master/CR
 
 Docker Hub: https://hub.docker.com/r/sickcodes/docker-osx
 
+- sickcodes/docker-osx:latest - base recovery image
+
+- sickcodes/docker-osx:naked - supply your own .img file
+
+- sickcodes/docker-osx:auto - 22gb image boot to OSX shell
+
+#### Follow [@sickcodes on Twitter](https://twitter.com/sickcodes) for updates or feature requests!
+
 # Quick Start Docker-OSX
+
+`sickcodes/docker-osx:latest`
+
 ```bash
 
 docker run \
@@ -25,11 +36,66 @@ docker run \
 
 ```
 
-# Features Coming in v3.0
-- Fully automated installation.
-- Ready-to-go instances.
+# Quick Start 22GB Pre-Made Image
 
-# Features In Docker-OSX v2.7
+`sickcodes/docker-osx:auto`
+
+You will need around 50GB of space: half for the base image + half for your runtime image.
+```bash
+# boot straight to OSX shell with no display (19GB)
+docker run \
+    --device /dev/kvm \
+    -p 50922:10022 \
+    sickcodes/docker-osx:auto
+
+# Wait 2-3 minutes until you drop into the shell.
+```
+```bash
+
+# boot to OSX shell + display (19GB)
+docker run \
+    --device /dev/kvm \
+    -p 50922:10022 \
+    -v /tmp/.X11-unix:/tmp/.X11-unix \
+    -e "DISPLAY=${DISPLAY:-:0.0}" \
+    sickcodes/docker-osx:auto
+
+# Boots in a minute or two!
+
+```
+
+# Quick Start Own Image
+
+`sickcodes/docker-osx:naked`
+
+Supply your image with `-v "${PWD}/mac_hdd_ng.img:/image"` and use `sickcodes/docker-osx:naked`
+
+```bash
+# run your own image + SSH
+docker run -it \
+    --device /dev/kvm \
+    -p 50922:10022 \
+    -v "${PWD}/mac_hdd_ng.img:/image" \
+    -v /tmp/.X11-unix:/tmp/.X11-unix \
+    -e "DISPLAY=${DISPLAY:-:0.0}" \
+    sickcodes/docker-osx:naked
+```
+```bash
+# run your own image headless + SSH
+docker run -it \
+    --device /dev/kvm \
+    -p 50922:10022 \
+    -v "${PWD}/mac_hdd_ng.img:/image" \
+    sickcodes/docker-osx:naked
+```
+
+# Features In Docker-OSX v3.0
+- Full auto mode: boot straight to OSX shell.
+- sickcodes/docker-osx:latest - original base recovery image (safe)
+- sickcodes/docker-osx:naked - supply your own .img file (safe)
+- sickcodes/docker-osx:auto - 22gb image boot to OSX shell (must trust @sickcodes)
+- Full auto mode: boot straight to OSX shell.
+- Supply your own image using -v $PWD/disk.img:/image
 - Kubernetes Helm Chart. [See ./helm](https://github.com/sickcodes/Docker-OSX/tree/master/helm)
 - OSX-KVM
 - X11 Forwarding
@@ -47,11 +113,28 @@ Upstream: https://github.com/kholia/OSX-KVM && the great guy [@kholia](https://t
 
 Upstream Credits (OSX-KVM project) among many others: https://github.com/kholia/OSX-KVM/blob/master/CREDITS.md
 
+# Download The Image for sickcodes/docker-osx:naked
+
+```bash
+wget https://images.sick.codes/mac_hdd_ng_auto.img.zst
+
+zstd -k mac_hdd_ng_auto.img.zst
+
+docker run -it \
+    --device /dev/kvm \
+    -p 50922:10022 \
+    -v "${PWD}/mac_hdd_ng_auto.img:/image" \
+    -v /tmp/.X11-unix:/tmp/.X11-unix \
+    -e "DISPLAY=${DISPLAY:-:0.0}" \
+    sickcodes/docker-osx:naked
+
+```
+
 ### Other cool Docker-QEMU based projects:
 
 [Run iOS in a Docker with Docker-eyeOS](https://github.com/sickcodes/Docker-eyeOS) - [https://github.com/sickcodes/Docker-eyeOS](https://github.com/sickcodes/Docker-eyeOS)
 
-# Run Docker-OSX
+# Run Docker-OSX (Original Version)
 
 ```bash
 
@@ -72,7 +155,7 @@ docker run \
 
 ```
 
-# Run but allow SSH into OSX!
+# Run but allow SSH into OSX (Original Version)!
 
 ```bash
 docker run \
@@ -459,7 +542,7 @@ Mirror locations can be found here (use 2 letter country codes): https://archlin
 
 ```bash
 docker build -t docker-osx:latest \
-    --build-arg RANKMIRRORS=yes \
+    --build-arg RANKMIRRORS=true \
     --build-arg MIRROR_COUNTRY=US \
     --build-arg MIRROR_COUNT=10 \
     --build-arg VERSION=10.15.6 \

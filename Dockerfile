@@ -8,7 +8,7 @@
 # Repo:             https://github.com/sickcodes/Docker-OSX/
 # Title:            Mac on Docker (Docker-OSX)
 # Author:           Sick.Codes https://sick.codes/
-# Version:          2.7
+# Version:          3.0
 # License:          GPLv3+
 #
 # All credits for OSX-KVM and the rest at @Kholia's repo: https://github.com/kholia/osx-kvm
@@ -35,13 +35,14 @@
 #
 # Optargs:
 #
-#       SIZE=200G
-#       VERSION=10.15.6
-#       ENV RAM=5
-#       ENV SMP=4
-#       ENV CORES=4
-#       ENV EXTRA=
-#       ENV INTERNAL_SSH_PORT=10022
+#       -v $PWD/disk.img:/image
+#       -e SIZE=200G
+#       -e VERSION=10.15.6
+#       -e RAM=5
+#       -e SMP=4
+#       -e CORES=4
+#       -e EXTRA=
+#       -e INTERNAL_SSH_PORT=10022
 #
 # Extra QEMU args:
 #
@@ -55,15 +56,15 @@ MAINTAINER 'https://sick.codes' <https://sick.codes>
 SHELL ["/bin/bash", "-c"]
 
 # change disk size here or add during build, e.g. --build-arg VERSION=10.14.5 --build-arg SIZE=50G
-ARG SIZE=200G
-ARG VERSION=10.15.6
+ARG SIZE 200G
+ARG VERSION 10.15.6
 
-ARG RANKMIRRORS=no
+# OPTIONAL: Arch Linux server mirrors for super fast builds
+# set RANKMIRRORS to any value other that nothing, e.g. -e RANKMIRRORS=true
+ARG RANKMIRRORS
 ARG MIRROR_COUNTRY=US
 ARG MIRROR_COUNT=10
-
-# Arch Linux server mirrors for faster builds
-RUN if [[ "${RANKMIRRORS}" = yes ]]; then { pacman -Sy wget --noconfirm || pacman -Syu wget --noconfirm ; } \
+RUN if [[ "${RANKMIRRORS}" ]]; then { pacman -Sy wget --noconfirm || pacman -Syu wget --noconfirm ; } \
     ; wget -O ./rankmirrors "https://raw.githubusercontent.com/sickcodes/Docker-OSX/master/rankmirrors" \
     ; wget -O- "https://www.archlinux.org/mirrorlist/?country=${MIRROR_COUNTRY:-US}&protocol=https&use_mirror_status=on" \
     | sed -e 's/^#Server/Server/' -e '/^#/d' \
@@ -72,7 +73,7 @@ RUN if [[ "${RANKMIRRORS}" = yes ]]; then { pacman -Sy wget --noconfirm || pacma
     && tee -a /etc/pacman.d/mirrorlist <<< 'Server = http://mirrors.evowise.com/archlinux/$repo/os/$arch' \
     && tee -a /etc/pacman.d/mirrorlist <<< 'Server = http://mirror.rackspace.com/archlinux/$repo/os/$arch' \
     && tee -a /etc/pacman.d/mirrorlist <<< 'Server = https://mirror.rackspace.com/archlinux/$repo/os/$arch' \
-    && cat /etc/pacman.d/mirrorlist; fi
+    && cat /etc/pacman.d/mirrorlist ; fi
 
 # This fails on hub.docker.com, useful for debugging in cloud
 # RUN [[ $(egrep -c '(svm|vmx)' /proc/cpuinfo) -gt 0 ]] || { echo KVM not possible on this host && exit 1; }
@@ -135,7 +136,7 @@ RUN touch enable-ssh.sh \
 
 # RUN yes | sudo pacman -Syu qemu libvirt dnsmasq virt-manager bridge-utils edk2-ovmf netctl libvirt-dbus --overwrite --noconfirm
 
-RUN yes | sudo pacman -Syu qemu libvirt dnsmasq virt-manager bridge-utils openresolv jack iptables-nft edk2-ovmf netctl libvirt-dbus --overwrite --noconfirm \
+RUN yes | sudo pacman -Syu qemu libvirt dnsmasq virt-manager bridge-utils openresolv jack ebtables edk2-ovmf netctl libvirt-dbus --overwrite --noconfirm \
     ; yes | sudo pacman -Scc
 
 # RUN sudo systemctl enable libvirtd.service
@@ -188,15 +189,21 @@ RUN grep -v InstallMedia ./Launch.sh > ./Launch-nopicker.sh \
 
 ENV USER arch
 
-ENV DISPLAY=:0.0
+ENV DISPLAY :0.0
 
 USER arch
 
 VOLUME ["/tmp/.X11-unix"]
 
+VOLUME /image
+
 ENV IMAGE_PATH=/home/arch/OSX-KVM/mac_hdd_ng.img
 
-CMD ./enable-ssh.sh && envsubst < ./Launch.sh | bash
+CMD case "$(file --brief /image)" in \
+        QEMU*) export IMAGE_PATH=/image;; \
+        directory*) export IMAGE_PATH=/home/arch/OSX-KVM/mac_hdd_ng.img;; \
+    esac \
+    ; ./enable-ssh.sh && envsubst < ./Launch.sh | bash
 
 # virt-manager mode: eta son
 # CMD virsh define <(envsubst < Docker-OSX.xml) && virt-manager || virt-manager

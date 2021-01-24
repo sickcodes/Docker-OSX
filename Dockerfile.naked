@@ -1,0 +1,98 @@
+#!/usr/bin/docker
+#     ____             __             ____  ______  __
+#    / __ \____  _____/ /_____  _____/ __ \/ ___/ |/ /
+#   / / / / __ \/ ___/ //_/ _ \/ ___/ / / /\__ \|   / 
+#  / /_/ / /_/ / /__/ ,< /  __/ /  / /_/ /___/ /   |  
+# /_____/\____/\___/_/|_|\___/_/   \____//____/_/|_|  NAKED/SUPPLY_YOUR_OWN
+# 
+# Title:            Mac on Docker (Docker-OSX) [AUTOINSTALL]
+# Author:           Sick.Codes https://twitter.com/sickcodes       
+# Version:          3.0
+# License:          GPLv3+
+# Repository:       https://github.com/sickcodes/Docker-OSX
+# 
+# This image won't run unless you supply a disk image using:
+#       -v ${PWD}/mac_hdd_ng.img:/image
+# 
+# Take screenshots in the Arch container and display in terminal: scrotcat
+#
+# Build:
+# 
+#       docker build -t docker-osx:naked -f Dockerfile.naked .
+# 
+# Run headless:
+# 
+#       docker run -it --device /dev/kvm -p 50922:10022 -v ${PWD}/mac_hdd_ng.img:/image docker-osx:naked
+# 
+# Run with display:
+# 
+#       docker run -it --device /dev/kvm -p 50922:10022 -v ${PWD}/mac_hdd_ng.img:/image -e "DISPLAY=${DISPLAY:-:0.0}" -v /tmp/.X11-unix:/tmp/.X11-unix docker-osx:naked
+# 
+
+FROM sickcodes/docker-osx:latest
+
+MAINTAINER 'https://twitter.com/sickcodes' <https://sick.codes>
+
+USER root
+
+WORKDIR /root
+
+RUN rm -f /home/arch/OSX-KVM/mac_hdd_ng.img
+
+# OPTIONAL: Arch Linux server mirrors for super fast builds
+# set RANKMIRRORS to any value other that nothing, e.g. -e RANKMIRRORS=true
+ARG RANKMIRRORS
+ARG MIRROR_COUNTRY=US
+ARG MIRROR_COUNT=10
+RUN if [[ "${RANKMIRRORS}" ]]; then { pacman -Sy wget --noconfirm || pacman -Syu wget --noconfirm ; } \
+    ; wget -O ./rankmirrors "https://raw.githubusercontent.com/sickcodes/Docker-OSX/master/rankmirrors" \
+    ; wget -O- "https://www.archlinux.org/mirrorlist/?country=${MIRROR_COUNTRY:-US}&protocol=https&use_mirror_status=on" \
+    | sed -e 's/^#Server/Server/' -e '/^#/d' \
+    | head -n "$((${MIRROR_COUNT:-10}+1))" \
+    | bash ./rankmirrors --verbose --max-time 5 - > /etc/pacman.d/mirrorlist \
+    && tee -a /etc/pacman.d/mirrorlist <<< 'Server = http://mirrors.evowise.com/archlinux/$repo/os/$arch' \
+    && tee -a /etc/pacman.d/mirrorlist <<< 'Server = http://mirror.rackspace.com/archlinux/$repo/os/$arch' \
+    && tee -a /etc/pacman.d/mirrorlist <<< 'Server = https://mirror.rackspace.com/archlinux/$repo/os/$arch' \
+    && cat /etc/pacman.d/mirrorlist ; fi
+
+RUN pacman -Syu xorg-server-xvfb xterm xorg-xhost xorg-xrandr xdotool sshpass scrot base-devel --noconfirm
+
+RUN git clone https://github.com/stolk/imcat.git \
+    && cd imcat \
+    && make \
+    && sudo cp imcat /usr/bin/imcat \
+    && touch /usr/bin/scrotcat \
+    && tee -a /usr/bin/scrotcat <<< '/usr/bin/imcat <(scrot -o /dev/stdout)' \
+    && chmod +x /usr/bin/scrotcat
+
+USER arch
+
+RUN mkdir -p ~/.ssh \
+    && touch ~/.ssh/authorized_keys \
+    && touch ~/.ssh/config \
+    && chmod 700 ~/.ssh \
+    && chmod 600 ~/.ssh/config \
+    && chmod 600 ~/.ssh/authorized_keys \
+    && tee -a ~/.ssh/config <<< 'Host *' \
+    && tee -a ~/.ssh/config <<< '    StrictHostKeyChecking no' \
+    && tee -a ~/.ssh/config <<< '    UserKnownHostsFile=/dev/null'
+
+WORKDIR /home/arch/OSX-KVM
+
+ARG COMPLETE
+
+ARG NOPICKER=true
+
+RUN [[ "${NOPICKER}" = true ]] && mv ./Launch-nopicker.sh ./Launch.sh
+
+VOLUME /image
+
+ENV DISPLAY=:99
+
+ENV IMAGE_PATH=/image
+
+CMD [[ "${DISPLAY}" = ':99' ]] && { nohup Xvfb :99 -screen 0 1920x1080x16 \
+    & until [[ "$(xrandr --query 2>/dev/null)" ]]; do sleep 0.1 ; done ; } \
+    ; sudo chown "$(id -u)":"$(id -g)" "${IMAGE_PATH}" 2>/dev/null || true \
+    ; ./enable-ssh.sh \
+    ; envsubst < ./Launch.sh | bash
