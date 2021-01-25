@@ -116,7 +116,7 @@ Upstream Credits (OSX-KVM project) among many others: https://github.com/kholia/
 # Download The Image for sickcodes/docker-osx:naked
 
 ```bash
-wget https://images.sick.codes/mac_hdd_ng_auto.img.zst
+wget https://images2.sick.codes/mac_hdd_ng_auto.img.zst
 
 zstd -k mac_hdd_ng_auto.img.zst
 
