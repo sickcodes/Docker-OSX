@@ -96,16 +96,11 @@ ARG IMAGE_URL='https://images2.sick.codes/mac_hdd_ng_auto.img'
 # otherwise use your own image: -v "$PWD/disk.img":/image
 RUN if [[ "${COMPLETE}" ]]; then \
     echo "Downloading 20GB+ image... This step might take a while... Press Ctrl+C if you want to abort." \
-    ; wget --no-verbose \
-        --no-dns-cache \
-        --no-check-certificate \
-        --output-document=/home/arch/OSX-KVM/mac_hdd_ng.img \
-        "${IMAGE_URL}" \
+    ; rm -f /home/arch/OSX-KVM/mac_hdd_ng.img \
+        && curl -k "${IMAGE_URL}" > /home/arch/OSX-KVM/mac_hdd_ng.img \
     ; fi
 
 RUN mv ./Launch-nopicker.sh ./Launch.sh
-
-VOLUME /image
 
 ENV DISPLAY=:99
 

@@ -193,14 +193,12 @@ ENV DISPLAY=:0.0
 
 USER arch
 
-VOLUME ["/tmp/.X11-unix"]
-
-VOLUME /image
-
 ENV IMAGE_PATH=/home/arch/OSX-KVM/mac_hdd_ng.img
 
+VOLUME ["/tmp/.X11-unix"]
+
 CMD case "$(file --brief /image)" in \
-        QEMU*) export IMAGE_PATH=/image;; \
+        QEMU*) export IMAGE_PATH=/image && sudo chown "$(id -u)":"$(id -g)" "${IMAGE_PATH}" 2>/dev/null || true;; \
         directory*) export IMAGE_PATH=/home/arch/OSX-KVM/mac_hdd_ng.img;; \
     esac \
     ; ./enable-ssh.sh && envsubst < ./Launch.sh | bash

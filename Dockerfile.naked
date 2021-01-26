@@ -83,8 +83,6 @@ ARG NOPICKER=true
 
 RUN [[ "${NOPICKER}" = true ]] && mv ./Launch-nopicker.sh ./Launch.sh
 
-VOLUME /image
-
 ENV DISPLAY=:99
 
 ENV IMAGE_PATH=/image
