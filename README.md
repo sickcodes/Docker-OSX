@@ -121,7 +121,7 @@ Upstream Credits (OSX-KVM project) among many others: https://github.com/kholia/
 ```bash
 wget https://images2.sick.codes/mac_hdd_ng_auto.img.zst
 
-zstd -k mac_hdd_ng_auto.img.zst
+zstd -d mac_hdd_ng_auto.img.zst
 
 docker run -it \
     --device /dev/kvm \
