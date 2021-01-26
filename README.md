@@ -41,6 +41,9 @@ docker run -it \
 `sickcodes/docker-osx:auto`
 
 You will need around 50GB of space: half for the base image + half for your runtime image.
+
+If you run out of space, you can nuke your Docker images/history/cache by simply deleting `/var/lib/docker`
+
 ```bash
 # boot straight to OSX shell with no display (19GB)
 docker run -it \
