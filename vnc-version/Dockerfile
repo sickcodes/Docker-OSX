@@ -121,10 +121,4 @@ RUN printf '\n\n\n\n%s\n%s\n\n\n\n' '===========VNC_PASSWORD========== ' "$(<vnc
 
 WORKDIR /home/arch/OSX-KVM
 
-VOLUME /image
-
-CMD case "$(file --brief /image)" in \
-        QEMU*) export IMAGE_PATH=/image;; \
-        directory*) export IMAGE_PATH=/home/arch/OSX-KVM/mac_hdd_ng.img;; \
-    esac \
-    ; ./enable-ssh.sh && envsubst < ./Launch_custom.sh | bash
+CMD ./enable-ssh.sh && envsubst < ./Launch_custom.sh | bash

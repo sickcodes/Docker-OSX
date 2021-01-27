@@ -88,7 +88,7 @@ ENV DISPLAY=:99
 ENV IMAGE_PATH=/image
 
 CMD [[ "${DISPLAY}" = ':99' ]] && { nohup Xvfb :99 -screen 0 1920x1080x16 \
-    & until [[ "$(xrandr --query 2>/dev/null)" ]]; do sleep 0.1 ; done ; } \
+    & until [[ "$(xrandr --query 2>/dev/null)" ]]; do sleep 1 ; done ; } \
     ; sudo chown "$(id -u)":"$(id -g)" "${IMAGE_PATH}" 2>/dev/null || true \
     ; ./enable-ssh.sh \
     ; envsubst < ./Launch.sh | bash

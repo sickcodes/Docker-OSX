@@ -115,32 +115,34 @@ CMD echo "${BOILERPLATE}" \
     ; [[ "${DISPLAY}" = ':99' ]] && { nohup Xvfb :99 -screen 0 1920x1080x16 \
     & until [[ "$(xrandr --query 2>/dev/null)" ]]; do sleep 0.1 ; done ; } \
     ; case "$(file --brief /image)" in \
-        QEMU*) export IMAGE_PATH=/image;; \
+        QEMU*) export IMAGE_PATH=/image && sudo chown "$(id -u)":"$(id -g)" "${IMAGE_PATH}" 2>/dev/null || true;; \
         directory*) export IMAGE_PATH=/home/arch/OSX-KVM/mac_hdd_ng.img;; \
     esac \
     ; stat "${IMAGE_PATH}" \
     ; echo "Large image is being copied between layers, please wait a minute..." \
-    ; sudo chown "$(id -u)":"$(id -g)" "${IMAGE_PATH}" 2>/dev/null || true \
     ; ./enable-ssh.sh \
-    ; /usr/bin/ssh-keygen -t rsa -f ~/.ssh/id_docker_osx -q -N "" \
-    ; chmod 600 ~/.ssh/id_docker_osx \
+    ; [[ -e ~/.ssh/id_docker_osx ]] || { \
+        /usr/bin/ssh-keygen -t rsa -f ~/.ssh/id_docker_osx -q -N "" \
+        && chmod 600 ~/.ssh/id_docker_osx \
+    ; } \
     ; envsubst < ./Launch.sh | bash \
     & echo "Booting Docker-OSX in the background. Please wait..." \
     ; until [[ "$(sshpass -palpine ssh-copy-id -f -i ~/.ssh/id_docker_osx.pub -p 10022 user@127.0.0.1)" ]]; do \
-        scrotcat \
-        ; echo "Waiting to copy SSH key into OSX..." \
+        echo "Disk is being copied between layers. Repeating until able to copy SSH key into OSX..." \
         ; sleep 1 \
     ; done \
-    ; tee -a ~/.ssh/config <<< 'Host 127.0.0.1' \
-    ; tee -a ~/.ssh/config <<< '    User user' \
-    ; tee -a ~/.ssh/config <<< '    Port 10022' \
-    ; tee -a ~/.ssh/config <<< '    IdentityFile ~/.ssh/id_docker_osx' \
-    ; tee -a ~/.ssh/config <<< '    StrictHostKeyChecking no' \
-    ; tee -a ~/.ssh/config <<< '    UserKnownHostsFile=/dev/null' \
-    ; echo 'Default username: user' \
-    ; echo 'Default password: alpine' \
-    ; echo 'Change it immediately using the command: passwd' \
-    ; ssh -i ~/.ssh/id_docker_osx user@127.0.0.1 -p 10022
+    ; grep id_docker_osx ~/.ssh/config || { \
+        tee -a ~/.ssh/config <<< 'Host 127.0.0.1' \
+        ; tee -a ~/.ssh/config <<< '    User user' \
+        ; tee -a ~/.ssh/config <<< '    Port 10022' \
+        ; tee -a ~/.ssh/config <<< '    IdentityFile ~/.ssh/id_docker_osx' \
+        ; tee -a ~/.ssh/config <<< '    StrictHostKeyChecking no' \
+        ; tee -a ~/.ssh/config <<< '    UserKnownHostsFile=/dev/null' \
+    ; } \
+    && echo 'Default username: user' \
+    && echo 'Default password: alpine' \
+    && echo 'Change it immediately using the command: passwd' \
+    && ssh -i ~/.ssh/id_docker_osx user@127.0.0.1 -p 10022 "${OSX_COMMANDS}"
 
 # username: user
 # password: alpine

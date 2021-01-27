@@ -21,9 +21,9 @@ Docker Hub: https://hub.docker.com/r/sickcodes/docker-osx
 
 # Quick Start Docker-OSX
 
-`sickcodes/docker-osx:latest`
-
 ```bash
+
+docker pull sickcodes/docker-osx:latest
 
 docker run -it \
     --device /dev/kvm \
@@ -38,13 +38,15 @@ docker run -it \
 
 # Quick Start 22GB Pre-Made Image
 
-`sickcodes/docker-osx:auto`
 
 You will need around 50GB of space: half for the base image + half for your runtime image.
 
 If you run out of space, you can nuke your Docker images/history/cache by simply deleting `/var/lib/docker`
 
 ```bash
+
+docker pull sickcodes/docker-osx:auto
+
 # boot straight to OSX shell with no display (19GB)
 docker run -it \
     --device /dev/kvm \
@@ -55,25 +57,37 @@ docker run -it \
 ```
 ```bash
 
-# boot to OSX shell + display (19GB)
+# boot to OSX shell + display (19GB) + commands to run inside OSX
 docker run -it \
     --device /dev/kvm \
     -p 50922:10022 \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
     -e "DISPLAY=${DISPLAY:-:0.0}" \
+    -e "OSX_COMMANDS=/bin/bash -c \"pwd && uname -a\""
     sickcodes/docker-osx:auto
 
 # Boots in a minute or two!
 
 ```
+### Restart an auto container
+
+```bash
+# find last container
+docker ps -a
+
+# docker start old container with -i for interactive
+docker start -i containerid
+
+```
 
 # Quick Start Own Image
 
-`sickcodes/docker-osx:naked`
 
 Supply your image with `-v "${PWD}/mac_hdd_ng.img:/image"` and use `sickcodes/docker-osx:naked`
 
 ```bash
+docker pull sickcodes/docker-osx:naked
+
 # run your own image + SSH
 docker run -it \
     --device /dev/kvm \
@@ -97,7 +111,6 @@ docker run -it \
 - sickcodes/docker-osx:latest - original base recovery image (safe)
 - sickcodes/docker-osx:naked - supply your own .img file (safe)
 - sickcodes/docker-osx:auto - 22gb image boot to OSX shell (must trust @sickcodes)
-- Full auto mode: boot straight to OSX shell.
 - Supply your own image using -v $PWD/disk.img:/image
 - Kubernetes Helm Chart. [See ./helm](https://github.com/sickcodes/Docker-OSX/tree/master/helm)
 - OSX-KVM
