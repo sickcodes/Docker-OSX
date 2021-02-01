@@ -63,7 +63,7 @@ docker run -it \
     -p 50922:10022 \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
     -e "DISPLAY=${DISPLAY:-:0.0}" \
-    -e "OSX_COMMANDS=/bin/bash -c \"pwd && uname -a\""
+    -e "OSX_COMMANDS=/bin/bash -c \"pwd && uname -a\"" \
     sickcodes/docker-osx:auto
 
 # Boots in a minute or two!
@@ -115,7 +115,7 @@ docker run -it \
 - Kubernetes Helm Chart. [See ./helm](https://github.com/sickcodes/Docker-OSX/tree/master/helm)
 - OSX-KVM
 - X11 Forwarding
-- SSH on localhost:50922 
+- SSH on localhost:50922
 - QEMU
 - VNC on localhost:8888 [vnc version is inside a separate directory](https://github.com/sickcodes/Docker-OSX/blob/master/vnc-version/Dockerfile)
 - Create an ARMY using `docker commit`
@@ -181,7 +181,7 @@ docker run -it \
     -p 50922:10022 \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
     -e "DISPLAY=${DISPLAY:-:0.0}" \
-    sickcodes/docker-osx:latest 
+    sickcodes/docker-osx:latest
 
 # turn on SSH after you've installed OSX in the "Sharing" settings.
 ssh fullname@localhost -p 50922
@@ -261,7 +261,7 @@ docker start abc123xyz567
 - Erase the BIGGEST disk (around 200gb default), DO NOT MODIFY THE SMALLER DISKS.
 -- if you can't click `erase`, you may need to reduce the disk size by 1kb
 
-- (optional) Create a partition using the unused space to house the OS and your files if you want to limit the capacity. (For Xcode 12 partition at least 60gb.) 
+- (optional) Create a partition using the unused space to house the OS and your files if you want to limit the capacity. (For Xcode 12 partition at least 60gb.)
 
 - Click `Reinstall macOS`
 
@@ -273,7 +273,7 @@ docker start abc123xyz567
 # To do this, run the following commands
 
 # make note of your container id
-docker ps --all 
+docker ps --all
 docker commit containerid newImageName
 
 # To run this image do the following
