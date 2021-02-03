@@ -7,7 +7,9 @@ Run Mac in a Docker container! Run near native OSX-KVM in Docker! X11 Forwarding
 
 Author: Sick.Codes https://sick.codes/ & https://twitter.com/sickcodes
 
-PR & Contributor Credits: https://github.com/sickcodes/Docker-OSX/blob/master/CREDITS.md
+### PR & Contributor Credits
+
+https://github.com/sickcodes/Docker-OSX/blob/master/CREDITS.md
 
 Docker Hub: https://hub.docker.com/r/sickcodes/docker-osx
 
@@ -16,6 +18,15 @@ Docker Hub: https://hub.docker.com/r/sickcodes/docker-osx
 - sickcodes/docker-osx:naked - supply your own .img file
 
 - sickcodes/docker-osx:auto - 22gb image boot to OSX shell
+
+## Professional Support Available!
+
+Enquire at https://sick.codes/contact
+
+- Enterprise support, Business support, or casual support.
+- Custom images, custom scripts, consulting (per hour available!)
+- One-on-one with you, or your development team.
+
 
 #### Follow [@sickcodes on Twitter](https://twitter.com/sickcodes) for updates or feature requests!
 
