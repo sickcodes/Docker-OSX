@@ -110,7 +110,7 @@ ARG IMAGE_URL='https://images2.sick.codes/mac_hdd_ng_auto.img'
 RUN if [[ "${COMPLETE}" ]]; then \
         echo "Downloading 20GB+ image... This step might take a while... Press Ctrl+C if you want to abort." \
         ; rm -f /home/arch/OSX-KVM/mac_hdd_ng.img \
-        && wget -O /home/arch/OSX-KVM/mac_hdd_ng.img "${IMAGE_URL}" \
+        && wget --no-verbose -O /home/arch/OSX-KVM/mac_hdd_ng.img "${IMAGE_URL}" \
     ; fi
 
 RUN mv ./Launch-nopicker.sh ./Launch.sh
