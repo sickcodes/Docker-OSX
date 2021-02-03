@@ -47,31 +47,44 @@ USER root
 
 WORKDIR /root
 
+# For taking screenshots of the Xfvb screen, useful during development.
+ARG SCROT
+
 # OPTIONAL: Arch Linux server mirrors for super fast builds
 # set RANKMIRRORS to any value other that nothing, e.g. -e RANKMIRRORS=true
 ARG RANKMIRRORS
 ARG MIRROR_COUNTRY=US
 ARG MIRROR_COUNT=10
-RUN if [[ "${RANKMIRRORS}" ]]; then { pacman -Sy wget --noconfirm || pacman -Syu wget --noconfirm ; } \
-    ; wget -O ./rankmirrors "https://raw.githubusercontent.com/sickcodes/Docker-OSX/master/rankmirrors" \
-    ; wget -O- "https://www.archlinux.org/mirrorlist/?country=${MIRROR_COUNTRY:-US}&protocol=https&use_mirror_status=on" \
-    | sed -e 's/^#Server/Server/' -e '/^#/d' \
-    | head -n "$((${MIRROR_COUNT:-10}+1))" \
-    | bash ./rankmirrors --verbose --max-time 5 - > /etc/pacman.d/mirrorlist \
-    && tee -a /etc/pacman.d/mirrorlist <<< 'Server = http://mirrors.evowise.com/archlinux/$repo/os/$arch' \
-    && tee -a /etc/pacman.d/mirrorlist <<< 'Server = http://mirror.rackspace.com/archlinux/$repo/os/$arch' \
-    && tee -a /etc/pacman.d/mirrorlist <<< 'Server = https://mirror.rackspace.com/archlinux/$repo/os/$arch' \
-    && cat /etc/pacman.d/mirrorlist ; fi
+RUN if [[ "${RANKMIRRORS}" ]]; then \
+        { pacman -Sy wget --noconfirm || pacman -Syu wget --noconfirm ; } \
+        ; wget -O ./rankmirrors "https://raw.githubusercontent.com/sickcodes/Docker-OSX/master/rankmirrors" \
+        ; wget -O- "https://www.archlinux.org/mirrorlist/?country=${MIRROR_COUNTRY:-US}&protocol=https&use_mirror_status=on" \
+        | sed -e 's/^#Server/Server/' -e '/^#/d' \
+        | head -n "$((${MIRROR_COUNT:-10}+1))" \
+        | bash ./rankmirrors --verbose --max-time 5 - > /etc/pacman.d/mirrorlist \
+        && tee -a /etc/pacman.d/mirrorlist <<< 'Server = http://mirrors.evowise.com/archlinux/$repo/os/$arch' \
+        && tee -a /etc/pacman.d/mirrorlist <<< 'Server = http://mirror.rackspace.com/archlinux/$repo/os/$arch' \
+        && tee -a /etc/pacman.d/mirrorlist <<< 'Server = https://mirror.rackspace.com/archlinux/$repo/os/$arch' \
+        && cat /etc/pacman.d/mirrorlist \
+    ; fi \
+    ; yes | pacman -Scc
 
-RUN pacman -Syu xorg-server-xvfb wget xterm xorg-xhost xorg-xrandr xdotool sshpass scrot base-devel --noconfirm
-
-RUN git clone https://github.com/stolk/imcat.git \
-    && cd imcat \
-    && make \
-    && sudo cp imcat /usr/bin/imcat \
-    && touch /usr/bin/scrotcat \
-    && tee -a /usr/bin/scrotcat <<< '/usr/bin/imcat <(scrot -o /dev/stdout)' \
-    && chmod +x /usr/bin/scrotcat
+RUN pacman -Syu xorg-server-xvfb wget xterm xorg-xhost xorg-xrandr sshpass --noconfirm \
+    && if [[ "${SCROT}" ]]; then \
+        pacman -Syu scrot base-devel --noconfirm \
+        && git clone https://github.com/stolk/imcat.git \
+        && cd imcat \
+        && make \
+        && sudo cp imcat /usr/bin/imcat \
+        && touch /usr/bin/scrotcat \
+        && tee -a /usr/bin/scrotcat <<< '/usr/bin/imcat <(scrot -o /dev/stdout)' \
+        && chmod +x /usr/bin/scrotcat \
+    ; else \
+        touch /usr/bin/scrotcat \
+        && echo echo >> /usr/bin/scrotcat \
+        && chmod +x /usr/bin/scrotcat \
+    ; fi \
+    ; yes | pacman -Scc
 
 USER arch
 
@@ -95,9 +108,9 @@ ARG IMAGE_URL='https://images2.sick.codes/mac_hdd_ng_auto.img'
 # use the COMPLETE arg, for a complete image, ready to boot.
 # otherwise use your own image: -v "$PWD/disk.img":/image
 RUN if [[ "${COMPLETE}" ]]; then \
-    echo "Downloading 20GB+ image... This step might take a while... Press Ctrl+C if you want to abort." \
-    ; rm -f /home/arch/OSX-KVM/mac_hdd_ng.img \
-        && curl -k "${IMAGE_URL}" > /home/arch/OSX-KVM/mac_hdd_ng.img \
+        echo "Downloading 20GB+ image... This step might take a while... Press Ctrl+C if you want to abort." \
+        ; rm -f /home/arch/OSX-KVM/mac_hdd_ng.img \
+        && wget -O /home/arch/OSX-KVM/mac_hdd_ng.img "${IMAGE_URL}" \
     ; fi
 
 RUN mv ./Launch-nopicker.sh ./Launch.sh
@@ -112,8 +125,11 @@ ENV BOILERPLATE="By using this Dockerfile, you hereby agree that you are a secur
 
 CMD echo "${BOILERPLATE}" \
     && [[ "${TERMS_OF_USE}" = i_agree ]] || exit 1 \
-    ; [[ "${DISPLAY}" = ':99' ]] && { nohup Xvfb :99 -screen 0 1920x1080x16 \
-    & until [[ "$(xrandr --query 2>/dev/null)" ]]; do sleep 0.1 ; done ; } \
+    ; [[ "${DISPLAY}" = ':99' ]] && { \
+        nohup Xvfb :99 -screen 0 1920x1080x16 \
+        & until [[ "$(xrandr --query 2>/dev/null)" ]]; do sleep 0.1 ; done \
+    ; } \
+    ; echo "Checking whether /image is a directory or a QEMU disk." \
     ; case "$(file --brief /image)" in \
         QEMU*) export IMAGE_PATH=/image && sudo chown "$(id -u)":"$(id -g)" "${IMAGE_PATH}" 2>/dev/null || true;; \
         directory*) export IMAGE_PATH=/home/arch/OSX-KVM/mac_hdd_ng.img;; \

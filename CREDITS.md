@@ -52,3 +52,5 @@ These credits refer to the contributors to this repository:
 
 [@cephasara](https://github.com/cephasara) - Fix helm installation failure and cleanup values organization #134
 
+[@prometheas](https://github.com/prometheas) - docs: fix broken multi-line docker command #140 
+
