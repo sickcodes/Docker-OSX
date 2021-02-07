@@ -1,5 +1,6 @@
 |Version|Date|Notes|
 |---|---|---|
+|   |2021-02-07|Add NOPICKER environment variable to :naked image for effortless boot toggling.|
 |   |2021-02-07|Add MAC_ADDRESS environment variable.|
 |   |2021-02-03|Employ wget --no-verbose to avoid buffer overload in hub.docker.com.|
 |   |2021-02-03|Reduce build size.|

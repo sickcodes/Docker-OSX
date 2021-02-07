@@ -111,7 +111,10 @@ docker start -i containerid
 # Quick Start Own Image
 
 
-Supply your image with `-v "${PWD}/mac_hdd_ng.img:/image"` and use `sickcodes/docker-osx:naked`
+Supply your own local image with `-v "${PWD}/mac_hdd_ng.img:/image"` and use `sickcodes/docker-osx:naked`
+
+- Naked image is for booting any existing .img file.
+- By default, this image has a variable called `NOPICKER` which is `"true"`. Use `-e NOPICKER=false` or any other string than the word `true` to enter the boot menu. This lets you use other disks instead of skipping the boot menu, e.g. recovery disk.
 
 ```bash
 docker pull sickcodes/docker-osx:naked
@@ -124,6 +127,17 @@ docker run -it \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
     -e "DISPLAY=${DISPLAY:-:0.0}" \
     sickcodes/docker-osx:naked
+
+# run local copy of the auto image + SSH + Boot menu
+docker run -it \
+    --device /dev/kvm \
+    -p 50922:10022 \
+    -v "${PWD}/mac_hdd_ng_auto.img:/image" \
+    -v /tmp/.X11-unix:/tmp/.X11-unix \
+    -e "DISPLAY=${DISPLAY:-:0.0}" \
+    -e "NOPICKER=false" \
+    sickcodes/docker-osx:naked
+
 ```
 ```bash
 # run your own image headless + SSH
