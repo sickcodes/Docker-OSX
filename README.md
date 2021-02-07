@@ -66,7 +66,24 @@ docker run -it \
 
 # Wait 2-3 minutes until you drop into the shell.
 ```
+
 ```bash
+
+docker pull sickcodes/docker-osx:auto
+
+# boot to OSX shell + display (19GB)
+docker run -it \
+    --device /dev/kvm \
+    -p 50922:10022 \
+    -v /tmp/.X11-unix:/tmp/.X11-unix \
+    -e "DISPLAY=${DISPLAY:-:0.0}" \
+    sickcodes/docker-osx:auto
+
+```
+
+```bash
+
+docker pull sickcodes/docker-osx:auto
 
 # boot to OSX shell + display (19GB) + commands to run inside OSX
 docker run -it \
@@ -94,7 +111,10 @@ docker start -i containerid
 # Quick Start Own Image
 
 
-Supply your image with `-v "${PWD}/mac_hdd_ng.img:/image"` and use `sickcodes/docker-osx:naked`
+Supply your own local image with `-v "${PWD}/mac_hdd_ng.img:/image"` and use `sickcodes/docker-osx:naked`
+
+- Naked image is for booting any existing .img file.
+- By default, this image has a variable called `NOPICKER` which is `"true"`. Use `-e NOPICKER=false` or any other string than the word `true` to enter the boot menu. This lets you use other disks instead of skipping the boot menu, e.g. recovery disk.
 
 ```bash
 docker pull sickcodes/docker-osx:naked
@@ -107,6 +127,17 @@ docker run -it \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
     -e "DISPLAY=${DISPLAY:-:0.0}" \
     sickcodes/docker-osx:naked
+
+# run local copy of the auto image + SSH + Boot menu
+docker run -it \
+    --device /dev/kvm \
+    -p 50922:10022 \
+    -v "${PWD}/mac_hdd_ng_auto.img:/image" \
+    -v /tmp/.X11-unix:/tmp/.X11-unix \
+    -e "DISPLAY=${DISPLAY:-:0.0}" \
+    -e "NOPICKER=false" \
+    sickcodes/docker-osx:naked
+
 ```
 ```bash
 # run your own image headless + SSH
@@ -581,12 +612,18 @@ docker build -t docker-osx:latest \
 Pass any devices/directories to the Docker container & the QEMU arguments using the handy `-e EXTRA=` runtime options.
 
 ```bash
+# example customizations
 docker run \
     -e RAM=4 \
     -e SMP=4 \
     -e CORES=4 \
     -e EXTRA='-usb -device usb-host,hostbus=1,hostaddr=8' \
     -e INTERNAL_SSH_PORT=23 \
+    -e MAC_ADDRESS="$(xxd -c1 -p -l 6 /dev/urandom | tr '\n' ':' | cut -c1-17)" \
+    -e AUDIO_DRIVER=alsa \
+    -e IMAGE_PATH=/image \
+    -e SCREEN_SHARE_PORT=5900 \
+    -e DISPLAY=:0 \
     --device /dev/kvm \
     --device /dev/snd \
     -v /tmp/.X11-unix:/tmp/.X11-unix \

@@ -43,6 +43,7 @@
 #       -e CORES=4
 #       -e EXTRA=
 #       -e INTERNAL_SSH_PORT=10022
+#       -e MAC_ADDRESS=
 #
 # Extra QEMU args:
 #
@@ -64,16 +65,18 @@ ARG VERSION=10.15.6
 ARG RANKMIRRORS
 ARG MIRROR_COUNTRY=US
 ARG MIRROR_COUNT=10
-RUN if [[ "${RANKMIRRORS}" ]]; then { pacman -Sy wget --noconfirm || pacman -Syu wget --noconfirm ; } \
-    ; wget -O ./rankmirrors "https://raw.githubusercontent.com/sickcodes/Docker-OSX/master/rankmirrors" \
-    ; wget -O- "https://www.archlinux.org/mirrorlist/?country=${MIRROR_COUNTRY:-US}&protocol=https&use_mirror_status=on" \
-    | sed -e 's/^#Server/Server/' -e '/^#/d' \
-    | head -n "$((${MIRROR_COUNT:-10}+1))" \
-    | bash ./rankmirrors --verbose --max-time 5 - > /etc/pacman.d/mirrorlist \
-    && tee -a /etc/pacman.d/mirrorlist <<< 'Server = http://mirrors.evowise.com/archlinux/$repo/os/$arch' \
-    && tee -a /etc/pacman.d/mirrorlist <<< 'Server = http://mirror.rackspace.com/archlinux/$repo/os/$arch' \
-    && tee -a /etc/pacman.d/mirrorlist <<< 'Server = https://mirror.rackspace.com/archlinux/$repo/os/$arch' \
-    && cat /etc/pacman.d/mirrorlist ; fi
+RUN if [[ "${RANKMIRRORS}" ]]; then \
+        { pacman -Sy wget --noconfirm || pacman -Syu wget --noconfirm ; } \
+        ; wget -O ./rankmirrors "https://raw.githubusercontent.com/sickcodes/Docker-OSX/master/rankmirrors" \
+        ; wget -O- "https://www.archlinux.org/mirrorlist/?country=${MIRROR_COUNTRY:-US}&protocol=https&use_mirror_status=on" \
+        | sed -e 's/^#Server/Server/' -e '/^#/d' \
+        | head -n "$((${MIRROR_COUNT:-10}+1))" \
+        | bash ./rankmirrors --verbose --max-time 5 - > /etc/pacman.d/mirrorlist \
+        && tee -a /etc/pacman.d/mirrorlist <<< 'Server = http://mirrors.evowise.com/archlinux/$repo/os/$arch' \
+        && tee -a /etc/pacman.d/mirrorlist <<< 'Server = http://mirror.rackspace.com/archlinux/$repo/os/$arch' \
+        && tee -a /etc/pacman.d/mirrorlist <<< 'Server = https://mirror.rackspace.com/archlinux/$repo/os/$arch' \
+        && cat /etc/pacman.d/mirrorlist \
+    ; fi
 
 # This fails on hub.docker.com, useful for debugging in cloud
 # RUN [[ $(egrep -c '(svm|vmx)' /proc/cpuinfo) -gt 0 ]] || { echo KVM not possible on this host && exit 1; }
@@ -81,9 +84,7 @@ RUN if [[ "${RANKMIRRORS}" ]]; then { pacman -Sy wget --noconfirm || pacman -Syu
 RUN tee -a /etc/pacman.conf <<< '[community-testing]' \
     && tee -a /etc/pacman.conf <<< 'Include = /etc/pacman.d/mirrorlist'
 
-RUN pacman -Syu --noconfirm \
-    && pacman -S sudo git vim nano alsa-utils openssh --noconfirm \
-    && yes | pacman -Scc \
+RUN pacman -Syu sudo git vim nano alsa-utils openssh --noconfirm \
     && ln -s /bin/vim /bin/vi \
     && useradd arch -p arch \
     && tee -a /etc/sudoers <<< 'arch ALL=(ALL) NOPASSWD: ALL' \
@@ -137,7 +138,7 @@ RUN touch enable-ssh.sh \
 # RUN yes | sudo pacman -Syu qemu libvirt dnsmasq virt-manager bridge-utils edk2-ovmf netctl libvirt-dbus --overwrite --noconfirm
 
 RUN yes | sudo pacman -Syu qemu libvirt dnsmasq virt-manager bridge-utils openresolv jack ebtables edk2-ovmf netctl libvirt-dbus --overwrite --noconfirm \
-    ; yes | sudo pacman -Scc
+    && yes | sudo pacman -Scc
 
 # RUN sudo systemctl enable libvirtd.service
 # RUN sudo systemctl enable virtlogd.service
@@ -177,7 +178,7 @@ RUN touch Launch.sh \
     && tee -a Launch.sh <<< '-drive id=InstallMedia,if=none,file=/home/arch/OSX-KVM/BaseSystem.img,format=qcow2 \' \
     && tee -a Launch.sh <<< '-drive id=MacHDD,if=none,file=${IMAGE_PATH:-/home/arch/OSX-KVM/mac_hdd_ng.img},format=qcow2 \' \
     && tee -a Launch.sh <<< '-device ide-hd,bus=sata.4,drive=MacHDD \' \
-    && tee -a Launch.sh <<< '-netdev user,id=net0,hostfwd=tcp::${INTERNAL_SSH_PORT:-10022}-:22,hostfwd=tcp::${SCREEN_SHARE_PORT:-5900}-:5900, -device e1000-82545em,netdev=net0,id=net0,mac=52:54:00:09:49:17 \' \
+    && tee -a Launch.sh <<< '-netdev user,id=net0,hostfwd=tcp::${INTERNAL_SSH_PORT:-10022}-:22,hostfwd=tcp::${SCREEN_SHARE_PORT:-5900}-:5900, -device e1000-82545em,netdev=net0,id=net0,mac=${MAC_ADDRESS:-52:54:00:09:49:17} \' \
     && tee -a Launch.sh <<< '-monitor stdio \' \
     && tee -a Launch.sh <<< '-vga vmware \' \
     && tee -a Launch.sh <<< '${EXTRA:-}'
@@ -187,11 +188,11 @@ RUN grep -v InstallMedia ./Launch.sh > ./Launch-nopicker.sh \
     && chmod +x ./Launch-nopicker.sh \
     && sed -i -e s/OpenCore\.qcow2/OpenCore\-nopicker\.qcow2/ ./Launch-nopicker.sh
 
+USER arch
+
 ENV USER arch
 
 ENV DISPLAY=:0.0
-
-USER arch
 
 ENV IMAGE_PATH=/home/arch/OSX-KVM/mac_hdd_ng.img
 

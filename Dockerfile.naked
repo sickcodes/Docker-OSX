@@ -55,15 +55,25 @@ RUN if [[ "${RANKMIRRORS}" ]]; then { pacman -Sy wget --noconfirm || pacman -Syu
     && tee -a /etc/pacman.d/mirrorlist <<< 'Server = https://mirror.rackspace.com/archlinux/$repo/os/$arch' \
     && cat /etc/pacman.d/mirrorlist ; fi
 
-RUN pacman -Syu xorg-server-xvfb xterm xorg-xhost xorg-xrandr xdotool sshpass scrot base-devel --noconfirm
+# For taking screenshots of the Xfvb screen, useful during development.
+ARG SCROT
 
-RUN git clone https://github.com/stolk/imcat.git \
-    && cd imcat \
-    && make \
-    && sudo cp imcat /usr/bin/imcat \
-    && touch /usr/bin/scrotcat \
-    && tee -a /usr/bin/scrotcat <<< '/usr/bin/imcat <(scrot -o /dev/stdout)' \
-    && chmod +x /usr/bin/scrotcat
+RUN pacman -Syu xorg-server-xvfb wget xterm xorg-xhost xorg-xrandr sshpass --noconfirm \
+    && if [[ "${SCROT}" ]]; then \
+        pacman -Syu scrot base-devel --noconfirm \
+        && git clone https://github.com/stolk/imcat.git \
+        && cd imcat \
+        && make \
+        && sudo cp imcat /usr/bin/imcat \
+        && touch /usr/bin/scrotcat \
+        && tee -a /usr/bin/scrotcat <<< '/usr/bin/imcat <(scrot -o /dev/stdout)' \
+        && chmod +x /usr/bin/scrotcat \
+    ; else \
+        touch /usr/bin/scrotcat \
+        && echo echo >> /usr/bin/scrotcat \
+        && chmod +x /usr/bin/scrotcat \
+    ; fi \
+    ; yes | pacman -Scc
 
 USER arch
 
@@ -79,16 +89,17 @@ RUN mkdir -p ~/.ssh \
 
 WORKDIR /home/arch/OSX-KVM
 
-ARG NOPICKER=true
-
-RUN [[ "${NOPICKER}" = true ]] && mv ./Launch-nopicker.sh ./Launch.sh
+ENV NOPICKER=true
 
 ENV DISPLAY=:99
 
 ENV IMAGE_PATH=/image
 
-CMD [[ "${DISPLAY}" = ':99' ]] && { nohup Xvfb :99 -screen 0 1920x1080x16 \
-    & until [[ "$(xrandr --query 2>/dev/null)" ]]; do sleep 1 ; done ; } \
+CMD [[ "${DISPLAY}" = ':99' ]] && { \
+        nohup Xvfb :99 -screen 0 1920x1080x16 \
+        & until [[ "$(xrandr --query 2>/dev/null)" ]]; do sleep 1 ; done \
+    ; } \
     ; sudo chown "$(id -u)":"$(id -g)" "${IMAGE_PATH}" 2>/dev/null || true \
     ; ./enable-ssh.sh \
+    ; [[ "${NOPICKER}" == true ]] && mv ./Launch-nopicker.sh ./Launch.sh \
     ; envsubst < ./Launch.sh | bash
