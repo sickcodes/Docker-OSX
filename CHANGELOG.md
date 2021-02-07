@@ -1,5 +1,10 @@
 |Version|Date|Notes|
 |---|---|---|
+|   |2021-02-07|Add MAC_ADDRESS environment variable.|
+|   |2021-02-03|Employ wget --no-verbose to avoid buffer overload in hub.docker.com.|
+|   |2021-02-03|Reduce build size.|
+|   |2021-01-27|Add OSX_COMMANDS to allow runtime commands on :auto image.|
+|   |2021-01-26|Removed most pointless VOLUME build commands.|
 |3.0|2021-01-23|Add fast mode boot straight to shell. And -v $PWD/disk.img:/image for all Dockerfiles|
 |   |2021-01-22|Add additional helm chart instructions and files.|
 |   |2021-01-15|Fix helm initial disk creation process and add installation instructions.|

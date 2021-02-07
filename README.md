@@ -66,7 +66,24 @@ docker run -it \
 
 # Wait 2-3 minutes until you drop into the shell.
 ```
+
 ```bash
+
+docker pull sickcodes/docker-osx:auto
+
+# boot to OSX shell + display (19GB)
+docker run -it \
+    --device /dev/kvm \
+    -p 50922:10022 \
+    -v /tmp/.X11-unix:/tmp/.X11-unix \
+    -e "DISPLAY=${DISPLAY:-:0.0}" \
+    sickcodes/docker-osx:auto
+
+```
+
+```bash
+
+docker pull sickcodes/docker-osx:auto
 
 # boot to OSX shell + display (19GB) + commands to run inside OSX
 docker run -it \
@@ -581,12 +598,18 @@ docker build -t docker-osx:latest \
 Pass any devices/directories to the Docker container & the QEMU arguments using the handy `-e EXTRA=` runtime options.
 
 ```bash
+# example customizations
 docker run \
     -e RAM=4 \
     -e SMP=4 \
     -e CORES=4 \
     -e EXTRA='-usb -device usb-host,hostbus=1,hostaddr=8' \
     -e INTERNAL_SSH_PORT=23 \
+    -e MAC_ADDRESS="$(xxd -c1 -p -l 6 /dev/urandom | tr '\n' ':' | cut -c1-17)" \
+    -e AUDIO_DRIVER=alsa \
+    -e IMAGE_PATH=/image \
+    -e SCREEN_SHARE_PORT=5900 \
+    -e DISPLAY=:0 \
     --device /dev/kvm \
     --device /dev/snd \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
