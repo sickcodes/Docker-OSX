@@ -622,6 +622,7 @@ docker run \
     -e IMAGE_PATH=/image \
     -e SCREEN_SHARE_PORT=5900 \
     -e DISPLAY=:0 \
+    -e NETWORKING=vmxnet3 \
     --device /dev/kvm \
     --device /dev/snd \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
