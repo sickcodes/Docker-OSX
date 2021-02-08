@@ -17,7 +17,7 @@ Docker Hub: https://hub.docker.com/r/sickcodes/docker-osx
 
 - sickcodes/docker-osx:naked - supply your own .img file
 
-- sickcodes/docker-osx:auto - 22gb image boot to OSX shell
+- sickcodes/docker-osx:auto - 17.5GB image boot to OSX shell
 
 ## Professional Support Available!
 
@@ -47,7 +47,7 @@ docker run -it \
 
 ```
 
-# Quick Start 22GB Pre-Made Image
+# Quick Start 17.5GB Pre-Made Image
 
 
 You will need around 50GB of space: half for the base image + half for your runtime image.
@@ -152,7 +152,7 @@ docker run -it \
 - Full auto mode: boot straight to OSX shell.
 - sickcodes/docker-osx:latest - original base recovery image (safe)
 - sickcodes/docker-osx:naked - supply your own .img file (safe)
-- sickcodes/docker-osx:auto - 22gb image boot to OSX shell (must trust @sickcodes)
+- sickcodes/docker-osx:auto - 17.5GB image boot to OSX shell (must trust @sickcodes)
 - Supply your own image using -v $PWD/disk.img:/image
 - Kubernetes Helm Chart. [See ./helm](https://github.com/sickcodes/Docker-OSX/tree/master/helm)
 - OSX-KVM
@@ -174,9 +174,7 @@ Upstream Credits (OSX-KVM project) among many others: https://github.com/kholia/
 # Download The Image for sickcodes/docker-osx:naked
 
 ```bash
-wget https://images2.sick.codes/mac_hdd_ng_auto.img.zst
-
-zstd -d mac_hdd_ng_auto.img.zst
+wget https://images2.sick.codes/mac_hdd_ng_auto.img
 
 docker run -it \
     --device /dev/kvm \
