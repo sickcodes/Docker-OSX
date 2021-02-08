@@ -544,7 +544,7 @@ This file builds on top of the work done by Dhiru Kholia and many others on the 
 * Shut down the VM and copy out the qcow image with `docker cp stoppedcontainer:/home/arch/OSX-KVM/mac_hdd_ng.img .`
 * Run `qemu-img check -r all mac_hdd_ng.img` to fix any errors.
 * Run `qemu-img convert -O qcow2 mac_hdd_ng.img deduped.img` and check for errors again
-* OPTIONAL: Run `qemu-img -c -O qcow2 deduped.img compressed.img` to further compress the image. This may reduce the runtime speed though, but it should reduce the size by roughly 25%.
+* OPTIONAL: Run `qemu-img convert -c -O qcow2 deduped.img compressed.img` to further compress the image. This may reduce the runtime speed though, but it should reduce the size by roughly 25%.
 * Check for errors again, and build a fresh docker image. E.g. with this Dockerfile
 
 ```

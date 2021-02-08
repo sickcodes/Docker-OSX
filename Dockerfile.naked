@@ -77,6 +77,8 @@ RUN pacman -Syu xorg-server-xvfb wget xterm xorg-xhost xorg-xrandr sshpass --noc
 
 USER arch
 
+WORKDIR /home/arch/OSX-KVM
+
 RUN mkdir -p ~/.ssh \
     && touch ~/.ssh/authorized_keys \
     && touch ~/.ssh/config \
@@ -86,8 +88,6 @@ RUN mkdir -p ~/.ssh \
     && tee -a ~/.ssh/config <<< 'Host *' \
     && tee -a ~/.ssh/config <<< '    StrictHostKeyChecking no' \
     && tee -a ~/.ssh/config <<< '    UserKnownHostsFile=/dev/null'
-
-WORKDIR /home/arch/OSX-KVM
 
 ENV NOPICKER=true
 
