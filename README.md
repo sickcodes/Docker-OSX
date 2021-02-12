@@ -27,6 +27,11 @@ Enquire at https://sick.codes/contact
 - Custom images, custom scripts, consulting (per hour available!)
 - One-on-one with you, or your development team.
 
+## Kubernetes Support
+
+Kubernetes Helm Chart & Documentation [available at ./helm](https://github.com/sickcodes/Docker-OSX/tree/master/helm)
+
+[![Artifact HUB](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/docker-osx)](https://artifacthub.io/packages/search?repo=docker-osx)
 
 #### Follow [@sickcodes on Twitter](https://twitter.com/sickcodes) for updates or feature requests!
 

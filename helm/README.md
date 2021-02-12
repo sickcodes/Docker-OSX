@@ -1,5 +1,8 @@
 # docker-osx
 
+Available now on Artifact HUB
+[![Artifact HUB](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/docker-osx)](https://artifacthub.io/packages/search?repo=docker-osx)
+
 ## Information
 
 This installs `docker-osx` in Kubernetes.

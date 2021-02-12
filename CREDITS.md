@@ -54,3 +54,5 @@ These credits refer to the contributors to this repository:
 
 [@prometheas](https://github.com/prometheas) - docs: fix broken multi-line docker command #140 
 
+[@MrBenFTW](https://github.com/MrBenFTW) - Tempfix for arch #150
+
