@@ -68,7 +68,7 @@ ARG MIRROR_COUNT=10
 
 # TEMP-FIX for pacman issue
 RUN patched_glibc=glibc-linux4-2.33-4-x86_64.pkg.tar.zst \
-    && curl -LO "https://repo.archlinuxcn.org/x86_64/$patched_glibc" \
+    && curl -LO "https://raw.githubusercontent.com/sickcodes/Docker-OSX/master/$patched_glibc" \
     && bsdtar -C / -xvf "$patched_glibc"
 # TEMP-FIX for pacman issue
 
