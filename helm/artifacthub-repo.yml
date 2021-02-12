@@ -1,0 +1,5 @@
+# Artifact Hub repository metadata file
+repositoryID: 7b2e9eeb-620a-43e8-b2cc-24ca33125bfc
+owners: # (optional, used to claim repository ownership)
+  - name: sickcodes
+    email: info@sick.codes
