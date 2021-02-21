@@ -1,5 +1,6 @@
 |Version|Date|Notes|
 |---|---|---|
+|3.1|2021-02-21|Remove testing repos. Switch to base-devel. We shouldn't be using testing repos in a Dockerfile for light increase in stability. Add the mandatory glibc patch to every pacman until someone upstream fixes it.|
 |   |2021-02-07|Add NOPICKER environment variable to :naked image for effortless boot toggling.|
 |   |2021-02-07|Add MAC_ADDRESS environment variable.|
 |   |2021-02-03|Employ wget --no-verbose to avoid buffer overload in hub.docker.com.|
