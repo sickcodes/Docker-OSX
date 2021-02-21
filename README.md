@@ -153,7 +153,7 @@ docker run -it \
     sickcodes/docker-osx:naked
 ```
 
-# Features In Docker-OSX v3.0
+# Features In Docker-OSX v3.1
 - Full auto mode: boot straight to OSX shell.
 - sickcodes/docker-osx:latest - original base recovery image (safe)
 - sickcodes/docker-osx:naked - supply your own .img file (safe)

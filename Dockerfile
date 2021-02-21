@@ -8,7 +8,7 @@
 # Repo:             https://github.com/sickcodes/Docker-OSX/
 # Title:            Mac on Docker (Docker-OSX)
 # Author:           Sick.Codes https://sick.codes/
-# Version:          3.0
+# Version:          3.1
 # License:          GPLv3+
 #
 # All credits for OSX-KVM and the rest at @Kholia's repo: https://github.com/kholia/osx-kvm
@@ -50,7 +50,7 @@
 #       docker run ... -e EXTRA="-usb -device usb-host,hostbus=1,hostaddr=8" ...
 #       # you will also need to pass the device to the container
 
-FROM archlinux:latest
+FROM archlinux:base-devel
 
 MAINTAINER 'https://sick.codes' <https://sick.codes>
 
@@ -68,8 +68,8 @@ ARG MIRROR_COUNT=10
 
 # TEMP-FIX for pacman issue
 RUN patched_glibc=glibc-linux4-2.33-4-x86_64.pkg.tar.zst \
-    && curl -LO "https://raw.githubusercontent.com/sickcodes/Docker-OSX/master/$patched_glibc" \
-    && bsdtar -C / -xvf "$patched_glibc"
+    && curl -LO "https://raw.githubusercontent.com/sickcodes/Docker-OSX/master/${patched_glibc}" \
+    && bsdtar -C / -xvf "${patched_glibc}" || echo "Everything is fine."
 # TEMP-FIX for pacman issue
 
 RUN if [[ "${RANKMIRRORS}" ]]; then \
@@ -88,15 +88,21 @@ RUN if [[ "${RANKMIRRORS}" ]]; then \
 # This fails on hub.docker.com, useful for debugging in cloud
 # RUN [[ $(egrep -c '(svm|vmx)' /proc/cpuinfo) -gt 0 ]] || { echo KVM not possible on this host && exit 1; }
 
-RUN tee -a /etc/pacman.conf <<< '[community-testing]' \
-    && tee -a /etc/pacman.conf <<< 'Include = /etc/pacman.d/mirrorlist'
+# RUN tee -a /etc/pacman.conf <<< '[community-testing]' \
+#     && tee -a /etc/pacman.conf <<< 'Include = /etc/pacman.d/mirrorlist'
 
-RUN pacman -Syu sudo git vim nano alsa-utils openssh --noconfirm \
+RUN pacman -Syu git vim nano alsa-utils openssh --noconfirm \
     && ln -s /bin/vim /bin/vi \
     && useradd arch -p arch \
     && tee -a /etc/sudoers <<< 'arch ALL=(ALL) NOPASSWD: ALL' \
     && mkdir /home/arch \
     && chown arch:arch /home/arch
+
+# TEMP-FIX for pacman issue
+RUN patched_glibc=glibc-linux4-2.33-4-x86_64.pkg.tar.zst \
+    && curl -LO "https://raw.githubusercontent.com/sickcodes/Docker-OSX/master/${patched_glibc}" \
+    && bsdtar -C / -xvf "${patched_glibc}" || echo "Everything is fine."
+# TEMP-FIX for pacman issue
 
 # allow ssh to container
 RUN mkdir -m 700 /root/.ssh
@@ -146,6 +152,12 @@ RUN touch enable-ssh.sh \
 
 RUN yes | sudo pacman -Syu qemu libvirt dnsmasq virt-manager bridge-utils openresolv jack ebtables edk2-ovmf netctl libvirt-dbus --overwrite --noconfirm \
     && yes | sudo pacman -Scc
+
+# TEMP-FIX for pacman issue
+RUN patched_glibc=glibc-linux4-2.33-4-x86_64.pkg.tar.zst \
+    && curl -LO "https://raw.githubusercontent.com/sickcodes/Docker-OSX/master/${patched_glibc}" \
+    && bsdtar -C / -xvf "${patched_glibc}" || echo "Everything is fine."
+# TEMP-FIX for pacman issue
 
 # RUN sudo systemctl enable libvirtd.service
 # RUN sudo systemctl enable virtlogd.service
