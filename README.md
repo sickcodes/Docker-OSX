@@ -272,6 +272,8 @@ sudo yum install libvirt qemu-kvm
 sudo systemctl enable libvirtd.service
 sudo systemctl enable virtlogd.service
 
+echo 1 | sudo tee /sys/module/kvm/parameters/ignore_msrs
+
 sudo modprobe kvm
 
 # reboot
