@@ -219,12 +219,15 @@ ENV IMAGE_PATH=/home/arch/OSX-KVM/mac_hdd_ng.img
 ENV NETWORKING=e1000-82545em
 # ENV NETWORKING=vmxnet3
 
+ENV NOPICKER=false
+
 VOLUME ["/tmp/.X11-unix"]
 
 CMD case "$(file --brief /image)" in \
         QEMU*) export IMAGE_PATH=/image && sudo chown "$(id -u)":"$(id -g)" "${IMAGE_PATH}" 2>/dev/null || true;; \
         directory*) export IMAGE_PATH=/home/arch/OSX-KVM/mac_hdd_ng.img;; \
     esac \
+    ; [[ "${NOPICKER}" == true ]] && mv ./Launch-nopicker.sh ./Launch.sh \
     ; ./enable-ssh.sh && envsubst < ./Launch.sh | bash
 
 # virt-manager mode: eta son

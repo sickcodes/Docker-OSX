@@ -191,6 +191,14 @@ docker run -it \
 
 ```
 
+# Internet Speeds
+
+### Slow internet but iMessage & iCloud compatability
+`-e NETWORKING=e1000-82545em`
+
+### FAST internet but not compatable with iMessage & iCloud
+`-e NETWORKING=vmxnet3`
+
 ### Other cool Docker-QEMU based projects:
 
 [Run iOS in a Docker with Docker-eyeOS](https://github.com/sickcodes/Docker-eyeOS) - [https://github.com/sickcodes/Docker-eyeOS](https://github.com/sickcodes/Docker-eyeOS)
@@ -517,6 +525,8 @@ docker start newcontainerid
 ```
 
 # DESTROY: Wipe old images to free disk space
+
+The easiest way to clean out your entire Docker (ALL images, layers, and containers) is to `sudo rm -rf /var/lib/docker`
 
 This is useful for getting disk space back.
 
