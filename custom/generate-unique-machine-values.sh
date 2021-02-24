@@ -93,17 +93,17 @@ done
 
 
 build_mac_serial () {
-    MACINFOPKG_VERSION="${MACINFOPKG_VERSION:=2.1.2}"
+    export MACINFOPKG_VERSION="${MACINFOPKG_VERSION:=2.1.2}"
     wget -O "${TARBALL:=./MacInfoPkg.tar.gz}" \
-        "https://github.com/acidanthera/MacInfoPkg/archive/${MACINFOPKG_VERSION:=2.1.2}.tar.gz"
+        "https://github.com/acidanthera/MacInfoPkg/archive/${MACINFOPKG_VERSION}.tar.gz"
     tar -xzvf "${TARBALL}"
     cd "./MacInfoPkg-${MACINFOPKG_VERSION}/macserial" \
-        && ./build.tool 2>/dev/null \
+        && ./build.tool \
         && cd -
     mv "./MacInfoPkg-${MACINFOPKG_VERSION}/macserial/bin/macserial" .
     rm -f "${TARBALL}"
     rm -rf "./MacInfoPkg-${MACINFOPKG_VERSION}/"
-    chmod +x macserial
+    chmod +x ./macserial
     stat ./macserial
 }
 
@@ -156,10 +156,13 @@ EOF
 
 main () {
     # setting default variables if there are no options
+    export DEVICE_MODEL="${DEVICE_MODEL:=iMacPro1,1}"
+    export SERIAL_SET_COUNT="${SERIAL_SET_COUNT:=1}"
+    export OUTPUT_DIRECTORY="${OUTPUT_DIRECTORY:=.}"
     cat <<EOF
-DEVICE_MODEL:       ${DEVICE_MODEL:=iMacPro1,1}
-SERIAL_SET_COUNT:   ${SERIAL_SET_COUNT:=1}
-OUTPUT_DIRECTORY:   ${OUTPUT_DIRECTORY:=.}
+DEVICE_MODEL:       ${DEVICE_MODEL}
+SERIAL_SET_COUNT:   ${SERIAL_SET_COUNT}
+OUTPUT_DIRECTORY:   ${OUTPUT_DIRECTORY}
 EOF
     [[ -d "${OUTPUT_DIRECTORY}" ]] || mkdir -p "${OUTPUT_DIRECTORY}"
     [[ -e ./macserial ]] || build_mac_serial

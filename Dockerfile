@@ -91,7 +91,7 @@ RUN if [[ "${RANKMIRRORS}" ]]; then \
 # RUN tee -a /etc/pacman.conf <<< '[community-testing]' \
 #     && tee -a /etc/pacman.conf <<< 'Include = /etc/pacman.d/mirrorlist'
 
-RUN pacman -Syu git vim nano alsa-utils openssh --noconfirm \
+RUN pacman -Syu git zip vim nano alsa-utils openssh --noconfirm \
     && ln -s /bin/vim /bin/vi \
     && useradd arch -p arch \
     && tee -a /etc/sudoers <<< 'arch ALL=(ALL) NOPASSWD: ALL' \
