@@ -18,14 +18,16 @@ General options:
     --model, -m <model>             Device model, e.g. 'iMacPro1,1'
     --csv <filename>                Optionally change the CSV output filename.
     --tsv <filename>                Optionally change the TSV output filename.
+    --output-bootdisk <filename>    Optionally change the bootdisk qcow output filename. Useless when count > 1.
+    --output-env <filename>         Optionally change the bootdisk env filename. Useless when count > 1.
     --output-dir <directory>        Optionally change the script output location.
 
     --help, -h, help                Display this help and exit
     --plists                        Create corresponding config.plists for each serial set.
-    --qcows                         [SLOW] Create corresponding boot disk images for each serial set.
+    --bootdisks                     [SLOW] Create corresponding boot disk images for each serial set.
 
 Example:
-    ./generate-unique-machine-values.sh --count 1 --model='iMacPro1,1' --plists --qcows
+    ./generate-unique-machine-values.sh --count 1 --model='iMacPro1,1' --plists --bootdisks
 
         The above example will generate a
             - serial
@@ -100,6 +102,26 @@ while (( "$#" )); do
                 shift
             ;;
 
+    --output-bootdisk=* )
+                export OUTPUT_QCOW="${1#*=}"
+                shift
+            ;;
+    --output-bootdisk* )
+                export OUTPUT_QCOW="${2}"
+                shift
+                shift
+            ;;
+
+    --output-env=* )
+                export OUTPUT_ENV="${1#*=}"
+                shift
+            ;;
+    --output-env* )
+                export OUTPUT_ENV="${2}"
+                shift
+                shift
+            ;;
+
     --model=* | -m=* )
                 export DEVICE_MODEL="${1#*=}"
                 shift
@@ -114,7 +136,7 @@ while (( "$#" )); do
                 export CREATE_PLISTS=1
                 shift
             ;;
-    --qcows ) 
+    --bootdisks ) 
                 export CREATE_QCOWS=1
                 shift
             ;;
@@ -199,8 +221,9 @@ generate_serial_sets () {
                 printf "${DEVICE_MODEL}\t${Serial}\t${BoardSerial}\t${SmUUID}\t${MacAddress}\n" >> "${TSV_SERIAL_SETS_FILE}"
             fi 
 
-            touch "${OUTPUT_DIRECTORY}/envs/${Serial}.env.sh"
-            cat <<EOF > "${OUTPUT_DIRECTORY}/envs/${Serial}.env.sh"
+            OUTPUT_ENV_FILE="${OUTPUT_ENV:-"${OUTPUT_DIRECTORY}/envs/${Serial}.env.sh"}"
+            touch "${OUTPUT_ENV_FILE}"
+            cat <<EOF > "${OUTPUT_ENV_FILE}"
 export Type=${DEVICE_MODEL}
 export Serial=${Serial}
 export BoardSerial=${BoardSerial}
@@ -208,10 +231,10 @@ export SmUUID=${SmUUID}
 export MacAddress=${MacAddress}
 EOF
 
-            # plist required for qcows, so create anyway.
+            # plist required for bootdisks, so create anyway.
             if [[ "${CREATE_PLISTS}" ]] || [[ "${CREATE_QCOWS}" ]]; then
                 mkdir -p "${OUTPUT_DIRECTORY}/plists"
-                source "${OUTPUT_DIRECTORY}/envs/${Serial}.env.sh"
+                source "${OUTPUT_ENV_FILE}"
                 ROM_VALUE="${MacAddress//\:/}"
                 ROM_VALUE="${ROM_VALUE,,}"
                 sed -e s/{{DEVICE_MODEL}}/"${Type}"/g \
@@ -226,7 +249,7 @@ EOF
                 mkdir -p "${OUTPUT_DIRECTORY}/qcows"
                 ./opencore-image-ng.sh \
                     --cfg "${OUTPUT_DIRECTORY}/plists/${Serial}.config.plist" \
-                    --img "${OUTPUT_DIRECTORY}/qcows/${Serial}.OpenCore-nopicker.qcow2" || exit 1
+                    --img "${OUTPUT_QCOW:-${OUTPUT_DIRECTORY}/qcows/${Serial}.OpenCore-nopicker.qcow2}" || exit 1
             fi
 
         done

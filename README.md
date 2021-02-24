@@ -499,30 +499,7 @@ sudo mv somedir/mac_hdd_ng.img .
 
 # Use an Old Docker-OSX Disk in a Fresh Container (Replication)
 
-You do not have to reinstall everything, you can simply:
-
-- start a new container
-
-- overwrite the .img in the new container with your big old one
-
-```bash
-
-# start a new docker-osx container
-# you can start with ssh, without, or vnc, because they are all interchangable.
-
-# get the NEW container id
-docker ps
-
-# docker cp your OLD disk into the NEW container
-docker cp ./mac_hdd_ng.img newcontainerid:/home/arch/OSX-KVM/mac_hdd_ng.img
-
-# kill the NEW container
-docker kill newcontainerid
-
-# start the NEW container and it just works
-docker start newcontainerid
-
-```
+[Use the sickcodes/docker-osx:naked image.](https://github.com/sickcodes/Docker-OSX/tree/custom-identity#quick-start-own-image)
 
 # DESTROY: Wipe old images to free disk space
 
