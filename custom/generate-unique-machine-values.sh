@@ -13,26 +13,37 @@
 
 help_text="Usage: generate-unique-machine-values.sh
 
-Example:
-    ./generate-unique-machine-values.sh --count 1 --model="iMacPro1,1"
-
 General options:
     --count, -n, -c <count>         Number of serials to generate
-    --model, -m <model>             Device model, e.g. "iMacPro1,1"
+    --model, -m <model>             Device model, e.g. 'iMacPro1,1'
     --csv <filename>                Optionally change the CSV output filename.
+    --tsv <filename>                Optionally change the TSV output filename.
     --output-dir <directory>        Optionally change the script output location.
 
     --help, -h, help                Display this help and exit
     --plists                        Create corresponding config.plists for each serial set.
     --qcows                         [SLOW] Create corresponding boot disk images for each serial set.
 
+Example:
+    ./generate-unique-machine-values.sh --count 1 --model='iMacPro1,1' --plists --qcows
+
+        The above example will generate a
+            - serial
+            - board serial
+            - uuid
+            - MAC address
+            - ROM value based on lowercase MAC address
+            - Boot disk qcow image.
+            - config.plist
+
 Notes:
-    - Default is 1 serial for "iMacPro1,1" in the current working directory.
+    - Default is 1 serial for 'iMacPro1,1' in the current working directory.
+    - Default output is CSV, whereas setting the TSV option will output as tab-separated.
     - CSV is double quoted.
     - If you do not set a CSV filename, the output will be sent to the output-dir.
     - If you do not set an output-dir, the current directory will be the output directory.
-    - Sourcable environment variable shell files will be written to a folder, "envs".
-    - config.plist files will be written to a folder, "plists".
+    - Sourcable environment variable shell files will be written to a folder, 'envs'.
+    - config.plist files will be written to a folder, 'plists'.
 
 Author:  Sick.Codes https://sick.codes/
 Project: https://github.com/sickcodes/Docker-OSX/
@@ -65,6 +76,16 @@ while (( "$#" )); do
             ;;
     --csv* )
                 export CSV_OUTPUT_FILENAME="${2}"
+                shift
+                shift
+            ;;
+
+    --tsv=* )
+                export TSV_OUTPUT_FILENAME="${1#*=}"
+                shift
+            ;;
+    --tsv* )
+                export TSV_OUTPUT_FILENAME="${2}"
                 shift
                 shift
             ;;
@@ -127,15 +148,13 @@ download_vendor_mac_addresses () {
 }
 
 download_qcow_efi_folder () {
-    git clone https://github.com/kholia/OSX-KVM.git
+    git clone --depth 1 https://github.com/kholia/OSX-KVM.git
     cp -ra ./OSX-KVM/OpenCore-Catalina/EFI .
     mkdir -p ./EFI/OC/Resources
     # clone some Apple drivers
-    git clone https://github.com/acidanthera/OcBinaryData.git
-
+    git clone --depth 1 https://github.com/acidanthera/OcBinaryData.git
     # copy said drivers into EFI/OC/Resources
     cp -a ./OcBinaryData/Resources/* ./EFI/OC/Resources
-
     # EFI Shell commands
     touch startup.nsh && echo 'fs0:\EFI\BOOT\BOOTx64.efi' > startup.nsh
 }
@@ -147,8 +166,9 @@ generate_serial_sets () {
     export DEVICE_MODEL="${DEVICE_MODEL:=iMacPro1,1}"
     export VENDOR_REGEX="${VENDOR_REGEX:=Apple, Inc.}"
     
-    if [[ "${CSV_OUTPUT_FILENAME}" ]]; then
-        export SERIAL_SETS_FILE="${CSV_OUTPUT_FILENAME}"
+    if [[ "${CSV_OUTPUT_FILENAME}" ]] || [[ "${TSV_OUTPUT_FILENAME}" ]]; then
+        [[ ${CSV_OUTPUT_FILENAME} ]] && export CSV_SERIAL_SETS_FILE="${CSV_OUTPUT_FILENAME}"
+        [[ ${TSV_OUTPUT_FILENAME} ]] && export TSV_SERIAL_SETS_FILE="${TSV_OUTPUT_FILENAME}"
     else
         export SERIAL_SETS_FILE="${OUTPUT_DIRECTORY}/serial_sets-${DATE_NOW}.csv"
     fi
@@ -169,7 +189,16 @@ generate_serial_sets () {
             RANDOM_MAC_PREFIX="$(cut -d$'\t' -f1 <<< "${RANDOM_MAC_PREFIX}")"
             MacAddress="$(printf "${RANDOM_MAC_PREFIX}:%02X:%02X:%02X" $[RANDOM%256] $[RANDOM%256] $[RANDOM%256])"
 
-            echo "\"${DEVICE_MODEL}\",\"${Serial}\",\"${BoardSerial}\",\"${SmUUID}\",\"${MacAddress}\"" >> "${SERIAL_SETS_FILE}"
+            # append to csv file
+            if [[ "${CSV_SERIAL_SETS_FILE}" ]]; then
+                echo "\"${DEVICE_MODEL}\",\"${Serial}\",\"${BoardSerial}\",\"${SmUUID}\",\"${MacAddress}\"" >> "${CSV_SERIAL_SETS_FILE}"
+            fi
+
+            # append to tsv file
+            if [[ "${TSV_SERIAL_SETS_FILE}" ]]; then
+                printf "${DEVICE_MODEL}\t${Serial}\t${BoardSerial}\t${SmUUID}\t${MacAddress}\n" >> "${TSV_SERIAL_SETS_FILE}"
+            fi 
+
             touch "${OUTPUT_DIRECTORY}/envs/${Serial}.env.sh"
             cat <<EOF > "${OUTPUT_DIRECTORY}/envs/${Serial}.env.sh"
 export Type=${DEVICE_MODEL}
@@ -179,8 +208,12 @@ export SmUUID=${SmUUID}
 export MacAddress=${MacAddress}
 EOF
 
+            # plist required for qcows, so create anyway.
             if [[ "${CREATE_PLISTS}" ]] || [[ "${CREATE_QCOWS}" ]]; then
                 mkdir -p "${OUTPUT_DIRECTORY}/plists"
+                source "${OUTPUT_DIRECTORY}/envs/${Serial}.env.sh"
+                ROM_VALUE="${MacAddress//\:/}"
+                ROM_VALUE="${ROM_VALUE,,}"
                 sed -e s/{{DEVICE_MODEL}}/"${Type}"/g \
                     -e s/{{SERIAL_OLD}}/"${Serial}"/g \
                     -e s/{{BOARD_SERIAL_OLD}}/"${BoardSerial}"/g \
@@ -198,7 +231,13 @@ EOF
 
         done
 
-    cat <(echo "Type,Serial,BoardSerial,SmUUID,MacAddress") "${SERIAL_SETS_FILE}"
+        [[ -e "${CSV_SERIAL_SETS_FILE}" ]] && \
+            cat <(echo "Type,Serial,BoardSerial,SmUUID,MacAddress") "${CSV_SERIAL_SETS_FILE}"
+
+
+        [[ -e "${TSV_SERIAL_SETS_FILE}" ]] && \
+            cat <(printf "Type\tSerial\tBoardSerial\tSmUUID\tMacAddress\n") "${TSV_SERIAL_SETS_FILE}"
+    
 }
 
 main () {
