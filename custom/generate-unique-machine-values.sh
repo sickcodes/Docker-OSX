@@ -21,7 +21,10 @@ General options:
     --model, -m <model>             Device model, e.g. "iMacPro1,1"
     --csv <filename>                Optionally change the CSV output filename.
     --output-dir <directory>        Optionally change the script output location.
+
     --help, -h, help                Display this help and exit
+    --plists                        Create corresponding config.plists for each serial set.
+    --qcows                         [SLOW] Create corresponding boot disk images for each serial set.
 
 Notes:
     - Default is 1 serial for "iMacPro1,1" in the current working directory.
@@ -29,12 +32,14 @@ Notes:
     - If you do not set a CSV filename, the output will be sent to the output-dir.
     - If you do not set an output-dir, the current directory will be the output directory.
     - Sourcable environment variable shell files will be written to a folder, "envs".
+    - config.plist files will be written to a folder, "plists".
 
 Author:  Sick.Codes https://sick.codes/
 Project: https://github.com/sickcodes/Docker-OSX/
 "
 
 MACINFOPKG_VERSION=2.1.2
+PLIST_MASTER=config-nopicker-custom.plist
 
 # gather arguments
 while (( "$#" )); do
@@ -84,6 +89,15 @@ while (( "$#" )); do
                 shift
             ;;
 
+    --plists )
+                export CREATE_PLISTS=1
+                shift
+            ;;
+    --qcows ) 
+                export CREATE_QCOWS=1
+                shift
+            ;;
+
     *)
                 echo "Invalid option. Running with default values..."
                 shift
@@ -111,6 +125,21 @@ download_vendor_mac_addresses () {
     # download the MAC Address vendor list
     [[ -e "${MAC_ADDRESSES_FILE:=vendor_macs.tsv}" ]] || wget -O "${MAC_ADDRESSES_FILE}" https://gitlab.com/wireshark/wireshark/-/raw/master/manuf
 }
+
+download_qcow_efi_folder () {
+    git clone https://github.com/kholia/OSX-KVM.git
+    cp -ra ./OSX-KVM/OpenCore-Catalina/EFI .
+    mkdir -p ./EFI/OC/Resources
+    # clone some Apple drivers
+    git clone https://github.com/acidanthera/OcBinaryData.git
+
+    # copy said drivers into EFI/OC/Resources
+    cp -a ./OcBinaryData/Resources/* ./EFI/OC/Resources
+
+    # EFI Shell commands
+    touch startup.nsh && echo 'fs0:\EFI\BOOT\BOOTx64.efi' > startup.nsh
+}
+
 
 generate_serial_sets () {
     mkdir -p "${OUTPUT_DIRECTORY}/envs"
@@ -149,7 +178,25 @@ export BoardSerial=${BoardSerial}
 export SmUUID=${SmUUID}
 export MacAddress=${MacAddress}
 EOF
-    done
+
+            if [[ "${CREATE_PLISTS}" ]] || [[ "${CREATE_QCOWS}" ]]; then
+                mkdir -p "${OUTPUT_DIRECTORY}/plists"
+                sed -e s/{{DEVICE_MODEL}}/"${Type}"/g \
+                    -e s/{{SERIAL_OLD}}/"${Serial}"/g \
+                    -e s/{{BOARD_SERIAL_OLD}}/"${BoardSerial}"/g \
+                    -e s/{{SYSTEM_UUID_OLD}}/"${SmUUID}"/g \
+                    -e s/{{ROM_OLD}}/"${ROM_VALUE}"/g \
+                    "${PLIST_MASTER}" > "${OUTPUT_DIRECTORY}/plists/${Serial}.config.plist" || exit 1
+            fi
+
+            if [[ "${CREATE_QCOWS}" ]]; then
+                mkdir -p "${OUTPUT_DIRECTORY}/qcows"
+                ./opencore-image-ng.sh \
+                    --cfg "${OUTPUT_DIRECTORY}/plists/${Serial}.config.plist" \
+                    --img "${OUTPUT_DIRECTORY}/qcows/${Serial}.OpenCore-nopicker.qcow2" || exit 1
+            fi
+
+        done
 
     cat <(echo "Type,Serial,BoardSerial,SmUUID,MacAddress") "${SERIAL_SETS_FILE}"
 }
@@ -167,6 +214,7 @@ EOF
     [[ -d "${OUTPUT_DIRECTORY}" ]] || mkdir -p "${OUTPUT_DIRECTORY}"
     [[ -e ./macserial ]] || build_mac_serial
     download_vendor_mac_addresses
+    download_qcow_efi_folder
     generate_serial_sets
     echo "${SERIAL_SETS_FILE}"    
 }
