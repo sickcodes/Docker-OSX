@@ -702,19 +702,19 @@
 			<key>AdviseWindows</key>
 			<false/>
 			<key>MLB</key>
-			<string>{{BOARD_SERIAL_OLD}}</string>
+			<string>{{BOARD_SERIAL}}</string>
 			<key>ROM</key>
 			<data>
-			{{ROM_OLD}}
+			{{ROM}}
 			</data>
 			<key>SpoofVendor</key>
 			<true/>
 			<key>SystemProductName</key>
 			<string>{{DEVICE_MODEL}}</string>
 			<key>SystemSerialNumber</key>
-			<string>{{SERIAL_OLD}}</string>
+			<string>{{SERIAL}}</string>
 			<key>SystemUUID</key>
-			<string>{{SYSTEM_UUID_OLD}}</string>
+			<string>{{UUID}}</string>
 		</dict>
 		<key>UpdateDataHub</key>
 		<true/>

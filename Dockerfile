@@ -174,6 +174,18 @@ RUN python fetch-macOS.py --version "${VERSION}" \
 
 WORKDIR /home/arch/OSX-KVM
 
+ARG LINUX=true
+
+# required to use libguestfs inside a docker container, to create bootdisks for docker-osx on-the-fly
+RUN if [[ "${LINUX}" == true ]]; then \
+        sudo pacman -Syu linux libguestfs --noconfirm \
+        && patched_glibc=glibc-linux4-2.33-4-x86_64.pkg.tar.zst \
+        && curl -LO "https://raw.githubusercontent.com/sickcodes/Docker-OSX/master/${patched_glibc}" \
+        && bsdtar -C / -xvf "${patched_glibc}" || echo "Everything is fine." \
+    ; fi
+
+RUN git clone https://github.com/sickcodes/Docker-OSX.git
+
 RUN touch Launch.sh \
     && chmod +x ./Launch.sh \
     && tee -a Launch.sh <<< '#!/bin/sh' \
@@ -183,7 +195,7 @@ RUN touch Launch.sh \
     && tee -a Launch.sh <<< 'exec qemu-system-x86_64 -m ${RAM:-8}000 \' \
     && tee -a Launch.sh <<< '-cpu Penryn,vendor=GenuineIntel,+invtsc,vmware-cpuid-freq=on,+pcid,+ssse3,+sse4.2,+popcnt,+avx,+aes,+xsave,+xsaveopt,check \' \
     && tee -a Launch.sh <<< '-machine q35,accel=kvm:tcg \' \
-    && tee -a Launch.sh <<< '-smp ${SMP:-4},cores=${CORES:-4} \' \
+    && tee -a Launch.sh <<< '-smp ${CPU_STRING:-${SMP:-4},cores=${CORES:-4}} \' \
     && tee -a Launch.sh <<< '-usb -device usb-kbd -device usb-tablet \' \
     && tee -a Launch.sh <<< '-device isa-applesmc,osk=ourhardworkbythesewordsguardedpleasedontsteal\(c\)AppleComputerInc \' \
     && tee -a Launch.sh <<< '-drive if=pflash,format=raw,readonly,file=/home/arch/OSX-KVM/OVMF_CODE.fd \' \
@@ -191,7 +203,7 @@ RUN touch Launch.sh \
     && tee -a Launch.sh <<< '-smbios type=2 \' \
     && tee -a Launch.sh <<< '-audiodev ${AUDIO_DRIVER:-alsa},id=hda -device ich9-intel-hda -device hda-duplex,audiodev=hda \' \
     && tee -a Launch.sh <<< '-device ich9-ahci,id=sata \' \
-    && tee -a Launch.sh <<< '-drive id=OpenCoreBoot,if=none,snapshot=on,format=qcow2,file=/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore.qcow2 \' \
+    && tee -a Launch.sh <<< '-drive id=OpenCoreBoot,if=none,snapshot=on,format=qcow2,file=${BOOTDISK:-/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore.qcow2} \' \
     && tee -a Launch.sh <<< '-device ide-hd,bus=sata.2,drive=OpenCoreBoot \' \
     && tee -a Launch.sh <<< '-device ide-hd,bus=sata.3,drive=InstallMedia \' \
     && tee -a Launch.sh <<< '-drive id=InstallMedia,if=none,file=/home/arch/OSX-KVM/BaseSystem.img,format=qcow2 \' \

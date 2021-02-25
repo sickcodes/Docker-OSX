@@ -89,21 +89,22 @@ function fish_fini() {
 	fish umount-all
 }
 
+# disabled by sick.codes to allow unattended image overwrites
 ######################################################################
 # sanity checks
 
-if test ! -f "$cfg"; then
-	echo "ERROR: cfg not found: $cfg"
-	exit 1
-fi
-if test -f "$img"; then
-	if test "$allow_override" = "yes"; then
-		rm -f "$img"
-	else
-		echo "ERROR: image exists: $img"
-		exit 1
-	fi
-fi
+# if test ! -f "$cfg"; then
+# 	echo "ERROR: cfg not found: $cfg"
+# 	exit 1
+# fi
+# if test -f "$img"; then
+# 	if test "$allow_override" = "yes"; then
+# 		rm -f "$img"
+# 	else
+# 		echo "ERROR: image exists: $img"
+# 		exit 1
+# 	fi
+# fi
 
 ######################################################################
 # go!

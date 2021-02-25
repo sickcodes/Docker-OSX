@@ -201,65 +201,65 @@ generate_serial_sets () {
     ./macserial \
         --num "${SERIAL_SET_COUNT:=1}" \
         --model "${DEVICE_MODEL}" \
-        | while IFS='\ \|\ ' read -r Serial BoardSerial; do
+        | while IFS='\ \|\ ' read -r SERIAL BOARD_SERIAL; do
             # make a uuid...
-            SmUUID="$(uuidgen)"
-            SmUUID="${SmUUID^^}"
+            UUID="$(uuidgen)"
+            UUID="${UUID^^}"
 
             # get a random vendor specific MAC address.
             RANDOM_MAC_PREFIX="$(grep -e "${VENDOR_REGEX}" < "${MAC_ADDRESSES_FILE:=vendor_macs.tsv}" | sort --random-sort | head -n1)"
             RANDOM_MAC_PREFIX="$(cut -d$'\t' -f1 <<< "${RANDOM_MAC_PREFIX}")"
-            MacAddress="$(printf "${RANDOM_MAC_PREFIX}:%02X:%02X:%02X" $[RANDOM%256] $[RANDOM%256] $[RANDOM%256])"
+            MAC_ADDRESS="$(printf "${RANDOM_MAC_PREFIX}:%02X:%02X:%02X" $[RANDOM%256] $[RANDOM%256] $[RANDOM%256])"
 
             # append to csv file
             if [[ "${CSV_SERIAL_SETS_FILE}" ]]; then
-                echo "\"${DEVICE_MODEL}\",\"${Serial}\",\"${BoardSerial}\",\"${SmUUID}\",\"${MacAddress}\"" >> "${CSV_SERIAL_SETS_FILE}"
+                echo "\"${DEVICE_MODEL}\",\"${SERIAL}\",\"${BOARD_SERIAL}\",\"${UUID}\",\"${MAC_ADDRESS}\"" >> "${CSV_SERIAL_SETS_FILE}"
             fi
 
             # append to tsv file
             if [[ "${TSV_SERIAL_SETS_FILE}" ]]; then
-                printf "${DEVICE_MODEL}\t${Serial}\t${BoardSerial}\t${SmUUID}\t${MacAddress}\n" >> "${TSV_SERIAL_SETS_FILE}"
+                printf "${DEVICE_MODEL}\t${SERIAL}\t${BOARD_SERIAL}\t${UUID}\t${MAC_ADDRESS}\n" >> "${TSV_SERIAL_SETS_FILE}"
             fi 
 
-            OUTPUT_ENV_FILE="${OUTPUT_ENV:-"${OUTPUT_DIRECTORY}/envs/${Serial}.env.sh"}"
+            OUTPUT_ENV_FILE="${OUTPUT_ENV:-"${OUTPUT_DIRECTORY}/envs/${SERIAL}.env.sh"}"
             touch "${OUTPUT_ENV_FILE}"
             cat <<EOF > "${OUTPUT_ENV_FILE}"
-export Type=${DEVICE_MODEL}
-export Serial=${Serial}
-export BoardSerial=${BoardSerial}
-export SmUUID=${SmUUID}
-export MacAddress=${MacAddress}
+export DEVICE_MODEL="${DEVICE_MODEL}"
+export SERIAL="${SERIAL}"
+export BOARD_SERIAL="${BOARD_SERIAL}"
+export UUID="${UUID}"
+export MAC_ADDRESS="${MAC_ADDRESS}"
 EOF
 
             # plist required for bootdisks, so create anyway.
             if [[ "${CREATE_PLISTS}" ]] || [[ "${CREATE_QCOWS}" ]]; then
                 mkdir -p "${OUTPUT_DIRECTORY}/plists"
                 source "${OUTPUT_ENV_FILE}"
-                ROM_VALUE="${MacAddress//\:/}"
+                ROM_VALUE="${MAC_ADDRESS//\:/}"
                 ROM_VALUE="${ROM_VALUE,,}"
-                sed -e s/{{DEVICE_MODEL}}/"${Type}"/g \
-                    -e s/{{SERIAL_OLD}}/"${Serial}"/g \
-                    -e s/{{BOARD_SERIAL_OLD}}/"${BoardSerial}"/g \
-                    -e s/{{SYSTEM_UUID_OLD}}/"${SmUUID}"/g \
-                    -e s/{{ROM_OLD}}/"${ROM_VALUE}"/g \
-                    "${PLIST_MASTER}" > "${OUTPUT_DIRECTORY}/plists/${Serial}.config.plist" || exit 1
+                sed -e s/{{DEVICE_MODEL}}/"${DEVICE_MODEL}"/g \
+                    -e s/{{SERIAL}}/"${SERIAL}"/g \
+                    -e s/{{BOARD_SERIAL}}/"${BOARD_SERIAL}"/g \
+                    -e s/{{UUID}}/"${UUID}"/g \
+                    -e s/{{ROM}}/"${ROM}"/g \
+                    "${PLIST_MASTER}" > "${OUTPUT_DIRECTORY}/plists/${SERIAL}.config.plist" || exit 1
             fi
 
             if [[ "${CREATE_QCOWS}" ]]; then
                 mkdir -p "${OUTPUT_DIRECTORY}/qcows"
                 ./opencore-image-ng.sh \
-                    --cfg "${OUTPUT_DIRECTORY}/plists/${Serial}.config.plist" \
-                    --img "${OUTPUT_QCOW:-${OUTPUT_DIRECTORY}/qcows/${Serial}.OpenCore-nopicker.qcow2}" || exit 1
+                    --cfg "${OUTPUT_DIRECTORY}/plists/${SERIAL}.config.plist" \
+                    --img "${OUTPUT_QCOW:-${OUTPUT_DIRECTORY}/qcows/${SERIAL}.OpenCore-nopicker.qcow2}" || exit 1
             fi
 
         done
 
         [[ -e "${CSV_SERIAL_SETS_FILE}" ]] && \
-            cat <(echo "Type,Serial,BoardSerial,SmUUID,MacAddress") "${CSV_SERIAL_SETS_FILE}"
+            cat <(echo "DEVICE_MODEL,SERIAL,BOARD_SERIAL,UUID,MAC_ADDRESS") "${CSV_SERIAL_SETS_FILE}"
 
 
         [[ -e "${TSV_SERIAL_SETS_FILE}" ]] && \
-            cat <(printf "Type\tSerial\tBoardSerial\tSmUUID\tMacAddress\n") "${TSV_SERIAL_SETS_FILE}"
+            cat <(printf "DEVICE_MODEL\tSERIAL\BOARD_SERIAL\tUUID\tMAC_ADDRESS\n") "${TSV_SERIAL_SETS_FILE}"
     
 }
 
