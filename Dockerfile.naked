@@ -101,11 +101,15 @@ RUN mkdir -p ~/.ssh \
     && tee -a ~/.ssh/config <<< '    StrictHostKeyChecking no' \
     && tee -a ~/.ssh/config <<< '    UserKnownHostsFile=/dev/null'
 
-ENV NOPICKER=true
+ENV BOOTDISK=/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore.qcow2
 
 ENV DISPLAY=:99
 
+ENV ENV=/env
+
 ENV IMAGE_PATH=/image
+
+ENV NOPICKER=true
 
 CMD sudo chown "$(id -u)":"$(id -g)" "${IMAGE_PATH}" "${BOOTDISK}" 2>/dev/null || true \
     ; [[ "${DISPLAY}" = ':99' ]] && { \

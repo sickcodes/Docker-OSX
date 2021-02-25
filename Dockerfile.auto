@@ -131,6 +131,10 @@ ENV DISPLAY=:99
 
 ENV IMAGE_PATH=/home/arch/OSX-KVM/mac_hdd_ng.img
 
+ENV BOOTDISK=/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore.qcow2
+
+ENV ENV=/env
+
 ENV NOPICKER=true
 
 ENV TERMS_OF_USE=i_agree

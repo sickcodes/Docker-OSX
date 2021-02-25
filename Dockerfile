@@ -227,7 +227,11 @@ USER arch
 
 ENV USER arch
 
+ENV BOOTDISK=/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore.qcow2
+
 ENV DISPLAY=:0.0
+
+ENV ENV=/env
 
 ENV IMAGE_PATH=/home/arch/OSX-KVM/mac_hdd_ng.img
 
@@ -236,8 +240,8 @@ ENV NETWORKING=e1000-82545em
 
 ENV NOPICKER=false
 
-# Boolean for generating a bootdisk with new serials.
 ENV UNIQUE=false
+# Boolean for generating a bootdisk with new serials.
 
 VOLUME ["/tmp/.X11-unix"]
 
@@ -273,8 +277,8 @@ CMD sudo chown "$(id -u)":"$(id -g)" "${IMAGE_PATH}" "${BOOTDISK}" 2>/dev/null |
         --count 1 \
         --tsv ./serial.tsv \
         --bootdisks \
-        --output-bootdisk "${BOOTDISK:-/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore.qcow2}" \
-        --output-env "${ENV:=/env}" \
+        --output-bootdisk "${BOOTDISK}" \
+        --output-env "${ENV}" \
     && source "${ENV}" \
     ; [[ "${GENERATE_SPECIFIC}" == true ]] \
             && source /env \
@@ -284,7 +288,7 @@ CMD sudo chown "$(id -u)":"$(id -g)" "${IMAGE_PATH}" "${BOOTDISK}" 2>/dev/null |
             --board-serial "${BOARD_SERIAL}" \
             --uuid "${UUID}" \
             --mac-address "${MAC_ADDRESS}" \
-            --output-bootdisk "${BOOTDISK:-/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore.qcow2}" \
+            --output-bootdisk "${BOOTDISK}" \
     ; case "$(file --brief /bootdisk)" in \
         QEMU\ QCOW2\ Image* ) export BOOTDISK=/bootdisk \
             ;; \
