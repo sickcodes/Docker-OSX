@@ -143,7 +143,7 @@ generate_bootdisk () {
     # plist required for bootdisks, so create anyway.
     if [[ "${DEVICE_MODEL}" ]] \
             && [[ "${SERIAL}" ]] \
-            && [[ "${BOARD_SERIALR}" ]] \
+            && [[ "${BOARD_SERIAL}" ]] \
             && [[ "${UUID}" ]] \
             && [[ "${MAC_ADDRESS}" ]]; then
         ROM="${MAC_ADDRESS//\:/}"
