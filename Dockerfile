@@ -184,7 +184,8 @@ RUN if [[ "${LINUX}" == true ]]; then \
         && bsdtar -C / -xvf "${patched_glibc}" || echo "Everything is fine." \
     ; fi
 
-RUN git clone https://github.com/sickcodes/Docker-OSX.git
+# temporary branch, remove in final PR
+RUN git clone --branch custom-identity https://github.com/sickcodes/Docker-OSX.git
 
 RUN touch Launch.sh \
     && chmod +x ./Launch.sh \
