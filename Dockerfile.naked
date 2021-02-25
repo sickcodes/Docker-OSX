@@ -107,11 +107,11 @@ ENV DISPLAY=:99
 
 ENV IMAGE_PATH=/image
 
-CMD [[ "${DISPLAY}" = ':99' ]] && { \
+CMD sudo chown "$(id -u)":"$(id -g)" "${IMAGE_PATH}" "${BOOTDISK}" 2>/dev/null || true \
+    ; [[ "${DISPLAY}" = ':99' ]] && { \
         nohup Xvfb :99 -screen 0 1920x1080x16 \
         & until [[ "$(xrandr --query 2>/dev/null)" ]]; do sleep 1 ; done \
     ; } \
-    ; sudo chown "$(id -u)":"$(id -g)" "${IMAGE_PATH}" 2>/dev/null || true \
     ; [[ "${NOPICKER}" == true ]] && mv ./Launch-nopicker.sh ./Launch.sh \
     ; [[ "${GENERATE_UNIQUE}" == true ]] \
         && ./Docker-OSX/custom/generate-unique-machine-values.sh \
@@ -132,7 +132,6 @@ CMD [[ "${DISPLAY}" = ':99' ]] && { \
             --output-bootdisk "${BOOTDISK:-/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore.qcow2}" \
     ; case "$(file --brief /bootdisk)" in \
         QEMU\ QCOW2\ Image* ) export BOOTDISK=/bootdisk \
-                ; sudo chown "$(id -u)":"$(id -g)" "${BOOTDISK}" 2>/dev/null || true \
             ;; \
         directory* ) export BOOTDISK=/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore.qcow2 \
             ;; \

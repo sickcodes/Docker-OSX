@@ -260,9 +260,9 @@ VOLUME ["/tmp/.X11-unix"]
 # the default serial numbers are already contained in ./OpenCore-Catalina/OpenCore.qcow2
 # And the default serial numbers
 
-CMD case "$(file --brief /image)" in \
+CMD sudo chown "$(id -u)":"$(id -g)" "${IMAGE_PATH}" "${BOOTDISK}" 2>/dev/null || true \
+    ; case "$(file --brief /image)" in \
         QEMU\ QCOW2\ Image* ) export IMAGE_PATH=/image \
-                ; sudo chown "$(id -u)":"$(id -g)" "${IMAGE_PATH}" 2>/dev/null || true \
             ;; \
         directory* ) export IMAGE_PATH=/home/arch/OSX-KVM/mac_hdd_ng.img \
             ;; \
@@ -287,7 +287,6 @@ CMD case "$(file --brief /image)" in \
             --output-bootdisk "${BOOTDISK:-/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore.qcow2}" \
     ; case "$(file --brief /bootdisk)" in \
         QEMU\ QCOW2\ Image* ) export BOOTDISK=/bootdisk \
-                ; sudo chown "$(id -u)":"$(id -g)" "${BOOTDISK}" 2>/dev/null || true \
             ;; \
         directory* ) export BOOTDISK=/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore.qcow2 \
             ;; \
