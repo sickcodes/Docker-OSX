@@ -1,5 +1,6 @@
 |Version|Date|Notes|
 |---|---|---|
+|3.2|2021-02-25|Add a script to generate unique machine serial numbers. Add a script to generate a bootdisk from given serial numbers. Add Linux for libguestfs which allows the docker container to make QEMU bootdisks with specific serial numbers.|
 |   |2021-02-21|Add NOPICKER environment variable to ALL images.|
 |3.1|2021-02-21|Remove testing repos. Switch to base-devel. We shouldn't be using testing repos in a Dockerfile for light increase in stability. Add the mandatory glibc patch to every pacman until someone upstream fixes it.|
 |   |2021-02-07|Add NOPICKER environment variable to :naked image for effortless boot toggling.|

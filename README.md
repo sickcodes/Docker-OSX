@@ -3,9 +3,11 @@
 
 ![Running mac osx in a docker container](/running-mac-inside-docker-qemu.png?raw=true "OSX KVM DOCKER")
 
-Run Mac in a Docker container! Run near native OSX-KVM in Docker! X11 Forwarding!
+Run Mac in a Docker container! Run near native OSX-KVM in Docker! X11 Forwarding! iMessage security research!
 
 Author: Sick.Codes https://sick.codes/ & https://twitter.com/sickcodes
+
+Documentation: everything is on this page!
 
 ### PR & Contributor Credits
 
@@ -21,7 +23,9 @@ Docker Hub: https://hub.docker.com/r/sickcodes/docker-osx
 
 ## Professional Support Available!
 
-Enquire at https://sick.codes/contact
+Small questions & issues: open an issue!
+
+For big projects, DM on Twitter [@sickcodes on Twitter](https://twitter.com/sickcodes) or write to us at https://sick.codes/contact.
 
 - Enterprise support, Business support, or casual support.
 - Custom images, custom scripts, consulting (per hour available!)
@@ -31,11 +35,13 @@ Enquire at https://sick.codes/contact
 
 Kubernetes Helm Chart & Documentation [available at ./helm](https://github.com/sickcodes/Docker-OSX/tree/master/helm)
 
+Thank you to @cephasara for this major contribution.
+
 [![Artifact HUB](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/docker-osx)](https://artifacthub.io/packages/search?repo=docker-osx)
 
 #### Follow [@sickcodes on Twitter](https://twitter.com/sickcodes) for updates or feature requests!
 
-# Quick Start Docker-OSX
+# Basic Quick Start Docker-OSX
 
 ```bash
 
@@ -52,18 +58,28 @@ docker run -it \
 
 ```
 
-# Quick Start 17.5GB Pre-Made Image
+# Quick Start Large Pre-Made Image
 
+Current large image size: 17.5GB
 
-You will need around 50GB of space: half for the base image + half for your runtime image.
+This starts the special auto image @sickcodes prepared earlier.
 
-If you run out of space, you can nuke your Docker images/history/cache by simply deleting `/var/lib/docker`
+This image has already been installed with the following settings:
+
+- SSH enabled
+- username is user
+- password is alpine
+- Autoupdates off
+
+You will need around 50GB of space to run this image: half for the base image + half for your runtime image.
+
+If you run out of space, you can delete all your Docker images/history/cache by simply deleting `/var/lib/docker`
 
 ```bash
 
 docker pull sickcodes/docker-osx:auto
 
-# boot straight to OSX shell with no display (19GB)
+# boot directly into a real OSX shell with no display (Xvfb)
 docker run -it \
     --device /dev/kvm \
     -p 50922:10022 \
@@ -76,7 +92,7 @@ docker run -it \
 
 docker pull sickcodes/docker-osx:auto
 
-# boot to OSX shell + display (19GB)
+# boot directly into a real OSX shell with a visual display
 docker run -it \
     --device /dev/kvm \
     -p 50922:10022 \
@@ -90,7 +106,7 @@ docker run -it \
 
 docker pull sickcodes/docker-osx:auto
 
-# boot to OSX shell + display (19GB) + commands to run inside OSX
+# boot to OSX shell + display + specify commands to run inside OSX!
 docker run -it \
     --device /dev/kvm \
     -p 50922:10022 \
@@ -104,6 +120,8 @@ docker run -it \
 ```
 ### Restart an auto container
 
+Containers that use `sickcodes/docker-osx:auto` can be stopped at started.
+
 ```bash
 # find last container
 docker ps -a
@@ -113,13 +131,14 @@ docker start -i containerid
 
 ```
 
-# Quick Start Own Image
+# Quick Start Own Image (naked container image)
 
+This is my favourite container. You can supply an existing disk image as a docker command line argument.
 
 Supply your own local image with `-v "${PWD}/mac_hdd_ng.img:/image"` and use `sickcodes/docker-osx:naked`
 
 - Naked image is for booting any existing .img file.
-- By default, this image has a variable called `NOPICKER` which is `"true"`. Use `-e NOPICKER=false` or any other string than the word `true` to enter the boot menu. This lets you use other disks instead of skipping the boot menu, e.g. recovery disk.
+- By default, this image has a variable called `NOPICKER` which is `"true"`. This skips the disk selection menu. Use `-e NOPICKER=false` or any other string than the word `true` to enter the boot menu. This lets you use other disks instead of skipping the boot menu, e.g. recovery disk or disk utility.
 
 ```bash
 docker pull sickcodes/docker-osx:naked
@@ -153,30 +172,35 @@ docker run -it \
     sickcodes/docker-osx:naked
 ```
 
-# Features In Docker-OSX v3.1
-- Full auto mode: boot straight to OSX shell.
-- sickcodes/docker-osx:latest - original base recovery image (safe)
-- sickcodes/docker-osx:naked - supply your own .img file (safe)
-- sickcodes/docker-osx:auto - 17.5GB image boot to OSX shell (must trust @sickcodes)
-- Supply your own image using -v $PWD/disk.img:/image
+# Features In Docker-OSX v3.2
+- Serial number generators. [See below or ./custom](https://github.com/sickcodes/Docker-OSX/tree/master/custom)
+- Full auto mode: boot straight to OSX shell and even run commands as runtime arguments!
+- `sickcodes/docker-osx:latest` - original base recovery image (safe)
+- `sickcodes/docker-osx:naked` - supply your own .img file (safe)
+- `sickcodes/docker-osx:auto` - Large docker image that boots to OSX shell (must trust @sickcodes)
+- Supply your own image using `-v "${PWD}/disk.img:/image"`
 - Kubernetes Helm Chart. [See ./helm](https://github.com/sickcodes/Docker-OSX/tree/master/helm)
-- OSX-KVM
+- [OSX-KVM](https://github.com/kholia/OSX-KVM) inside a Docker container!
 - X11 Forwarding
-- SSH on localhost:50922
-- QEMU
-- VNC on localhost:8888 [vnc version is inside a separate directory](https://github.com/sickcodes/Docker-OSX/blob/master/vnc-version/Dockerfile)
-- Create an ARMY using `docker commit`
-- XFVB HEADLESS (use vnc)
+- SSH on `localhost:50922`
+- QEMU + KVM!
+- VNC version on `localhost:8888` [vnc version is inside a separate directory, there are security risks involved with using VNC, see insid the Dockerfile](https://github.com/sickcodes/Docker-OSX/blob/master/vnc-version/Dockerfile)
+- Create an ARMY of the same exact container using `docker commit`
+- Xfvb headless mode
 
 ### All Pull Requests Welcome!
 
-Docker-OSX is a GPLv3+ Dockerfile and we need contributors just like you :).
+Docker-OSX is a GPLv3+ Dockerfile and we need contributors just like you :)
 
 Upstream: https://github.com/kholia/OSX-KVM && the great guy [@kholia](https://twitter.com/kholia)
 
 Upstream Credits (OSX-KVM project) among many others: https://github.com/kholia/OSX-KVM/blob/master/CREDITS.md
 
 # Download The Image for sickcodes/docker-osx:naked
+
+This is the current automated image. Username is `user`, passsword is `alpine`, SSH is on, and auto-updates are off.
+
+If the download is slow, just get the image from `docker pull sickcodes/docker-osx:auto` and find it in `/var/lib/docker`.
 
 ```bash
 wget https://images2.sick.codes/mac_hdd_ng_auto.img
@@ -190,14 +214,6 @@ docker run -it \
     sickcodes/docker-osx:naked
 
 ```
-
-# Internet Speeds
-
-### Slow internet but iMessage & iCloud compatability
-`-e NETWORKING=e1000-82545em`
-
-### FAST internet but not compatable with iMessage & iCloud
-`-e NETWORKING=vmxnet3`
 
 ### Other cool Docker-QEMU based projects:
 
@@ -242,6 +258,8 @@ ssh fullname@localhost -p 50922
 ```
 
 # Autoboot into OSX after you've installed everything
+
+You can use `-e NOPICKER=true` or for older machines:
 
 ```bash
 # find you containerID
@@ -289,7 +307,9 @@ sudo modprobe kvm
 
 # Start the same container later (persistent disk)
 
-This is for when you want to run the SAME container again later.
+1. You can now pull the `.img` file out of the container, which is stored in `/var/lib/docker`, and supply it as a runtime argument to the `:naked` Docker image. See above.
+
+2. This is for when you want to run the SAME container again later.
 
 If you don't run this you will have a new image every time.
 
@@ -500,6 +520,15 @@ sudo mv somedir/mac_hdd_ng.img .
 # Use an Old Docker-OSX Disk in a Fresh Container (Replication)
 
 [Use the sickcodes/docker-osx:naked image.](https://github.com/sickcodes/Docker-OSX/tree/custom-identity#quick-start-own-image)
+
+# Internet Speeds
+
+### Slow internet but iMessage & iCloud compatability
+`-e NETWORKING=e1000-82545em`
+
+### FAST internet but not compatable with iMessage & iCloud
+`-e NETWORKING=vmxnet3`
+
 
 # DESTROY: Wipe old images to free disk space
 
@@ -713,7 +742,7 @@ The directory that we are letting the Docker container use is a X server display
 If we let the Docker container use the same display socket as our own environment, then any applications you run inside the Docker container will show up on your screen too! [https://www.x.org/archive/X11R6.8.0/doc/RELNOTES5.html](https://www.x.org/archive/X11R6.8.0/doc/RELNOTES5.html)
 
 
-## Todo:
+## TODO:
 ```
 - Security Documentation
 - GPU Acceleration: Coming Soon

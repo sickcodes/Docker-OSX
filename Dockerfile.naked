@@ -7,7 +7,7 @@
 # 
 # Title:            Mac on Docker (Docker-OSX) [AUTOINSTALL]
 # Author:           Sick.Codes https://twitter.com/sickcodes       
-# Version:          3.1
+# Version:          3.2
 # License:          GPLv3+
 # Repository:       https://github.com/sickcodes/Docker-OSX
 # 
@@ -29,7 +29,7 @@
 #       docker run -it --device /dev/kvm -p 50922:10022 -v ${PWD}/mac_hdd_ng.img:/image -e "DISPLAY=${DISPLAY:-:0.0}" -v /tmp/.X11-unix:/tmp/.X11-unix docker-osx:naked
 # 
 
-FROM sickcodes/docker-osx:latest
+FROM docker-osx:latest
 
 MAINTAINER 'https://twitter.com/sickcodes' <https://sick.codes>
 
@@ -112,6 +112,29 @@ CMD [[ "${DISPLAY}" = ':99' ]] && { \
         & until [[ "$(xrandr --query 2>/dev/null)" ]]; do sleep 1 ; done \
     ; } \
     ; sudo chown "$(id -u)":"$(id -g)" "${IMAGE_PATH}" 2>/dev/null || true \
-    ; ./enable-ssh.sh \
     ; [[ "${NOPICKER}" == true ]] && mv ./Launch-nopicker.sh ./Launch.sh \
-    ; envsubst < ./Launch.sh | bash
+    ; [[ "${GENERATE_UNIQUE}" == true ]] \
+        && ./Docker-OSX/custom/generate-unique-machine-values.sh \
+        --count 1 \
+        --tsv ./serial.tsv \
+        --bootdisks \
+        --output-bootdisk "${BOOTDISK:-/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore.qcow2}" \
+        --output-env "${ENV:=/env}" \
+    && source "${ENV}" \
+    ; [[ "${GENERATE_SPECIFIC}" == true ]] \
+            && source /env \
+            || ./Docker-OSX/custom/generate-specific-bootdisk.sh \
+            --model "${DEVICE_MODEL}" \
+            --serial "${SERIAL}" \
+            --board-serial "${BOARD_SERIAL}" \
+            --uuid "${UUID}" \
+            --mac-address "${MAC_ADDRESS}" \
+            --output-bootdisk "${BOOTDISK:-/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore.qcow2}" \
+    ; case "$(file --brief /bootdisk)" in \
+        QEMU\ QCOW2\ Image* ) export BOOTDISK=/bootdisk \
+                ; sudo chown "$(id -u)":"$(id -g)" "${BOOTDISK}" 2>/dev/null || true \
+            ;; \
+        directory* ) export BOOTDISK=/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore.qcow2 \
+            ;; \
+    esac \
+    ; ./enable-ssh.sh && envsubst < ./Launch.sh | bash

@@ -8,7 +8,7 @@
 # Repo:             https://github.com/sickcodes/Docker-OSX/
 # Title:            Mac on Docker (Docker-OSX)
 # Author:           Sick.Codes https://sick.codes/
-# Version:          3.1
+# Version:          3.2
 # License:          GPLv3+
 #
 # All credits for OSX-KVM and the rest at @Kholia's repo: https://github.com/kholia/osx-kvm
@@ -216,6 +216,8 @@ RUN touch Launch.sh \
     && tee -a Launch.sh <<< '${EXTRA:-}'
 
 # docker exec containerid mv ./Launch-nopicker.sh ./Launch.sh
+# This is now a legacy command.
+# You can use -e BOOTDISK=/bootdisk with -v ./bootdisk.img:/bootdisk
 RUN grep -v InstallMedia ./Launch.sh > ./Launch-nopicker.sh \
     && chmod +x ./Launch-nopicker.sh \
     && sed -i -e s/OpenCore\.qcow2/OpenCore\-nopicker\.qcow2/ ./Launch-nopicker.sh
@@ -233,13 +235,62 @@ ENV NETWORKING=e1000-82545em
 
 ENV NOPICKER=false
 
+# Boolean for generating a bootdisk with new serials.
+ENV UNIQUE=false
+
 VOLUME ["/tmp/.X11-unix"]
 
+# check if /image is a disk image or a directory. This allows you to optionally use -v disk.img:/image
+# NOPICKER is used to skip the disk selection screen
+# GENERATE_UNIQUE is used to generate serial numbers on boot.
+# /env is a file that you can generate and save using -v source.sh:/env
+# the env file is a file that you can carry to the next container which will supply the serials numbers.
+# GENERATE_SPECIFIC is used to either accept the env serial numbers OR you can supply using:
+    # -e DEVICE_MODEL="iMacPro1,1" \
+    # -e SERIAL="C02TW0WAHX87" \
+    # -e BOARD_SERIAL="C027251024NJG36UE" \
+    # -e UUID="5CCB366D-9118-4C61-A00A-E5BAF3BED451" \
+    # -e MAC_ADDRESS="A8:5C:2C:9A:46:2F" \
+
+# the output will be /bootdisk.
+# /bootdisk is a useful persistent place to store the 15Mb serial number bootdisk.
+
+# if you don't set any of the above:
+# the default serial numbers are already contained in ./OpenCore-Catalina/OpenCore.qcow2
+# And the default serial numbers
+
 CMD case "$(file --brief /image)" in \
-        QEMU*) export IMAGE_PATH=/image && sudo chown "$(id -u)":"$(id -g)" "${IMAGE_PATH}" 2>/dev/null || true;; \
-        directory*) export IMAGE_PATH=/home/arch/OSX-KVM/mac_hdd_ng.img;; \
+        QEMU\ QCOW2\ Image* ) export IMAGE_PATH=/image \
+                ; sudo chown "$(id -u)":"$(id -g)" "${IMAGE_PATH}" 2>/dev/null || true \
+            ;; \
+        directory* ) export IMAGE_PATH=/home/arch/OSX-KVM/mac_hdd_ng.img \
+            ;; \
     esac \
     ; [[ "${NOPICKER}" == true ]] && mv ./Launch-nopicker.sh ./Launch.sh \
+    ; [[ "${GENERATE_UNIQUE}" == true ]] \
+        && ./Docker-OSX/custom/generate-unique-machine-values.sh \
+        --count 1 \
+        --tsv ./serial.tsv \
+        --bootdisks \
+        --output-bootdisk "${BOOTDISK:-/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore.qcow2}" \
+        --output-env "${ENV:=/env}" \
+    && source "${ENV}" \
+    ; [[ "${GENERATE_SPECIFIC}" == true ]] \
+            && source /env \
+            || ./Docker-OSX/custom/generate-specific-bootdisk.sh \
+            --model "${DEVICE_MODEL}" \
+            --serial "${SERIAL}" \
+            --board-serial "${BOARD_SERIAL}" \
+            --uuid "${UUID}" \
+            --mac-address "${MAC_ADDRESS}" \
+            --output-bootdisk "${BOOTDISK:-/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore.qcow2}" \
+    ; case "$(file --brief /bootdisk)" in \
+        QEMU\ QCOW2\ Image* ) export BOOTDISK=/bootdisk \
+                ; sudo chown "$(id -u)":"$(id -g)" "${BOOTDISK}" 2>/dev/null || true \
+            ;; \
+        directory* ) export BOOTDISK=/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore.qcow2 \
+            ;; \
+    esac \
     ; ./enable-ssh.sh && envsubst < ./Launch.sh | bash
 
 # virt-manager mode: eta son
