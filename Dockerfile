@@ -52,7 +52,7 @@
 
 FROM archlinux:base-devel
 
-MAINTAINER 'https://sick.codes' <https://sick.codes>
+MAINTAINER 'https://twitter.com/sickcodes' <https://sick.codes>
 
 SHELL ["/bin/bash", "-c"]
 
@@ -271,7 +271,7 @@ CMD sudo chown "$(id -u)":"$(id -g)" "${IMAGE_PATH}" "${BOOTDISK}" 2>/dev/null |
         directory* ) export IMAGE_PATH=/home/arch/OSX-KVM/mac_hdd_ng.img \
             ;; \
     esac \
-    ; [[ "${NOPICKER}" == true ]] && mv ./Launch-nopicker.sh ./Launch.sh \
+    ; [[ "${NOPICKER}" == true ]] && BOOTDISK=/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore-nopicker.qcow2 \
     ; [[ "${GENERATE_UNIQUE}" == true ]] \
         && ./Docker-OSX/custom/generate-unique-machine-values.sh \
         --count 1 \
