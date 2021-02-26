@@ -111,7 +111,7 @@ ENV IMAGE_PATH=/image
 
 ENV NOPICKER=true
 
-CMD sudo chown "$(id -u)":"$(id -g)" "${IMAGE_PATH}" "${BOOTDISK}" 2>/dev/null || true \
+CMD sudo chown -R $(id -u):$(id -g) /dev/kvm /dev/snd "${IMAGE_PATH}" "${BOOTDISK}" "${ENV}" 2>/dev/null || true \
     ; [[ "${DISPLAY}" = ':99' ]] && { \
         nohup Xvfb :99 -screen 0 1920x1080x16 \
         & until [[ "$(xrandr --query 2>/dev/null)" ]]; do sleep 1 ; done \

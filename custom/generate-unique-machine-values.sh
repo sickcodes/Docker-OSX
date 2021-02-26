@@ -259,7 +259,7 @@ EOF
 
 
         [[ -e "${TSV_SERIAL_SETS_FILE}" ]] && \
-            cat <(printf "DEVICE_MODEL\tSERIAL\BOARD_SERIAL\tUUID\tMAC_ADDRESS\n") "${TSV_SERIAL_SETS_FILE}"
+            cat <(printf "DEVICE_MODEL\tSERIAL\tBOARD_SERIAL\tUUID\tMAC_ADDRESS\n") "${TSV_SERIAL_SETS_FILE}"
     
 }
 

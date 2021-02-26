@@ -264,7 +264,7 @@ VOLUME ["/tmp/.X11-unix"]
 # the default serial numbers are already contained in ./OpenCore-Catalina/OpenCore.qcow2
 # And the default serial numbers
 
-CMD sudo chown "$(id -u)":"$(id -g)" "${IMAGE_PATH}" "${BOOTDISK}" 2>/dev/null || true \
+CMD sudo chown -R $(id -u):$(id -g) /dev/kvm /dev/snd "${IMAGE_PATH}" "${BOOTDISK}" "${ENV}" 2>/dev/null || true \
     ; case "$(file --brief /image)" in \
         QEMU\ QCOW2\ Image* ) export IMAGE_PATH=/image \
             ;; \
