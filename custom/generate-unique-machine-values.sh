@@ -183,6 +183,8 @@ download_qcow_efi_folder () {
 
 
 generate_serial_sets () {
+    [[ -e ./config-nopicker-custom.plist ]] || wget https://raw.githubusercontent.com/sickcodes/Docker-OSX/custom-identity/custom/config-nopicker-custom.plist
+    [[ -e ./opencore-image-ng.sh ]] || wget https://raw.githubusercontent.com/sickcodes/Docker-OSX/custom-identity/custom/opencore-image-ng.sh && chmod +x opencore-image-ng.sh
     mkdir -p "${OUTPUT_DIRECTORY}/envs"
     export DATE_NOW="$(date +%F-%T)"
     export DEVICE_MODEL="${DEVICE_MODEL:=iMacPro1,1}"

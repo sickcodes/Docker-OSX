@@ -79,7 +79,7 @@ If you run out of space, you can delete all your Docker images/history/cache by 
 
 docker pull sickcodes/docker-osx:auto
 
-# boot directly into a real OSX shell with no display (Xvfb)
+# boot directly into a real OSX shell with no display (Xvfb) [HEADLESS]
 docker run -it \
     --device /dev/kvm \
     -p 50922:10022 \
@@ -92,7 +92,7 @@ docker run -it \
 
 docker pull sickcodes/docker-osx:auto
 
-# boot directly into a real OSX shell with a visual display
+# boot directly into a real OSX shell with a visual display [NOT HEADLESS]
 docker run -it \
     --device /dev/kvm \
     -p 50922:10022 \
@@ -144,6 +144,7 @@ Supply your own local image with `-v "${PWD}/mac_hdd_ng.img:/image"` and use `si
 docker pull sickcodes/docker-osx:naked
 
 # run your own image + SSH
+# change mac_hdd_ng.img
 docker run -it \
     --device /dev/kvm \
     -p 50922:10022 \
