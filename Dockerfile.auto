@@ -119,10 +119,13 @@ ARG IMAGE_URL='https://images2.sick.codes/mac_hdd_ng_auto.img'
 
 # use the COMPLETE arg, for a complete image, ready to boot.
 # otherwise use your own image: -v "$PWD/disk.img":/image
+ARG WGET_OPTIONS=
+# ARG WGET_OPTIONS='--no-verbose'
+
 RUN if [[ "${COMPLETE}" ]]; then \
         echo "Downloading 20GB+ image... This step might take a while... Press Ctrl+C if you want to abort." \
         ; rm -f /home/arch/OSX-KVM/mac_hdd_ng.img \
-        && wget --no-verbose -O /home/arch/OSX-KVM/mac_hdd_ng.img "${IMAGE_URL}" \
+        && wget ${WGET_OPTIONS} -O /home/arch/OSX-KVM/mac_hdd_ng.img "${IMAGE_URL}" \
     ; fi
 
 RUN mv ./Launch-nopicker.sh ./Launch.sh
