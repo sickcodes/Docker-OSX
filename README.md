@@ -3,9 +3,11 @@
 
 ![Running mac osx in a docker container](/running-mac-inside-docker-qemu.png?raw=true "OSX KVM DOCKER")
 
-Run Mac in a Docker container! Run near native OSX-KVM in Docker! X11 Forwarding!
+Run Mac in a Docker container! Run near native OSX-KVM in Docker! X11 Forwarding! iMessage security research!
 
 Author: Sick.Codes https://sick.codes/ & https://twitter.com/sickcodes
+
+Documentation: everything is on this page!
 
 ### PR & Contributor Credits
 
@@ -21,7 +23,9 @@ Docker Hub: https://hub.docker.com/r/sickcodes/docker-osx
 
 ## Professional Support Available!
 
-Enquire at https://sick.codes/contact
+Small questions & issues: open an issue!
+
+For big projects, DM on Twitter [@sickcodes on Twitter](https://twitter.com/sickcodes) or write to us at https://sick.codes/contact.
 
 - Enterprise support, Business support, or casual support.
 - Custom images, custom scripts, consulting (per hour available!)
@@ -31,11 +35,50 @@ Enquire at https://sick.codes/contact
 
 Kubernetes Helm Chart & Documentation [available at ./helm](https://github.com/sickcodes/Docker-OSX/tree/master/helm)
 
+Thank you to @cephasara for this major contribution.
+
 [![Artifact HUB](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/docker-osx)](https://artifacthub.io/packages/search?repo=docker-osx)
 
 #### Follow [@sickcodes on Twitter](https://twitter.com/sickcodes) for updates or feature requests!
 
-# Quick Start Docker-OSX
+# How to use
+
+### There are 3 images: **latest**, **auto** and **naked**.
+
+`sickcodes/docker-osx:latest` - [I want to try it out.](https://github.com/sickcodes/Docker-OSX#quick-start-175gb-pre-made-image)
+
+`sickcodes/docker-osx:latest` - [I want to use Docker-OSX to develop/secure Apps in Xcode (sign into Xcode, Transporter)](https://github.com/sickcodes/Docker-OSX#quick-start-docker-osx)
+
+`sickcodes/docker-osx:naked` - [I want to use Docker-OSX in CI/CD (sign into Xcode, Transporter)](https://github.com/sickcodes/Docker-OSX#fully-headless-using-my-own-image-for-cicd)
+Create your personal image using `:latest`. And then pull your image out. And then use duplicate that image again & again for use in `:naked`.
+
+`sickcodes/docker-osx:auto` - [I want to boot into command line only. (compile software, homebrew headless).](https://github.com/sickcodes/Docker-OSX#pre-built-image-arbitrary-command-line-arguments)
+
+`sickcodes/docker-osx:naked` - [I need iMessage/iCloud for security research.](https://github.com/sickcodes/Docker-OSX#serial-numbers)
+
+#### I need a screen.
+**KEEP** these two lines are in your command. Works in ANY of the machines:
+```dockerfile
+    -v /tmp/.X11-unix:/tmp/.X11-unix \
+    -e "DISPLAY=${DISPLAY:-:0.0}" \
+```
+
+#### I need headless.
+**REMOVE** these two lines from ANY of the machines:
+```dockerfile
+    -v /tmp/.X11-unix:/tmp/.X11-unix \
+    -e "DISPLAY=${DISPLAY:-:0.0}" \
+```
+
+#### I have used it already, and want to copy this image.
+Use `docker commit`, copy the ID, and then `docker start ID`
+
+**OR**
+
+[Pull out the .img file](https://github.com/sickcodes/Docker-OSX#backup-the-disk-wheres-my-disk), and then use that [.img file with :naked](https://github.com/sickcodes/Docker-OSX#quick-start-own-image-naked-container-image)
+
+
+# Basic Quick Start Docker-OSX
 
 ```bash
 
@@ -52,18 +95,26 @@ docker run -it \
 
 ```
 
-# Quick Start 17.5GB Pre-Made Image
+# Quick Start Large Pre-Made Image
 
+Current large image size: 17.5GB
 
-You will need around 50GB of space: half for the base image + half for your runtime image.
+This starts a container with an existing installation. This special auto image was made by @sickcodes:
 
-If you run out of space, you can nuke your Docker images/history/cache by simply deleting `/var/lib/docker`
+- SSH enabled
+- username is `user`
+- password is `alpine`
+- auto-updates off
+
+You will need around *50GB* of space to run this image: half for the base image + half for your runtime image.
+
+If you run out of space, you can delete all your old Docker images/history/cache by simply deleting `/var/lib/docker`, and restarting `dockerd`.
 
 ```bash
 
 docker pull sickcodes/docker-osx:auto
 
-# boot straight to OSX shell with no display (19GB)
+# boot directly into a real OSX shell with no display (Xvfb) [HEADLESS]
 docker run -it \
     --device /dev/kvm \
     -p 50922:10022 \
@@ -76,7 +127,7 @@ docker run -it \
 
 docker pull sickcodes/docker-osx:auto
 
-# boot to OSX shell + display (19GB)
+# boot directly into a real OSX shell with a visual display [NOT HEADLESS]
 docker run -it \
     --device /dev/kvm \
     -p 50922:10022 \
@@ -85,12 +136,13 @@ docker run -it \
     sickcodes/docker-osx:auto
 
 ```
+### Pre-built Image + Arbitrary Command Line Arguments.
 
 ```bash
 
 docker pull sickcodes/docker-osx:auto
 
-# boot to OSX shell + display (19GB) + commands to run inside OSX
+# boot to OSX shell + display + specify commands to run inside OSX!
 docker run -it \
     --device /dev/kvm \
     -p 50922:10022 \
@@ -104,6 +156,8 @@ docker run -it \
 ```
 ### Restart an auto container
 
+Containers that use `sickcodes/docker-osx:auto` can be stopped at started.
+
 ```bash
 # find last container
 docker ps -a
@@ -113,18 +167,20 @@ docker start -i containerid
 
 ```
 
-# Quick Start Own Image
+# Quick Start Own Image (naked container image)
 
+This is my favourite container. You can supply an existing disk image as a docker command line argument.
 
 Supply your own local image with `-v "${PWD}/mac_hdd_ng.img:/image"` and use `sickcodes/docker-osx:naked`
 
 - Naked image is for booting any existing .img file.
-- By default, this image has a variable called `NOPICKER` which is `"true"`. Use `-e NOPICKER=false` or any other string than the word `true` to enter the boot menu. This lets you use other disks instead of skipping the boot menu, e.g. recovery disk.
+- By default, this image has a variable called `NOPICKER` which is `"true"`. This skips the disk selection menu. Use `-e NOPICKER=false` or any other string than the word `true` to enter the boot menu. This lets you use other disks instead of skipping the boot menu, e.g. recovery disk or disk utility.
 
 ```bash
 docker pull sickcodes/docker-osx:naked
 
 # run your own image + SSH
+# change mac_hdd_ng.img
 docker run -it \
     --device /dev/kvm \
     -p 50922:10022 \
@@ -144,6 +200,9 @@ docker run -it \
     sickcodes/docker-osx:naked
 
 ```
+
+### Fully Headless, using my own image, for CI/CD
+
 ```bash
 # run your own image headless + SSH
 docker run -it \
@@ -153,30 +212,35 @@ docker run -it \
     sickcodes/docker-osx:naked
 ```
 
-# Features In Docker-OSX v3.1
-- Full auto mode: boot straight to OSX shell.
-- sickcodes/docker-osx:latest - original base recovery image (safe)
-- sickcodes/docker-osx:naked - supply your own .img file (safe)
-- sickcodes/docker-osx:auto - 17.5GB image boot to OSX shell (must trust @sickcodes)
-- Supply your own image using -v $PWD/disk.img:/image
+# Features In Docker-OSX v3.2
+- Serial number generators. [See below or ./custom](https://github.com/sickcodes/Docker-OSX/tree/master/custom)
+- Full auto mode: boot straight to OSX shell and even run commands as runtime arguments!
+- `sickcodes/docker-osx:latest` - original base recovery image (safe)
+- `sickcodes/docker-osx:naked` - supply your own .img file (safe)
+- `sickcodes/docker-osx:auto` - Large docker image that boots to OSX shell (must trust @sickcodes)
+- Supply your own image using `-v "${PWD}/disk.img:/image"`
 - Kubernetes Helm Chart. [See ./helm](https://github.com/sickcodes/Docker-OSX/tree/master/helm)
-- OSX-KVM
+- [OSX-KVM](https://github.com/kholia/OSX-KVM) inside a Docker container!
 - X11 Forwarding
-- SSH on localhost:50922
-- QEMU
-- VNC on localhost:8888 [vnc version is inside a separate directory](https://github.com/sickcodes/Docker-OSX/blob/master/vnc-version/Dockerfile)
-- Create an ARMY using `docker commit`
-- XFVB HEADLESS (use vnc)
+- SSH on `localhost:50922`
+- QEMU + KVM!
+- VNC version on `localhost:8888` [vnc version is inside a separate directory, there are security risks involved with using VNC, see insid the Dockerfile](https://github.com/sickcodes/Docker-OSX/blob/master/vnc-version/Dockerfile)
+- Create an ARMY of the same exact container using `docker commit`
+- Xfvb headless mode
 
 ### All Pull Requests Welcome!
 
-Docker-OSX is a GPLv3+ Dockerfile and we need contributors just like you :).
+Docker-OSX is a GPLv3+ Dockerfile and we need contributors just like you :)
 
 Upstream: https://github.com/kholia/OSX-KVM && the great guy [@kholia](https://twitter.com/kholia)
 
 Upstream Credits (OSX-KVM project) among many others: https://github.com/kholia/OSX-KVM/blob/master/CREDITS.md
 
 # Download The Image for sickcodes/docker-osx:naked
+
+This is the current automated image. Username is `user`, passsword is `alpine`, SSH is on, and auto-updates are off.
+
+If the download is slow, just get the image from `docker pull sickcodes/docker-osx:auto` and find it in `/var/lib/docker`.
 
 ```bash
 wget https://images2.sick.codes/mac_hdd_ng_auto.img
@@ -190,14 +254,6 @@ docker run -it \
     sickcodes/docker-osx:naked
 
 ```
-
-# Internet Speeds
-
-### Slow internet but iMessage & iCloud compatability
-`-e NETWORKING=e1000-82545em`
-
-### FAST internet but not compatable with iMessage & iCloud
-`-e NETWORKING=vmxnet3`
 
 ### Other cool Docker-QEMU based projects:
 
@@ -242,6 +298,10 @@ ssh fullname@localhost -p 50922
 ```
 
 # Autoboot into OSX after you've installed everything
+
+You can use `-e NOPICKER=true`.
+
+Old machines:
 
 ```bash
 # find you containerID
@@ -289,7 +349,9 @@ sudo modprobe kvm
 
 # Start the same container later (persistent disk)
 
-This is for when you want to run the SAME container again later.
+1. You can now pull the `.img` file out of the container, which is stored in `/var/lib/docker`, and supply it as a runtime argument to the `:naked` Docker image. See above.
+
+2. This is for when you want to run the SAME container again later.
 
 If you don't run this you will have a new image every time.
 
@@ -499,30 +561,16 @@ sudo mv somedir/mac_hdd_ng.img .
 
 # Use an Old Docker-OSX Disk in a Fresh Container (Replication)
 
-You do not have to reinstall everything, you can simply:
+[Use the sickcodes/docker-osx:naked image.](https://github.com/sickcodes/Docker-OSX/tree/master#quick-start-own-image)
 
-- start a new container
+# Internet Speeds
 
-- overwrite the .img in the new container with your big old one
+### Slow internet but iMessage & iCloud compatability
+`-e NETWORKING=e1000-82545em`
 
-```bash
+### FAST internet but not compatable with iMessage & iCloud
+`-e NETWORKING=vmxnet3`
 
-# start a new docker-osx container
-# you can start with ssh, without, or vnc, because they are all interchangable.
-
-# get the NEW container id
-docker ps
-
-# docker cp your OLD disk into the NEW container
-docker cp ./mac_hdd_ng.img newcontainerid:/home/arch/OSX-KVM/mac_hdd_ng.img
-
-# kill the NEW container
-docker kill newcontainerid
-
-# start the NEW container and it just works
-docker start newcontainerid
-
-```
 
 # DESTROY: Wipe old images to free disk space
 
@@ -538,15 +586,6 @@ It will delete ALL your old (and new) docker containers.
 docker system prune --all
 docker image prune --all
 ```
-
-# INSTANT OSX-KVM in a BOX!
-This Dockerfile automates the installation of OSX-KVM inside a docker container.
-
-It will build a Catalina Disk with up to 200GB of space.
-
-You can change the size and version using build arguments (see below).
-
-This file builds on top of the work done by Dhiru Kholia and many others on the OSX-KVM project.
 
 # CI/CD Related Improvements
 ## How to reduce the size of the image
@@ -647,6 +686,185 @@ docker run \
 
 ```
 
+# Serial Numbers
+
+The easiest way to show you is by these examples.
+
+For serial numbers, generate them in `./custom` OR make docker generate them at runtime (see below).
+
+At any time, verify your serial number before logging in iCloud, etc.
+
+```bash
+ioreg -l | grep IOPlatformSerialNumber
+
+# or from the host
+sshpass -p alpine ssh user@localhost -p 50922 'ioreg -l | grep IOPlatformSerialNumber'
+```
+
+```bash
+# proof of concept only, generates random serial numbers, headlessly, and quits right after.
+docker run --rm -it \
+    --device /dev/kvm \
+    -p 50922:10022 \
+    -e NOPICKER=true \
+    -e GENERATE_UNIQUE=true \
+    -e DEVICE_MODEL="iMacPro1,1" \
+    -e OSX_COMMANDS='ioreg -l | grep IOPlatformSerialNumber' \
+    sickcodes/docker-osx:auto
+```
+
+```bash
+# run the same as above 17gb auto image, with SSH, with nopicker, and save the bootdisk for later.
+# you don't need to save the bootdisk IF you supply specific serial numbers!
+touch ./C02TW0WAHX87.qcow
+
+docker run -it \
+    --device /dev/kvm \
+    -p 50922:10022 \
+    -e NOPICKER=true \
+    -e GENERATE_SPECIFIC=true \
+    -e DEVICE_MODEL="iMacPro1,1" \
+    -e SERIAL="C02TW0WAHX87" \
+    -e BOARD_SERIAL="C027251024NJG36UE" \
+    -e UUID="5CCB366D-9118-4C61-A00A-E5BAF3BED451" \
+    -e MAC_ADDRESS="A8:5C:2C:9A:46:2F" \
+    -e OSX_COMMANDS='ioreg -l | grep IOPlatformSerialNumber' \
+    sickcodes/docker-osx:auto
+```
+
+
+```bash
+# run an existing image in current directory, with a screen, with SSH, with nopicker, and save the bootdisk for later.
+
+stat mac_hdd_ng.img # make sure you have an image if you're using :naked
+touch ./mynewbootdisk.qcow
+
+docker run -it \
+    --device /dev/kvm \
+    -e "DISPLAY=${DISPLAY:-:0.0}" \
+    -v /tmp/.X11-unix:/tmp/.X11-unix \
+    -p 50922:10022 \
+    -e NOPICKER=true \
+    -e GENERATE_SPECIFIC=true \
+    -e DEVICE_MODEL="iMacPro1,1" \
+    -e SERIAL="C02TW0WAHX87" \
+    -e BOARD_SERIAL="C027251024NJG36UE" \
+    -e UUID="5CCB366D-9118-4C61-A00A-E5BAF3BED451" \
+    -e MAC_ADDRESS="A8:5C:2C:9A:46:2F" \
+    -e BOOTDISK=/bootdisk \
+    -v "${PWD}/mynewbootdisk.qcow:/bootdisk" \
+    -v "${PWD}/mac_hdd_ng.img:/image" \
+    sickcodes/docker-osx:naked
+```
+
+If you want to generate serial numbers, either make them at runtime using
+`    -e GENERATE_UNIQUE=true \`
+
+Or you can generate them inside the `./custom` folder. And then use:
+```bash
+    -e GENERATE_SPECIFIC=true \
+    -e SERIAL="" \
+    -e BOARD_SERIAL="" \
+    -e UUID="" \
+    -e MAC_ADDRESS="" \
+```
+
+#### Persistence from generating serial numbers is obviously ideal:
+
+```bash
+
+stat mac_hdd_ng_testing.img
+touch ./output.qcow 
+touch ./output.env
+
+# generate fresh random serial numbers, with a screen, using my own image, and save the bootdisk AND env file with my new serial numbers for later.
+
+docker run -it \
+    --device /dev/kvm \
+    -e "DISPLAY=${DISPLAY:-:0.0}" \
+    -v /tmp/.X11-unix:/tmp/.X11-unix \
+    -p 50922:10022 \
+    -e NOPICKER=true \
+    -e GENERATE_UNIQUE=true \
+    -e GENERATE_SPECIFIC=true \
+    -e DEVICE_MODEL="iMacPro1,1" \
+    -e BOOTDISK=/bootdisk \
+    -v "${PWD}/output.qcow:/bootdisk" \
+    -v "${PWD}/output.env:/env" \
+    -v "${PWD}/mac_hdd_ng_testing.img:/image" \
+    sickcodes/docker-osx:naked
+```
+
+To use iMessage or iCloud you need to change `5` values.
+
+`SERIAL`
+
+`BOARD_SERIAL`
+
+`UUID`
+
+`MAC_ADDRESS`
+
+_`ROM` is just the lowercased mac address, without `:` between each word._
+
+You can tell the container to generate them for you using `-e GENERATE_UNIQUE=true`
+
+Or tell the container to use specific ones using `-e GENERATE_UNIQUE=true`
+
+```bash
+    -e GENERATE_SPECIFIC=true \
+    -e DEVICE_MODEL="iMacPro1,1" \
+    -e SERIAL="C02TW0WAHX87" \
+    -e BOARD_SERIAL="C027251024NJG36UE" \
+    -e UUID="5CCB366D-9118-4C61-A00A-E5BAF3BED451" \
+    -e MAC_ADDRESS="A8:5C:2C:9A:46:2F" \
+```
+
+### Where do you get the serial numbers?
+
+```bash
+apt install libguestfs -y
+pacman -S libguestfs
+yum install libguestfs -y
+```
+
+Inside the `./custom` folder you will find `4` scripts.
+
+- `config-nopicker-custom.plist`
+- `opencore-image-ng.sh`
+These two files are from OSX-KVM.
+
+You don't need to touch these two files.
+
+The config.plist has 5 values replaced with placeholders. [Click here to see those values for no reason.](https://github.com/sickcodes/Docker-OSX/blob/master/custom/config-nopicker-custom.plist#L705)
+
+- `generate-unique-machine-values.sh`
+This script will generate serial numbers, with Mac Addresses, plus output to CSV/TSV, plus make a `bootdisk image`.
+
+You can create hundreds, `./custom/generate-unique-machine-values.sh --help`
+
+```bash
+./custom/generate-unique-machine-values.sh \
+    --count 1 \
+    --tsv ./serial.tsv \
+    --bootdisks \
+    --output-bootdisk OpenCore.qcow2 \
+    --output-env source.env.sh
+```
+
+Or if you have some specific serial numbers...
+
+- `generate-specific-bootdisk.sh`
+```bash
+generate-specific-bootdisk.sh \
+    --model "${DEVICE_MODEL}" \
+    --serial "${SERIAL}" \
+    --board-serial "${BOARD_SERIAL}" \
+    --uuid "${UUID}" \
+    --mac-address "${MAC_ADDRESS}" \
+    --output-bootdisk OpenCore-nopicker.qcow2
+```
+
 # Allow USB passthrough
 
 The simplest way to do this is the following:
@@ -736,7 +954,7 @@ The directory that we are letting the Docker container use is a X server display
 If we let the Docker container use the same display socket as our own environment, then any applications you run inside the Docker container will show up on your screen too! [https://www.x.org/archive/X11R6.8.0/doc/RELNOTES5.html](https://www.x.org/archive/X11R6.8.0/doc/RELNOTES5.html)
 
 
-## Todo:
+## TODO:
 ```
 - Security Documentation
 - GPU Acceleration: Coming Soon

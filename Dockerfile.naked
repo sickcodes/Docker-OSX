@@ -7,7 +7,7 @@
 # 
 # Title:            Mac on Docker (Docker-OSX) [AUTOINSTALL]
 # Author:           Sick.Codes https://twitter.com/sickcodes       
-# Version:          3.1
+# Version:          3.2
 # License:          GPLv3+
 # Repository:       https://github.com/sickcodes/Docker-OSX
 # 
@@ -101,17 +101,47 @@ RUN mkdir -p ~/.ssh \
     && tee -a ~/.ssh/config <<< '    StrictHostKeyChecking no' \
     && tee -a ~/.ssh/config <<< '    UserKnownHostsFile=/dev/null'
 
-ENV NOPICKER=true
+ENV BOOTDISK=/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore.qcow2
 
 ENV DISPLAY=:99
 
+ENV ENV=/env
+
 ENV IMAGE_PATH=/image
 
-CMD [[ "${DISPLAY}" = ':99' ]] && { \
+ENV NOPICKER=true
+
+CMD sudo chown -R $(id -u):$(id -g) /dev/kvm /dev/snd "${IMAGE_PATH}" "${BOOTDISK}" "${ENV}" 2>/dev/null || true \
+    ; [[ "${DISPLAY}" = ':99' ]] && { \
         nohup Xvfb :99 -screen 0 1920x1080x16 \
         & until [[ "$(xrandr --query 2>/dev/null)" ]]; do sleep 1 ; done \
     ; } \
-    ; sudo chown "$(id -u)":"$(id -g)" "${IMAGE_PATH}" 2>/dev/null || true \
-    ; ./enable-ssh.sh \
-    ; [[ "${NOPICKER}" == true ]] && mv ./Launch-nopicker.sh ./Launch.sh \
-    ; envsubst < ./Launch.sh | bash
+    ; [[ "${NOPICKER}" == true ]] && { \
+        sed -i '/^.*InstallMedia.*/d' Launch.sh \
+        && export BOOTDISK=/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore-nopicker.qcow2 \
+    ; } \
+    ; [[ "${GENERATE_UNIQUE}" == true ]] && { \
+        ./Docker-OSX/custom/generate-unique-machine-values.sh \
+        --count 1 \
+        --tsv ./serial.tsv \
+        --bootdisks \
+        --output-bootdisk "${BOOTDISK:-/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore.qcow2}" \
+        --output-env "${ENV:=/env}" || exit 1 \
+    ; } \
+    ; [[ "${GENERATE_SPECIFIC}" == true ]] && { \
+            source "${ENV:=/env}" \
+            || ./Docker-OSX/custom/generate-specific-bootdisk.sh \
+            --model "${DEVICE_MODEL}" \
+            --serial "${SERIAL}" \
+            --board-serial "${BOARD_SERIAL}" \
+            --uuid "${UUID}" \
+            --mac-address "${MAC_ADDRESS}" \
+            --output-bootdisk "${BOOTDISK:-/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore.qcow2}" || exit 1 \
+    ; } \
+    ; case "$(file --brief /bootdisk)" in \
+        QEMU\ QCOW2\ Image* ) export BOOTDISK=/bootdisk \
+            ;; \
+        directory* ) export BOOTDISK=/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore.qcow2 \
+            ;; \
+    esac \
+    ; ./enable-ssh.sh && envsubst < ./Launch.sh | bash

@@ -1,5 +1,9 @@
 # docker-osx
 
+Docker-OSX Helm Chart for Kubernetes.
+
+Project page: https://github.com/sickcodes/docker-osx
+
 Available now on Artifact HUB
 [![Artifact HUB](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/docker-osx)](https://artifacthub.io/packages/search?repo=docker-osx)
 
