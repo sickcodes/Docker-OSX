@@ -116,17 +116,18 @@ CMD sudo chown "$(id -u)":"$(id -g)" "${IMAGE_PATH}" "${BOOTDISK}" 2>/dev/null |
         nohup Xvfb :99 -screen 0 1920x1080x16 \
         & until [[ "$(xrandr --query 2>/dev/null)" ]]; do sleep 1 ; done \
     ; } \
-    ; [[ "${NOPICKER}" == true ]] && mv ./Launch-nopicker.sh ./Launch.sh \
-    ; [[ "${GENERATE_UNIQUE}" == true ]] \
-        && ./Docker-OSX/custom/generate-unique-machine-values.sh \
+    ; [[ "${NOPICKER}" == true ]] && export BOOTDISK=/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore-nopicker.qcow2 \
+    ; [[ "${GENERATE_UNIQUE}" == true ]] && { \
+        ./Docker-OSX/custom/generate-unique-machine-values.sh \
         --count 1 \
         --tsv ./serial.tsv \
         --bootdisks \
         --output-bootdisk "${BOOTDISK:-/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore.qcow2}" \
         --output-env "${ENV:=/env}" \
-    && source "${ENV}" \
-    ; [[ "${GENERATE_SPECIFIC}" == true ]] \
-            && source /env \
+        && source "${ENV}" \
+    ; } \
+    ; [[ "${GENERATE_SPECIFIC}" == true ]] && { \
+            source /env \
             || ./Docker-OSX/custom/generate-specific-bootdisk.sh \
             --model "${DEVICE_MODEL}" \
             --serial "${SERIAL}" \
@@ -134,6 +135,7 @@ CMD sudo chown "$(id -u)":"$(id -g)" "${IMAGE_PATH}" "${BOOTDISK}" 2>/dev/null |
             --uuid "${UUID}" \
             --mac-address "${MAC_ADDRESS}" \
             --output-bootdisk "${BOOTDISK:-/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore.qcow2}" \
+    ; } \
     ; case "$(file --brief /bootdisk)" in \
         QEMU\ QCOW2\ Image* ) export BOOTDISK=/bootdisk \
             ;; \

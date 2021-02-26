@@ -141,19 +141,20 @@ ENV BOILERPLATE="By using this Dockerfile, you hereby agree that you are a secur
 
 CMD echo "${BOILERPLATE}" \
     && [[ "${TERMS_OF_USE}" = i_agree ]] || exit 1 \
-    && echo "Disk is being copied between layers... Please wait a minute..." \
+    ; echo "Disk is being copied between layers... Please wait a minute..." \
     && sudo chown "$(id -u)":"$(id -g)" "${IMAGE_PATH}" "${BOOTDISK}" 2>/dev/null || true \
     ; [[ "${NOPICKER}" == true ]] && export BOOTDISK=/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore-nopicker.qcow2 \
-    ; [[ "${GENERATE_UNIQUE}" == true ]] \
-        && ./Docker-OSX/custom/generate-unique-machine-values.sh \
+    ; [[ "${GENERATE_UNIQUE}" == true ]] && { \
+        ./Docker-OSX/custom/generate-unique-machine-values.sh \
         --count 1 \
         --tsv ./serial.tsv \
         --bootdisks \
         --output-bootdisk "${BOOTDISK:-/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore.qcow2}" \
         --output-env "${ENV:=/env}" \
-    && source "${ENV}" \
-    ; [[ "${GENERATE_SPECIFIC}" == true ]] \
-            && source /env \
+        && source "${ENV}" \
+    ; } \
+    ; [[ "${GENERATE_SPECIFIC}" == true ]] && { \
+            source /env \
             || ./Docker-OSX/custom/generate-specific-bootdisk.sh \
             --model "${DEVICE_MODEL}" \
             --serial "${SERIAL}" \
@@ -161,6 +162,7 @@ CMD echo "${BOILERPLATE}" \
             --uuid "${UUID}" \
             --mac-address "${MAC_ADDRESS}" \
             --output-bootdisk "${BOOTDISK:-/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore.qcow2}" \
+    ; } \
     ; case "$(file --brief /bootdisk)" in \
         QEMU\ QCOW2\ Image* ) export BOOTDISK=/bootdisk \
             ;; \
