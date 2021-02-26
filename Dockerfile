@@ -271,7 +271,10 @@ CMD sudo chown "$(id -u)":"$(id -g)" "${IMAGE_PATH}" "${BOOTDISK}" 2>/dev/null |
         directory* ) export IMAGE_PATH=/home/arch/OSX-KVM/mac_hdd_ng.img \
             ;; \
     esac \
-    ; [[ "${NOPICKER}" == true ]] && export BOOTDISK=/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore-nopicker.qcow2 \
+    ; [[ "${NOPICKER}" == true ]] && { \
+        sed -i '/^.*InstallMedia.*/d' Launch.sh \
+        && export BOOTDISK=/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore-nopicker.qcow2 \
+    ; } \
     ; [[ "${GENERATE_UNIQUE}" == true ]] && { \
         ./Docker-OSX/custom/generate-unique-machine-values.sh \
         --count 1 \

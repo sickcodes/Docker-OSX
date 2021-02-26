@@ -116,7 +116,10 @@ CMD sudo chown "$(id -u)":"$(id -g)" "${IMAGE_PATH}" "${BOOTDISK}" 2>/dev/null |
         nohup Xvfb :99 -screen 0 1920x1080x16 \
         & until [[ "$(xrandr --query 2>/dev/null)" ]]; do sleep 1 ; done \
     ; } \
-    ; [[ "${NOPICKER}" == true ]] && export BOOTDISK=/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore-nopicker.qcow2 \
+    ; [[ "${NOPICKER}" == true ]] && { \
+        sed -i '/^.*InstallMedia.*/d' Launch.sh \
+        && export BOOTDISK=/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore-nopicker.qcow2 \
+    ; } \
     ; [[ "${GENERATE_UNIQUE}" == true ]] && { \
         ./Docker-OSX/custom/generate-unique-machine-values.sh \
         --count 1 \
@@ -126,7 +129,7 @@ CMD sudo chown "$(id -u)":"$(id -g)" "${IMAGE_PATH}" "${BOOTDISK}" 2>/dev/null |
         --output-env "${ENV:=/env}" \
     ; } \
     ; [[ "${GENERATE_SPECIFIC}" == true ]] && { \
-            source "${ENV}" \
+            source "${ENV:=/env}" \
             || ./Docker-OSX/custom/generate-specific-bootdisk.sh \
             --model "${DEVICE_MODEL}" \
             --serial "${SERIAL}" \
