@@ -151,10 +151,9 @@ CMD echo "${BOILERPLATE}" \
         --bootdisks \
         --output-bootdisk "${BOOTDISK:-/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore.qcow2}" \
         --output-env "${ENV:=/env}" \
-        && source "${ENV}" \
     ; } \
     ; [[ "${GENERATE_SPECIFIC}" == true ]] && { \
-            source /env \
+            source "${ENV:=/env}" \
             || ./Docker-OSX/custom/generate-specific-bootdisk.sh \
             --model "${DEVICE_MODEL}" \
             --serial "${SERIAL}" \
