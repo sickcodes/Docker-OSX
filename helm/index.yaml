@@ -3,9 +3,9 @@ entries:
   docker-osx:
   - apiVersion: v1
     appVersion: 0.0.1.0
-    created: "2021-02-12T18:10:08.054368621Z"
+    created: "2021-02-27T04:15:48.784861502Z"
     description: Containerized OSX! Run OSX in a pod, headlessly, or with Xvfb. Test your Apps and master CI/CD processes.
-    digest: 04e88d78156fa1de709a3dad16558cb8f0bd1c1f0bde8144d530c9a0c143123a
+    digest: 5a62a9291b1494b9cfaa0708ab7bab9d13cca30adbeaced3d29a5bb6935caac9
     keywords:
     - docker-osx
     - mac
@@ -19,6 +19,6 @@ entries:
     - osx
     name: docker-osx
     urls:
-    - https://sickcodes.github.io/Docker-OSX/helm/docker-osx-0.1.0.tgz
-    version: 0.1.0
-generated: "2021-02-12T18:10:08.053067083Z"
+    - https://sickcodes.github.io/Docker-OSX/helm/docker-osx-0.2.0.tgz
+    version: 0.2.0
+generated: "2021-02-27T04:15:48.782073839Z"
