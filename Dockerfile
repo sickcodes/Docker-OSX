@@ -8,7 +8,7 @@
 # Repo:             https://github.com/sickcodes/Docker-OSX/
 # Title:            Mac on Docker (Docker-OSX)
 # Author:           Sick.Codes https://sick.codes/
-# Version:          3.2
+# Version:          4.0
 # License:          GPLv3+
 #
 # All credits for OSX-KVM and the rest at @Kholia's repo: https://github.com/kholia/osx-kvm

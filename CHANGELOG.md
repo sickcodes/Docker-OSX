@@ -1,5 +1,6 @@
 |Version|Date|Notes|
 |---|---|---|
+|4.0|2021-02-27|Add big-sur support. Use `sickcodes/docker-osx:big-sur` or build using `--build-arg VERSION=11`|
 |   |2021-02-26|Change `-e NOPICKER=true` to simply do `sed -i '/^.*InstallMedia.*/d' Launch.sh` and `export BOOTDISK=/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore-nopicker.qcow2`.|
 |3.2|2021-02-25|Add a script to generate unique machine serial numbers. Add a script to generate a bootdisk from given serial numbers. Add Linux for libguestfs which allows the docker container to make QEMU bootdisks with specific serial numbers.|
 |   |2021-02-21|Add NOPICKER environment variable to ALL images.|

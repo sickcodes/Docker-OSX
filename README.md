@@ -15,7 +15,9 @@ https://github.com/sickcodes/Docker-OSX/blob/master/CREDITS.md
 
 Docker Hub: https://hub.docker.com/r/sickcodes/docker-osx
 
-- sickcodes/docker-osx:latest - base recovery image
+- sickcodes/docker-osx:latest - base recovery image (10)
+
+- sickcodes/docker-osx:big-sur - base recovery image (11)
 
 - sickcodes/docker-osx:naked - supply your own .img file
 
@@ -84,12 +86,21 @@ Use `docker commit`, copy the ID, and then `docker start ID`
 
 docker pull sickcodes/docker-osx:latest
 
+# catalina
 docker run -it \
     --device /dev/kvm \
     -p 50922:10022 \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
     -e "DISPLAY=${DISPLAY:-:0.0}" \
     sickcodes/docker-osx:latest
+
+# big sur
+docker run -it \
+    --device /dev/kvm \
+    -p 50922:10022 \
+    -v /tmp/.X11-unix:/tmp/.X11-unix \
+    -e "DISPLAY=${DISPLAY:-:0.0}" \
+    sickcodes/docker-osx:big-sur
 
 # Wait 2-3 minutes until you see the logo.
 
@@ -212,7 +223,8 @@ docker run -it \
     sickcodes/docker-osx:naked
 ```
 
-# Features In Docker-OSX v3.2
+# Features In Docker-OSX v4
+- `sickcodes/docker-osx:big-sur` - original base recovery image for latest OS (safe)
 - Serial number generators. [See below or ./custom](https://github.com/sickcodes/Docker-OSX/tree/master/custom)
 - Full auto mode: boot straight to OSX shell and even run commands as runtime arguments!
 - `sickcodes/docker-osx:latest` - original base recovery image (safe)
