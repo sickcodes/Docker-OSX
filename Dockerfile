@@ -150,7 +150,7 @@ RUN touch enable-ssh.sh \
 
 # RUN yes | sudo pacman -Syu qemu libvirt dnsmasq virt-manager bridge-utils edk2-ovmf netctl libvirt-dbus --overwrite --noconfirm
 
-RUN yes | sudo pacman -Syu qemu libvirt dnsmasq virt-manager bridge-utils openresolv jack ebtables edk2-ovmf netctl libvirt-dbus --overwrite --noconfirm \
+RUN yes | sudo pacman -Syu qemu libvirt dnsmasq virt-manager bridge-utils openresolv jack ebtables edk2-ovmf netctl libvirt-dbus wget --overwrite --noconfirm \
     && yes | sudo pacman -Scc
 
 # TEMP-FIX for pacman issue
@@ -164,10 +164,23 @@ RUN patched_glibc=glibc-linux4-2.33-4-x86_64.pkg.tar.zst \
 
 WORKDIR /home/arch/OSX-KVM
 
-RUN python fetch-macOS.py --version "${VERSION}" \
-    && qemu-img convert BaseSystem.dmg -O qcow2 -p -c BaseSystem.img \
-    && qemu-img create -f qcow2 mac_hdd_ng.img "${SIZE}" \
-    && rm -f BaseSystem.dmg
+RUN [[ "${VERSION%%.*}" -lt 11 ]] && { python fetch-macOS.py --version "${VERSION}" \
+        && qemu-img convert BaseSystem.dmg -O qcow2 -p -c BaseSystem.img \
+        && qemu-img create -f qcow2 mac_hdd_ng.img "${SIZE}" \
+        && rm -f BaseSystem.dmg \
+    ; } || true
+
+# VERSION=11.2.1
+# this downloads LATEST ONLY
+ARG FETCH_MAC_OS_RAW=https://raw.githubusercontent.com/acidanthera/OpenCorePkg/master/Utilities/macrecovery/macrecovery.py
+# submit a PR to here to get the version option https://github.com/acidanthera/OpenCorePkg/blob/master/Utilities/macrecovery/macrecovery.py
+
+RUN [[ "${VERSION%%.*}" -ge 11 ]] && { wget "${FETCH_MAC_OS_RAW}" \
+        && python macrecovery.py download \
+        && qemu-img convert BaseSystem.dmg -O qcow2 -p -c BaseSystem.img \
+        && qemu-img create -f qcow2 mac_hdd_ng.img "${SIZE}" \
+        && rm -f BaseSystem.dmg \
+    ; } || true
 
 # > Launch.sh
 # > Docker-OSX.xml
