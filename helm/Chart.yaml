@@ -2,7 +2,7 @@ apiVersion: v1
 appVersion: "0.0.1.0"
 description: "Containerized OSX! Run OSX in a pod, headlessly, or with Xvfb. Test your Apps and master CI/CD processes."
 name: docker-osx
-version: 0.1.0
+version: 0.2.0
 keywords:
 - docker-osx
 - mac

@@ -138,8 +138,8 @@ download_qcow_efi_folder () {
 }
 
 generate_bootdisk () {
-    [[ -e ./config-nopicker-custom.plist ]] || wget https://raw.githubusercontent.com/sickcodes/Docker-OSX/custom-identity/custom/config-nopicker-custom.plist
-    [[ -e ./opencore-image-ng.sh ]] || wget https://raw.githubusercontent.com/sickcodes/Docker-OSX/custom-identity/custom/opencore-image-ng.sh && chmod +x opencore-image-ng.sh
+    [[ -e ./config-nopicker-custom.plist ]] || wget https://raw.githubusercontent.com/sickcodes/Docker-OSX/master/custom/config-nopicker-custom.plist
+    [[ -e ./opencore-image-ng.sh ]] || wget https://raw.githubusercontent.com/sickcodes/Docker-OSX/master/custom/opencore-image-ng.sh && chmod +x opencore-image-ng.sh
     # plist required for bootdisks, so create anyway.
     if [[ "${DEVICE_MODEL}" ]] \
             && [[ "${SERIAL}" ]] \
