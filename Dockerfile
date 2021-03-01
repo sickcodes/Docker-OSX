@@ -66,12 +66,6 @@ ARG RANKMIRRORS
 ARG MIRROR_COUNTRY=US
 ARG MIRROR_COUNT=10
 
-# TEMP-FIX for pacman issue
-RUN patched_glibc=glibc-linux4-2.33-4-x86_64.pkg.tar.zst \
-    && curl -LO "https://raw.githubusercontent.com/sickcodes/Docker-OSX/master/${patched_glibc}" \
-    && bsdtar -C / -xvf "${patched_glibc}" || echo "Everything is fine."
-# TEMP-FIX for pacman issue
-
 RUN if [[ "${RANKMIRRORS}" ]]; then \
         { pacman -Sy wget --noconfirm || pacman -Syu wget --noconfirm ; } \
         ; wget -O ./rankmirrors "https://raw.githubusercontent.com/sickcodes/Docker-OSX/master/rankmirrors" \
@@ -97,12 +91,6 @@ RUN pacman -Syu git zip vim nano alsa-utils openssh --noconfirm \
     && tee -a /etc/sudoers <<< 'arch ALL=(ALL) NOPASSWD: ALL' \
     && mkdir /home/arch \
     && chown arch:arch /home/arch
-
-# TEMP-FIX for pacman issue
-RUN patched_glibc=glibc-linux4-2.33-4-x86_64.pkg.tar.zst \
-    && curl -LO "https://raw.githubusercontent.com/sickcodes/Docker-OSX/master/${patched_glibc}" \
-    && bsdtar -C / -xvf "${patched_glibc}" || echo "Everything is fine."
-# TEMP-FIX for pacman issue
 
 # allow ssh to container
 RUN mkdir -m 700 /root/.ssh
@@ -153,12 +141,6 @@ RUN touch enable-ssh.sh \
 RUN yes | sudo pacman -Syu qemu libvirt dnsmasq virt-manager bridge-utils openresolv jack ebtables edk2-ovmf netctl libvirt-dbus wget --overwrite --noconfirm \
     && yes | sudo pacman -Scc
 
-# TEMP-FIX for pacman issue
-RUN patched_glibc=glibc-linux4-2.33-4-x86_64.pkg.tar.zst \
-    && curl -LO "https://raw.githubusercontent.com/sickcodes/Docker-OSX/master/${patched_glibc}" \
-    && bsdtar -C / -xvf "${patched_glibc}" || echo "Everything is fine."
-# TEMP-FIX for pacman issue
-
 # RUN sudo systemctl enable libvirtd.service
 # RUN sudo systemctl enable virtlogd.service
 
@@ -192,9 +174,6 @@ ARG LINUX=true
 # required to use libguestfs inside a docker container, to create bootdisks for docker-osx on-the-fly
 RUN if [[ "${LINUX}" == true ]]; then \
         sudo pacman -Syu linux libguestfs --noconfirm \
-        && patched_glibc=glibc-linux4-2.33-4-x86_64.pkg.tar.zst \
-        && curl -LO "https://raw.githubusercontent.com/sickcodes/Docker-OSX/master/${patched_glibc}" \
-        && bsdtar -C / -xvf "${patched_glibc}" || echo "Everything is fine." \
     ; fi
 
 # optional --build-arg to change branches for testing
