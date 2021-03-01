@@ -577,12 +577,11 @@ sudo mv somedir/mac_hdd_ng.img .
 
 # Internet Speeds
 
-### Slow internet but iMessage & iCloud compatability
-`-e NETWORKING=e1000-82545em`
-
-### FAST internet but not compatable with iMessage & iCloud
+### FAST internet
 `-e NETWORKING=vmxnet3`
 
+### SLOW internet
+`-e NETWORKING=e1000-82545em`
 
 # DESTROY: Wipe old images to free disk space
 
