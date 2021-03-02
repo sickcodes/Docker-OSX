@@ -47,9 +47,9 @@ Thank you to @cephasara for this major contribution.
 
 ### There are 3 images: **latest**, **auto** and **naked**.
 
-`sickcodes/docker-osx:latest` - [I want to try it out.](https://github.com/sickcodes/Docker-OSX#quick-start-175gb-pre-made-image)
+`sickcodes/docker-osx:latest` - [I want to try it out.](https://github.com/sickcodes/Docker-OSX#quick-start-large-pre-made-image)
 
-`sickcodes/docker-osx:latest` - [I want to use Docker-OSX to develop/secure Apps in Xcode (sign into Xcode, Transporter)](https://github.com/sickcodes/Docker-OSX#quick-start-docker-osx)
+`sickcodes/docker-osx:latest` - [I want to use Docker-OSX to develop/secure Apps in Xcode (sign into Xcode, Transporter)](https://github.com/sickcodes/Docker-OSX#basic-quick-start-docker-osx)
 
 `sickcodes/docker-osx:naked` - [I want to use Docker-OSX in CI/CD (sign into Xcode, Transporter)](https://github.com/sickcodes/Docker-OSX#fully-headless-using-my-own-image-for-cicd)
 Create your personal image using `:latest`. And then pull your image out. And then use duplicate that image again & again for use in `:naked`.
