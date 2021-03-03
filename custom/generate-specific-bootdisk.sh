@@ -15,12 +15,14 @@ help_text="Usage: generate-specific-bootdisk.sh
 
 General options:
     --model <string>                Device model, e.g. 'iMacPro1,1'
-    --serial <filename>             Device Serial number.
-    --board-serial <filename>       Board Serial number.
-    --uuid <filename>               SmUUID.
-    --mac-address <string>          Used to set the ROM value; lowercased and without a colon.
-    --output-bootdisk <filename>    Optionally change the bootdisk output filename.
-    --custom-plist <filename>       Optionally change the input plist.
+    --serial <filename>             Device Serial number
+    --board-serial <filename>       Board Serial number
+    --uuid <filename>               SmUUID
+    --mac-address <string>          Used to set the ROM value; lowercased and without a colon
+    --width <string>                Resolution x axis length in pixels (default 1920)
+    --height <string>               Resolution y axis length in pixels (default 1080
+    --output-bootdisk <filename>    Optionally change the bootdisk output filename
+    --custom-plist <filename>       Optionally change the input plist
 
     --help, -h, help                Display this help and exit
 
@@ -31,7 +33,9 @@ Example:
         --board-serial C027251024NJG36UE \
         --uuid 5CCB366D-9118-4C61-A00A-E5BAF3BED451 \
         --mac-address A8:5C:2C:9A:46:2F \
-        --output-bootdisk OpenCore-nopicker.qcow2
+        --output-bootdisk OpenCore-nopicker.qcow2 \
+        --widht 1920 \
+        --height 1080
 
 Author:  Sick.Codes https://sick.codes/
 Project: https://github.com/sickcodes/Docker-OSX/
@@ -97,6 +101,26 @@ while (( "$#" )); do
                 shift
             ;;
 
+    --width=* )
+                export WIDTH="${1#*=}"
+                shift
+            ;;
+    --width* )
+                export WIDTH="${2}"
+                shift
+                shift
+            ;;
+
+    --height=* )
+                export HEIGHT="${1#*=}"
+                shift
+            ;;
+    --height* )
+                export HEIGHT="${2}"
+                shift
+                shift
+            ;;
+
     --output-bootdisk=* )
                 export OUTPUT_QCOW="${1#*=}"
                 shift
@@ -153,6 +177,8 @@ generate_bootdisk () {
             -e s/{{BOARD_SERIAL}}/"${BOARD_SERIAL}"/g \
             -e s/{{UUID}}/"${UUID}"/g \
             -e s/{{ROM}}/"${ROM}"/g \
+            -e s/{{WIDTH}}/"${WIDTH:-1920}"/g \
+            -e s/{{HEIGHT}}/"${HEIGHT:-1080}"/g \
             "${PLIST_MASTER}" > ./tmp.config.plist || exit 1
     else
         cat <<EOF
@@ -163,6 +189,9 @@ Error: one of the following values is missing:
 --board-serial "${BOARD_SERIAL:-MISSING}"
 --uuid "${UUID:-MISSING}"
 --mac-address "${MAC_ADDRESS:-MISSING}"
+
+--width "${WIDTH:-1920}"
+--height "${HEIGHT:-1080}"
 
 EOF
         exit 1

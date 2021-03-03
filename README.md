@@ -493,6 +493,43 @@ sudo nohup dockerd &
 sudo systemctl enable docker
 ```
 
+# How to Forward Additional Ports from the guest.
+
+This is how it visually looks:
+
+`host:10023 <-> 10023:container:10023 <-> 80:guest`
+
+```bash
+On the host
+```bash
+docker run -it \
+    --device /dev/kvm \
+    -p 50922:10022 \
+    -e ADDITIONAL_PORTS='hostfwd=tcp::10023-:80,' \
+    -p 10023:10023 \
+    sickcodes/docker-osx:auto
+```
+
+Inside the container:
+```bash
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+brew install nginx
+sudo sed -i -e 's/8080/80/' /usr/local/etc/nginx/nginx.confcd
+# sudo nginx -s stop
+sudo nginx
+```
+
+nginx should appear on the host at port 10023.
+
+You can string multiple statements, for example:
+
+```bash
+    -e ADDITIONAL_PORTS='hostfwd=tcp::10023-:80,hostfwd=tcp::10043-:443,'
+    -p 10023:10023 \
+    -p 10043:10043 \
+```
+
 # How to Enable Network Forwarding
 
 Allow ipv4 forwarding for bridged networking connections:
@@ -706,11 +743,13 @@ For serial numbers, generate them in `./custom` OR make docker generate them at 
 At any time, verify your serial number before logging in iCloud, etc.
 
 ```bash
+# this is a quick way to check your serial number via cli inside OSX
 ioreg -l | grep IOPlatformSerialNumber
 
 # or from the host
-sshpass -p alpine ssh user@localhost -p 50922 'ioreg -l | grep IOPlatformSerialNumber'
+sshpass -p 'alpine' ssh user@localhost -p 50922 'ioreg -l | grep IOPlatformSerialNumber'
 ```
+# This example generates a random set of serial numbers at runtime, headlessly
 
 ```bash
 # proof of concept only, generates random serial numbers, headlessly, and quits right after.
@@ -723,6 +762,8 @@ docker run --rm -it \
     -e OSX_COMMANDS='ioreg -l | grep IOPlatformSerialNumber' \
     sickcodes/docker-osx:auto
 ```
+
+# This example generates a specific set of serial numbers at runtime
 
 ```bash
 # run the same as above 17gb auto image, with SSH, with nopicker, and save the bootdisk for later.
@@ -743,6 +784,7 @@ docker run -it \
     sickcodes/docker-osx:auto
 ```
 
+# This example generates a specific set of serial numbers at runtime, with your existing image, at 1000x1000 display resolution.
 
 ```bash
 # run an existing image in current directory, with a screen, with SSH, with nopicker, and save the bootdisk for later.
@@ -762,6 +804,8 @@ docker run -it \
     -e BOARD_SERIAL="C027251024NJG36UE" \
     -e UUID="5CCB366D-9118-4C61-A00A-E5BAF3BED451" \
     -e MAC_ADDRESS="A8:5C:2C:9A:46:2F" \
+    -e WIDTH=1000 \
+    -e HEIGHT=1000 \
     -e BOOTDISK=/bootdisk \
     -v "${PWD}/mynewbootdisk.qcow:/bootdisk" \
     -v "${PWD}/mac_hdd_ng.img:/image" \
@@ -779,6 +823,36 @@ Or you can generate them inside the `./custom` folder. And then use:
     -e UUID="" \
     -e MAC_ADDRESS="" \
 ```
+
+# Change Resolution Docker-OSX
+
+The display resolution is controlled by this line:
+
+https://github.com/sickcodes/Docker-OSX/blob/master/custom/config-nopicker-custom.plist#L819
+
+However, you need to mount that disk. Boring!
+
+Instead, you can simply add the following to any image:
+
+```bash
+-e GENERATE_UNIQUE=true \
+-e WIDTH=1920 \
+-e HEIGHT=1080 \
+```
+
+It will take around 1 minute longer to boot because it will make a new boot partition.
+
+```bash
+-e GENERATE_SPECIFIC=true \
+-e WIDTH=1920 \
+-e HEIGHT=1080 \
+-e SERIAL="" \
+-e BOARD_SERIAL="" \
+-e UUID="" \
+-e MAC_ADDRESS="" \
+```
+
+Must be used with either `-e GENERATE_UNIQUE=true` or `-e GENERATE_SPECIFIC=true`.
 
 #### Persistence from generating serial numbers is obviously ideal:
 

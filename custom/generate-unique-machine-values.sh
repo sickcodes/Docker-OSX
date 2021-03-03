@@ -21,6 +21,8 @@ General options:
     --output-bootdisk <filename>    Optionally change the bootdisk qcow output filename. Useless when count > 1.
     --output-env <filename>         Optionally change the bootdisk env filename. Useless when count > 1.
     --output-dir <directory>        Optionally change the script output location.
+    --width <string>                Resolution x axis length in pixels (default 1920)
+    --height <string>               Resolution y axis length in pixels (default 1080
 
     --help, -h, help                Display this help and exit
     --plists                        Create corresponding config.plists for each serial set.
@@ -132,6 +134,27 @@ while (( "$#" )); do
                 shift
             ;;
 
+    --width=* )
+                export WIDTH="${1#*=}"
+                shift
+            ;;
+
+    --width* )
+                export WIDTH="${2}"
+                shift
+                shift
+            ;;
+
+    --height=* )
+                export HEIGHT="${1#*=}"
+                shift
+            ;;
+    --height* )
+                export HEIGHT="${2}"
+                shift
+                shift
+            ;;
+
     --plists )
                 export CREATE_PLISTS=1
                 shift
@@ -231,6 +254,8 @@ export SERIAL="${SERIAL}"
 export BOARD_SERIAL="${BOARD_SERIAL}"
 export UUID="${UUID}"
 export MAC_ADDRESS="${MAC_ADDRESS}"
+export WIDTH="${WIDTH:=1920}"
+export HEIGHT="${HEIGHT:=1080}"
 EOF
 
             # plist required for bootdisks, so create anyway.
@@ -244,6 +269,8 @@ EOF
                     -e s/{{BOARD_SERIAL}}/"${BOARD_SERIAL}"/g \
                     -e s/{{UUID}}/"${UUID}"/g \
                     -e s/{{ROM}}/"${ROM}"/g \
+                    -e s/{{WIDTH}}/"${WIDTH}"/g \
+                    -e s/{{HEIGHT}}/"${HEIGHT}"/g \
                     "${PLIST_MASTER}" > "${OUTPUT_DIRECTORY}/plists/${SERIAL}.config.plist" || exit 1
             fi
 
