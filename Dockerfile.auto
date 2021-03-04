@@ -152,11 +152,13 @@ CMD echo "${BOILERPLATE}" \
     ; } \
     ; [[ "${GENERATE_UNIQUE}" == true ]] && { \
         ./Docker-OSX/custom/generate-unique-machine-values.sh \
-        --count 1 \
-        --tsv ./serial.tsv \
-        --bootdisks \
-        --output-bootdisk "${BOOTDISK:-/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore.qcow2}" \
-        --output-env "${ENV:=/env}" || exit 1 \
+            --count 1 \
+            --tsv ./serial.tsv \
+            --bootdisks \
+            --width "${WIDTH:-1920}" \
+            --height "${HEIGHT:-1080}" \
+            --output-bootdisk "${BOOTDISK:-/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore.qcow2}" \
+            --output-env "${ENV:=/env}" || exit 1 \
     ; } \
     ; [[ "${GENERATE_SPECIFIC}" == true ]] && { \
             source "${ENV:=/env}" \
@@ -166,6 +168,8 @@ CMD echo "${BOILERPLATE}" \
             --board-serial "${BOARD_SERIAL}" \
             --uuid "${UUID}" \
             --mac-address "${MAC_ADDRESS}" \
+            --width "${WIDTH:-1920}" \
+            --height "${HEIGHT:-1080}" \
             --output-bootdisk "${BOOTDISK:-/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore.qcow2}" || exit 1 \
     ; } \
     ; case "$(file --brief /bootdisk)" in \
