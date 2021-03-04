@@ -152,6 +152,7 @@ CMD echo "${BOILERPLATE}" \
     ; } \
     ; [[ "${GENERATE_UNIQUE}" == true ]] && { \
         ./Docker-OSX/custom/generate-unique-machine-values.sh \
+            --master-plist-url="${MASTER_PLIST_URL}" \
             --count 1 \
             --tsv ./serial.tsv \
             --bootdisks \
@@ -163,6 +164,7 @@ CMD echo "${BOILERPLATE}" \
     ; [[ "${GENERATE_SPECIFIC}" == true ]] && { \
             source "${ENV:=/env}" \
             || ./Docker-OSX/custom/generate-specific-bootdisk.sh \
+            --master-plist-url="${MASTER_PLIST_URL}" \
             --model "${DEVICE_MODEL}" \
             --serial "${SERIAL}" \
             --board-serial "${BOARD_SERIAL}" \

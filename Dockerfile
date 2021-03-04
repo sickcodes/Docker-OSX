@@ -273,6 +273,8 @@ ENV NOPICKER=false
 ENV WIDTH=1920
 ENV HEIGHT=1080
 
+ENV MASTER_PLIST_URL="https://raw.githubusercontent.com/sickcodes/Docker-OSX/master/custom/config-nopicker-custom.plist"
+
 VOLUME ["/tmp/.X11-unix"]
 
 # check if /image is a disk image or a directory. This allows you to optionally use -v disk.img:/image
@@ -307,6 +309,7 @@ CMD sudo chown -R $(id -u):$(id -g) /dev/kvm /dev/snd "${IMAGE_PATH}" "${BOOTDIS
     ; } \
     ; [[ "${GENERATE_UNIQUE}" == true ]] && { \
         ./Docker-OSX/custom/generate-unique-machine-values.sh \
+            --master-plist-url="${MASTER_PLIST_URL}" \
             --count 1 \
             --tsv ./serial.tsv \
             --bootdisks \
@@ -318,6 +321,7 @@ CMD sudo chown -R $(id -u):$(id -g) /dev/kvm /dev/snd "${IMAGE_PATH}" "${BOOTDIS
     ; [[ "${GENERATE_SPECIFIC}" == true ]] && { \
             source "${ENV:=/env}" \
             || ./Docker-OSX/custom/generate-specific-bootdisk.sh \
+            --master-plist-url="${MASTER_PLIST_URL}" \
             --model "${DEVICE_MODEL}" \
             --serial "${SERIAL}" \
             --board-serial "${BOARD_SERIAL}" \
