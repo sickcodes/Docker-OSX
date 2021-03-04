@@ -159,7 +159,7 @@ CMD echo "${BOILERPLATE}" \
             --width "${WIDTH:-1920}" \
             --height "${HEIGHT:-1080}" \
             --output-bootdisk "${BOOTDISK:-/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore.qcow2}" \
-            --output-env "${ENV:=/env}" || exit 1 \
+            --output-env "${ENV:=/env}" \
     ; } \
     ; [[ "${GENERATE_SPECIFIC}" == true ]] && { \
             source "${ENV:=/env}" 2>/dev/null \
@@ -172,7 +172,7 @@ CMD echo "${BOILERPLATE}" \
             --mac-address "${MAC_ADDRESS}" \
             --width "${WIDTH:-1920}" \
             --height "${HEIGHT:-1080}" \
-            --output-bootdisk "${BOOTDISK:-/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore.qcow2}" || exit 1 \
+            --output-bootdisk "${BOOTDISK:-/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore.qcow2}"  \
     ; } \
     ; case "$(file --brief /bootdisk)" in \
         QEMU\ QCOW2\ Image* ) export BOOTDISK=/bootdisk \
