@@ -22,7 +22,12 @@ General options:
     --width <string>                Resolution x axis length in pixels (default 1920)
     --height <string>               Resolution y axis length in pixels (default 1080
     --output-bootdisk <filename>    Optionally change the bootdisk output filename
-    --custom-plist <filename>       Optionally change the input plist
+    
+    --master-plist-url <url>        Specify an alternative master plist, via URL.
+    --custom-plist | --master-plist <filename>
+                                    Optionally change the input plist. Placeholders:
+                                        {{DEVICE_MODEL}}, {{SERIAL}}, {{BOARD_SERIAL}},
+                                        {{UUID}}, {{ROM}}, {{WIDTH}}, {{HEIGHT}}
 
     --help, -h, help                Display this help and exit
 
@@ -131,12 +136,33 @@ while (( "$#" )); do
                 shift
             ;;
 
+    --master-plist-url=* )
+                export MASTER_PLIST_URL="${1#*=}"
+                shift
+            ;;
+            
+    --master-plist-url* )
+                export MASTER_PLIST_URL="${2}"
+                shift
+                shift
+            ;;
+
+    --master-plist=* )
+                export MASTER_PLIST="${1#*=}"
+                shift
+            ;;
+    --master-plist* )
+                export MASTER_PLIST="${2}"
+                shift
+                shift
+            ;;
+
     --custom-plist=* )
-                export INPUT_PLIST="${1#*=}"
+                export MASTER_PLIST="${1#*=}"
                 shift
             ;;
     --custom-plist* )
-                export INPUT_PLIST="${2}"
+                export MASTER_PLIST="${2}"
                 shift
                 shift
             ;;
@@ -162,8 +188,23 @@ download_qcow_efi_folder () {
 }
 
 generate_bootdisk () {
-    [[ -e ./config-nopicker-custom.plist ]] || wget https://raw.githubusercontent.com/sickcodes/Docker-OSX/master/custom/config-nopicker-custom.plist
+
+    if [[ "${MASTER_PLIST}" ]]; then
+        [[ -e "${MASTER_PLIST}" ]] || echo "Could not find: ${MASTER_PLIST}"
+    elif [[ "${MASTER_PLIST}" ]] && [[ "${MASTER_PLIST_URL}" ]];
+        echo 'You specified both a custom plist file AND a custom plist url. Use one or the other.'
+    elif [[ "${MASTER_PLIST_URL}" ]];
+        wget -o "./${MASTER_PLIST:=/config-custom.plist}" "${MASTER_PLIST_URL}" \
+            || echo "Could not download ${MASTER_PLIST_URL}" && exit 1
+    else
+        MASTER_PLIST_URL='https://raw.githubusercontent.com/sickcodes/Docker-OSX/master/custom/config-nopicker-custom.plist'
+        wget -o "./${MASTER_PLIST:=/config-nopicker-custom.plist}" "${MASTER_PLIST_URL}" \
+            || echo "Could not download ${MASTER_PLIST_URL}" && exit 1
+    fi
+
+
     [[ -e ./opencore-image-ng.sh ]] || wget https://raw.githubusercontent.com/sickcodes/Docker-OSX/master/custom/opencore-image-ng.sh && chmod +x opencore-image-ng.sh
+
     # plist required for bootdisks, so create anyway.
     if [[ "${DEVICE_MODEL}" ]] \
             && [[ "${SERIAL}" ]] \
@@ -179,7 +220,7 @@ generate_bootdisk () {
             -e s/{{ROM}}/"${ROM}"/g \
             -e s/{{WIDTH}}/"${WIDTH:-1920}"/g \
             -e s/{{HEIGHT}}/"${HEIGHT:-1080}"/g \
-            "${PLIST_MASTER}" > ./tmp.config.plist || exit 1
+            "${MASTER_PLIST}" > ./tmp.config.plist || exit 1
     else
         cat <<EOF
 Error: one of the following values is missing:
@@ -198,7 +239,7 @@ EOF
     fi
 
     ./opencore-image-ng.sh \
-        --cfg "${INPUT_PLIST:-./tmp.config.plist}" \
+        --cfg "./tmp.config.plist" \
         --img "${OUTPUT_QCOW:-./${SERIAL}.OpenCore-nopicker.qcow2}" || exit 1
         rm ./tmp.config.plist
 
