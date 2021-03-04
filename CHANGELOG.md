@@ -1,5 +1,7 @@
 |Version|Date|Notes|
 |---|---|---|
+|4.1|2021-03-04|Add `-e MASTER_PLIST_URL` to all images to allow using your own remote plist.|
+|   |2021-03-03|Add `WIDTH` and `HEIGHT` to set the x and y resolutions, use in conjuction with serial numbers.|
 |   |2021-03-02|Add ADDITIONAL_PORTS, for example `-e ADDITIONAL_PORTS='hostfwd=tcp::23-:23,'`|
 |4.0|2021-02-27|Add big-sur support. Use `sickcodes/docker-osx:big-sur` or build using `--build-arg VERSION=11`|
 |   |2021-02-26|Change `-e NOPICKER=true` to simply do `sed -i '/^.*InstallMedia.*/d' Launch.sh` and `export BOOTDISK=/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore-nopicker.qcow2`.|

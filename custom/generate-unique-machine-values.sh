@@ -21,6 +21,14 @@ General options:
     --output-bootdisk <filename>    Optionally change the bootdisk qcow output filename. Useless when count > 1.
     --output-env <filename>         Optionally change the bootdisk env filename. Useless when count > 1.
     --output-dir <directory>        Optionally change the script output location.
+    --width <string>                Resolution x axis length in pixels (default 1920)
+    --height <string>               Resolution y axis length in pixels (default 1080
+
+    --master-plist-url <url>        Specify an alternative master plist, via URL.
+    --master-plist | --custom-plist <filename>
+                                    Optionally change the input plist. Placeholders:
+                                        {{DEVICE_MODEL}}, {{SERIAL}}, {{BOARD_SERIAL}},
+                                        {{UUID}}, {{ROM}}, {{WIDTH}}, {{HEIGHT}}
 
     --help, -h, help                Display this help and exit
     --plists                        Create corresponding config.plists for each serial set.
@@ -52,7 +60,6 @@ Project: https://github.com/sickcodes/Docker-OSX/
 "
 
 MACINFOPKG_VERSION=2.1.2
-PLIST_MASTER=config-nopicker-custom.plist
 
 # gather arguments
 while (( "$#" )); do
@@ -132,6 +139,60 @@ while (( "$#" )); do
                 shift
             ;;
 
+    --width=* )
+                export WIDTH="${1#*=}"
+                shift
+            ;;
+
+    --width* )
+                export WIDTH="${2}"
+                shift
+                shift
+            ;;
+
+    --height=* )
+                export HEIGHT="${1#*=}"
+                shift
+            ;;
+    --height* )
+                export HEIGHT="${2}"
+                shift
+                shift
+            ;;
+
+    --master-plist-url=* )
+                export MASTER_PLIST_URL="${1#*=}"
+                shift
+            ;;
+            
+    --master-plist-url* )
+                export MASTER_PLIST_URL="${2}"
+                shift
+                shift
+            ;;
+
+    --master-plist=* )
+                export MASTER_PLIST="${1#*=}"
+                shift
+            ;;
+
+    --master-plist* )
+                export MASTER_PLIST="${2}"
+                shift
+                shift
+            ;;
+
+    --custom-plist=* )
+                export MASTER_PLIST="${1#*=}"
+                shift
+            ;;
+
+    --custom-plist* )
+                export MASTER_PLIST="${2}"
+                shift
+                shift
+            ;;
+
     --plists )
                 export CREATE_PLISTS=1
                 shift
@@ -183,8 +244,22 @@ download_qcow_efi_folder () {
 
 
 generate_serial_sets () {
-    [[ -e ./config-nopicker-custom.plist ]] || wget https://raw.githubusercontent.com/sickcodes/Docker-OSX/master/custom/config-nopicker-custom.plist
+
+    if [[ "${MASTER_PLIST}" ]]; then
+        [[ -e "${MASTER_PLIST}" ]] || echo "Could not find: ${MASTER_PLIST}"
+    elif [[ "${MASTER_PLIST}" ]] && [[ "${MASTER_PLIST_URL}" ]]; then
+        echo 'You specified both a custom plist file AND a custom plist url. Use one or the other.'
+    elif [[ "${MASTER_PLIST_URL}" ]]; then
+        wget -O "${MASTER_PLIST:=./config-custom.plist}" "${MASTER_PLIST_URL}" \
+            || { echo "Could not download ${MASTER_PLIST_URL}" && exit 1 ; }
+    else
+        MASTER_PLIST_URL='https://raw.githubusercontent.com/sickcodes/Docker-OSX/master/custom/config-nopicker-custom.plist'
+        wget -O "${MASTER_PLIST:=./config-nopicker-custom.plist}" "${MASTER_PLIST_URL}" \
+            || { echo "Could not download ${MASTER_PLIST_URL}" && exit 1 ; }
+    fi
+
     [[ -e ./opencore-image-ng.sh ]] || wget https://raw.githubusercontent.com/sickcodes/Docker-OSX/master/custom/opencore-image-ng.sh && chmod +x opencore-image-ng.sh
+
     mkdir -p "${OUTPUT_DIRECTORY}/envs"
     export DATE_NOW="$(date +%F-%T)"
     export DEVICE_MODEL="${DEVICE_MODEL:=iMacPro1,1}"
@@ -231,6 +306,8 @@ export SERIAL="${SERIAL}"
 export BOARD_SERIAL="${BOARD_SERIAL}"
 export UUID="${UUID}"
 export MAC_ADDRESS="${MAC_ADDRESS}"
+export WIDTH="${WIDTH:=1920}"
+export HEIGHT="${HEIGHT:=1080}"
 EOF
 
             # plist required for bootdisks, so create anyway.
@@ -244,7 +321,9 @@ EOF
                     -e s/{{BOARD_SERIAL}}/"${BOARD_SERIAL}"/g \
                     -e s/{{UUID}}/"${UUID}"/g \
                     -e s/{{ROM}}/"${ROM}"/g \
-                    "${PLIST_MASTER}" > "${OUTPUT_DIRECTORY}/plists/${SERIAL}.config.plist" || exit 1
+                    -e s/{{WIDTH}}/"${WIDTH}"/g \
+                    -e s/{{HEIGHT}}/"${HEIGHT}"/g \
+                    "${MASTER_PLIST}" > "${OUTPUT_DIRECTORY}/plists/${SERIAL}.config.plist" || exit 1
             fi
 
             if [[ "${CREATE_QCOWS}" ]]; then

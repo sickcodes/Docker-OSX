@@ -5,11 +5,12 @@
 #  / /_/ / /_/ / /__/ ,< /  __/ /  / /_/ /___/ /   |
 # /_____/\____/\___/_/|_|\___/_/   \____//____/_/|_|
 #
-# Repo:             https://github.com/sickcodes/Docker-OSX/
-# Title:            Mac on Docker (Docker-OSX)
-# Author:           Sick.Codes https://sick.codes/
-# Version:          4.0
+# Title:            Docker-OSX (Mac on Docker)
+# Author:           Sick.Codes https://twitter.com/sickcodes
+# Version:          4.1
 # License:          GPLv3+
+# Repository:       https://github.com/sickcodes/Docker-OSX
+# Website:          https://sick.codes
 #
 # All credits for OSX-KVM and the rest at @Kholia's repo: https://github.com/kholia/osx-kvm
 # OpenCore support go to https://github.com/Leoyzen/KVM-Opencore
@@ -259,8 +260,21 @@ ENV NETWORKING=vmxnet3
 
 ENV NOPICKER=false
 
-ENV UNIQUE=false
-# Boolean for generating a bootdisk with new serials.
+# Boolean for generating a bootdisk with new random serials.
+ENV GENERATE_UNIQUE=false
+
+# Boolean for generating a bootdisk with specific serials.
+ENV GENERATE_SPECIFIC=false
+
+# boolean for skipping the disk selection menu at in the boot process
+ENV NOPICKER=false
+
+# The x and y coordinates for resolution.
+# Must be used with either -e GENERATE_UNIQUE=true or -e GENERATE_SPECIFIC=true.
+ENV WIDTH=1920
+ENV HEIGHT=1080
+
+ENV MASTER_PLIST_URL="https://raw.githubusercontent.com/sickcodes/Docker-OSX/master/custom/config-nopicker-custom.plist"
 
 VOLUME ["/tmp/.X11-unix"]
 
@@ -296,21 +310,27 @@ CMD sudo chown -R $(id -u):$(id -g) /dev/kvm /dev/snd "${IMAGE_PATH}" "${BOOTDIS
     ; } \
     ; [[ "${GENERATE_UNIQUE}" == true ]] && { \
         ./Docker-OSX/custom/generate-unique-machine-values.sh \
-        --count 1 \
-        --tsv ./serial.tsv \
-        --bootdisks \
-        --output-bootdisk "${BOOTDISK:-/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore.qcow2}" \
-        --output-env "${ENV:=/env}" || exit 1 \
+            --master-plist-url="${MASTER_PLIST_URL}" \
+            --count 1 \
+            --tsv ./serial.tsv \
+            --bootdisks \
+            --width "${WIDTH:-1920}" \
+            --height "${HEIGHT:-1080}" \
+            --output-bootdisk "${BOOTDISK:-/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore.qcow2}" \
+            --output-env "${ENV:=/env}" \
     ; } \
     ; [[ "${GENERATE_SPECIFIC}" == true ]] && { \
-            source "${ENV:=/env}" \
-            || ./Docker-OSX/custom/generate-specific-bootdisk.sh \
+            source "${ENV:=/env}" 2>/dev/null \
+            ; ./Docker-OSX/custom/generate-specific-bootdisk.sh \
+            --master-plist-url="${MASTER_PLIST_URL}" \
             --model "${DEVICE_MODEL}" \
             --serial "${SERIAL}" \
             --board-serial "${BOARD_SERIAL}" \
             --uuid "${UUID}" \
             --mac-address "${MAC_ADDRESS}" \
-            --output-bootdisk "${BOOTDISK:-/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore.qcow2}" || exit 1 \
+            --width "${WIDTH:-1920}" \
+            --height "${HEIGHT:-1080}" \
+            --output-bootdisk "${BOOTDISK:-/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore.qcow2}" \
     ; } \
     ; case "$(file --brief /bootdisk)" in \
         QEMU\ QCOW2\ Image* ) export BOOTDISK=/bootdisk \
