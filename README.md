@@ -784,7 +784,7 @@ docker run -it \
     sickcodes/docker-osx:auto
 ```
 
-# This example generates a specific set of serial numbers at runtime, with your existing image, at 1000x1000 display resolution.
+### This example generates a specific set of serial numbers at runtime, with your existing image, at 1000x1000 display resolution.
 
 ```bash
 # run an existing image in current directory, with a screen, with SSH, with nopicker, and save the bootdisk for later.
@@ -823,36 +823,6 @@ Or you can generate them inside the `./custom` folder. And then use:
     -e UUID="" \
     -e MAC_ADDRESS="" \
 ```
-
-# Change Resolution Docker-OSX
-
-The display resolution is controlled by this line:
-
-https://github.com/sickcodes/Docker-OSX/blob/master/custom/config-nopicker-custom.plist#L819
-
-However, you need to mount that disk. Boring!
-
-Instead, you can simply add the following to any image:
-
-```bash
--e GENERATE_UNIQUE=true \
--e WIDTH=1920 \
--e HEIGHT=1080 \
-```
-
-It will take around 1 minute longer to boot because it will make a new boot partition.
-
-```bash
--e GENERATE_SPECIFIC=true \
--e WIDTH=1920 \
--e HEIGHT=1080 \
--e SERIAL="" \
--e BOARD_SERIAL="" \
--e UUID="" \
--e MAC_ADDRESS="" \
-```
-
-Must be used with either `-e GENERATE_UNIQUE=true` or `-e GENERATE_SPECIFIC=true`.
 
 #### Persistence from generating serial numbers is obviously ideal:
 
@@ -948,6 +918,97 @@ generate-specific-bootdisk.sh \
     --uuid "${UUID}" \
     --mac-address "${MAC_ADDRESS}" \
     --output-bootdisk OpenCore-nopicker.qcow2
+```
+
+# Change Resolution Docker-OSX - change resolution OpenCore OSX-KVM 
+
+The display resolution is controlled by this line:
+
+https://github.com/sickcodes/Docker-OSX/blob/master/custom/config-nopicker-custom.plist#L819
+
+Instead of mounting that disk, Docker-OSX will generate a new `OpenCore.qcow2` by using this one cool trick:
+
+```bash
+-e GENERATE_UNIQUE=true \
+-e WIDTH=800 \
+-e HEIGHT=600 \
+```
+
+To use `WIDTH`/`HEIGHT`, you must use with either `-e GENERATE_UNIQUE=true` or `-e GENERATE_SPECIFIC=true`.
+
+It will take around 30 seconds longer to boot because it needs to make a new boot partition using `libguestfs`.
+
+```bash
+-e GENERATE_SPECIFIC=true \
+-e WIDTH=1920 \
+-e HEIGHT=1080 \
+-e SERIAL="" \
+-e BOARD_SERIAL="" \
+-e UUID="" \
+-e MAC_ADDRESS="" \
+```
+
+## Change Docker-OSX Resolution Examples
+
+```bash
+# using an image in your current directory
+stat mac_hdd_ng.img
+
+docker run -it \
+    --device /dev/kvm \
+    -p 50922:10022 \
+    -v "${PWD}/mac_hdd_ng.img:/image" \
+    -v /tmp/.X11-unix:/tmp/.X11-unix \
+    -e "DISPLAY=${DISPLAY:-:0.0}" \
+    -e GENERATE_SPECIFIC=true \
+    -e DEVICE_MODEL="iMacPro1,1" \
+    -e SERIAL="C02TW0WAHX87" \
+    -e BOARD_SERIAL="C027251024NJG36UE" \
+    -e UUID="5CCB366D-9118-4C61-A00A-E5BAF3BED451" \
+    -e MAC_ADDRESS="A8:5C:2C:9A:46:2F" \
+    -e MASTER_PLIST_URL=https://raw.githubusercontent.com/sickcodes/Docker-OSX/master/custom/config-nopicker-custom.plist \
+    -e WIDTH=1600 \
+    -e HEIGHT=900 \
+    sickcodes/docker-osx:naked
+```
+
+```bash
+# generating random serial numbers, using the DIY installer, along with the screen resolution changes.
+docker run -it \
+    --device /dev/kvm \
+    -p 50922:10022 \
+    -v /tmp/.X11-unix:/tmp/.X11-unix \
+    -e "DISPLAY=${DISPLAY:-:0.0}" \
+    -e GENERATE_UNIQUE=true \
+    -e WIDTH=800 \
+    -e HEIGHT=600 \
+    sickcodes/docker-osx:latest
+
+
+```
+
+
+Here's a few other resolutions! If you resolution is invalid, it will default to 800x600.
+
+```
+    -e WIDTH=800 \
+    -e HEIGHT=600 \
+```
+```
+    -e WIDTH=1280 \
+    -e HEIGHT=768 \
+```
+```
+    -e WIDTH=1600 \
+    -e HEIGHT=900 \
+```
+```
+    -e WIDTH=1920 \
+    -e HEIGHT=1080 \
+```
+```
+    -e WIDTH=2560 \
+    -e HEIGHT=1600 \
 ```
 
 # Allow USB passthrough

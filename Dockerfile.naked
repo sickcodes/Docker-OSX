@@ -3,13 +3,14 @@
 #    / __ \____  _____/ /_____  _____/ __ \/ ___/ |/ /
 #   / / / / __ \/ ___/ //_/ _ \/ ___/ / / /\__ \|   / 
 #  / /_/ / /_/ / /__/ ,< /  __/ /  / /_/ /___/ /   |  
-# /_____/\____/\___/_/|_|\___/_/   \____//____/_/|_|  NAKED/SUPPLY_YOUR_OWN
+# /_____/\____/\___/_/|_|\___/_/   \____//____/_/|_|  :NAKED
 # 
-# Title:            Mac on Docker (Docker-OSX) [AUTOINSTALL]
-# Author:           Sick.Codes https://twitter.com/sickcodes       
-# Version:          4.0
+# Title:            Docker-OSX (Mac on Docker) [AUTOINSTALL]
+# Author:           Sick.Codes https://twitter.com/sickcodes
+# Version:          4.1
 # License:          GPLv3+
 # Repository:       https://github.com/sickcodes/Docker-OSX
+# Website:          https://sick.codes
 # 
 # This image won't run unless you supply a disk image using:
 #       -v ${PWD}/mac_hdd_ng.img:/image

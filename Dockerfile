@@ -5,11 +5,12 @@
 #  / /_/ / /_/ / /__/ ,< /  __/ /  / /_/ /___/ /   |
 # /_____/\____/\___/_/|_|\___/_/   \____//____/_/|_|
 #
-# Repo:             https://github.com/sickcodes/Docker-OSX/
-# Title:            Mac on Docker (Docker-OSX)
-# Author:           Sick.Codes https://sick.codes/
-# Version:          4.0
+# Title:            Docker-OSX (Mac on Docker)
+# Author:           Sick.Codes https://twitter.com/sickcodes
+# Version:          4.1
 # License:          GPLv3+
+# Repository:       https://github.com/sickcodes/Docker-OSX
+# Website:          https://sick.codes
 #
 # All credits for OSX-KVM and the rest at @Kholia's repo: https://github.com/kholia/osx-kvm
 # OpenCore support go to https://github.com/Leoyzen/KVM-Opencore
