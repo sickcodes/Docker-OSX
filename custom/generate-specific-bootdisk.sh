@@ -194,11 +194,11 @@ generate_bootdisk () {
     elif [[ "${MASTER_PLIST}" ]] && [[ "${MASTER_PLIST_URL}" ]]; then
         echo 'You specified both a custom plist file AND a custom plist url. Use one or the other.'
     elif [[ "${MASTER_PLIST_URL}" ]]; then
-        wget -O "./${MASTER_PLIST:=/config-custom.plist}" "${MASTER_PLIST_URL}" \
+        wget -O "${MASTER_PLIST:=./config-custom.plist}" "${MASTER_PLIST_URL}" \
             || echo "Could not download ${MASTER_PLIST_URL}" && exit 1
     else
         MASTER_PLIST_URL='https://raw.githubusercontent.com/sickcodes/Docker-OSX/master/custom/config-nopicker-custom.plist'
-        wget -O "./${MASTER_PLIST:=/config-nopicker-custom.plist}" "${MASTER_PLIST_URL}" \
+        wget -O "${MASTER_PLIST:=./config-nopicker-custom.plist}" "${MASTER_PLIST_URL}" \
             || echo "Could not download ${MASTER_PLIST_URL}" && exit 1
     fi
 
