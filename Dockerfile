@@ -319,8 +319,8 @@ CMD sudo chown -R $(id -u):$(id -g) /dev/kvm /dev/snd "${IMAGE_PATH}" "${BOOTDIS
             --output-env "${ENV:=/env}" || exit 1 \
     ; } \
     ; [[ "${GENERATE_SPECIFIC}" == true ]] && { \
-            source "${ENV:=/env}" \
-            || ./Docker-OSX/custom/generate-specific-bootdisk.sh \
+            source "${ENV:=/env}" 2>/dev/null \
+            ; ./Docker-OSX/custom/generate-specific-bootdisk.sh \
             --master-plist-url="${MASTER_PLIST_URL}" \
             --model "${DEVICE_MODEL}" \
             --serial "${SERIAL}" \
