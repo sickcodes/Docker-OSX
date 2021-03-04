@@ -247,9 +247,9 @@ generate_serial_sets () {
 
     if [[ "${MASTER_PLIST}" ]]; then
         [[ -e "${MASTER_PLIST}" ]] || echo "Could not find: ${MASTER_PLIST}"
-    elif [[ "${MASTER_PLIST}" ]] && [[ "${MASTER_PLIST_URL}" ]];
+    elif [[ "${MASTER_PLIST}" ]] && [[ "${MASTER_PLIST_URL}" ]]; then
         echo 'You specified both a custom plist file AND a custom plist url. Use one or the other.'
-    elif [[ "${MASTER_PLIST_URL}" ]];
+    elif [[ "${MASTER_PLIST_URL}" ]]; then
         wget -o "./${MASTER_PLIST:=/config-custom.plist}" "${MASTER_PLIST_URL}" \
             || echo "Could not download ${MASTER_PLIST_URL}" && exit 1
     else
