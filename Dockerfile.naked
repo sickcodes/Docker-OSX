@@ -102,7 +102,7 @@ RUN mkdir -p ~/.ssh \
     && tee -a ~/.ssh/config <<< '    StrictHostKeyChecking no' \
     && tee -a ~/.ssh/config <<< '    UserKnownHostsFile=/dev/null'
 
-ENV BOOTDISK
+ENV BOOTDISK=
 
 ENV DISPLAY=:99
 

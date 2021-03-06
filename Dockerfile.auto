@@ -129,7 +129,7 @@ RUN if [[ "${COMPLETE}" ]]; then \
         && wget ${WGET_OPTIONS} -O /home/arch/OSX-KVM/mac_hdd_ng.img "${IMAGE_URL}" \
     ; fi
 
-ENV BOOTDISK
+ENV BOOTDISK=
 
 ENV DISPLAY=:99
 
