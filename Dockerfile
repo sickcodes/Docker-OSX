@@ -247,7 +247,7 @@ USER arch
 
 ENV USER arch
 
-ENV BOOTDISK=/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore.qcow2
+ENV BOOTDISK
 
 ENV DISPLAY=:0.0
 
@@ -257,8 +257,6 @@ ENV IMAGE_PATH=/home/arch/OSX-KVM/mac_hdd_ng.img
 
 # ENV NETWORKING=e1000-82545em
 ENV NETWORKING=vmxnet3
-
-ENV NOPICKER=false
 
 # Boolean for generating a bootdisk with new random serials.
 ENV GENERATE_UNIQUE=false
@@ -300,8 +298,9 @@ VOLUME ["/tmp/.X11-unix"]
 CMD sudo chown -R $(id -u):$(id -g) /dev/kvm /dev/snd "${IMAGE_PATH}" "${BOOTDISK}" "${ENV}" 2>/dev/null || true \
     ; [[ "${NOPICKER}" == true ]] && { \
         sed -i '/^.*InstallMedia.*/d' Launch.sh \
-        && export BOOTDISK="${BOOTDISK:-/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore-nopicker.qcow2}" \
+        && export BOOTDISK="${BOOTDISK:=/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore-nopicker.qcow2}" \
     ; } \
+    || export BOOTDISK="${BOOTDISK:=/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore.qcow2}" \
     ; [[ "${GENERATE_UNIQUE}" == true ]] && { \
         ./Docker-OSX/custom/generate-unique-machine-values.sh \
             --master-plist-url="${MASTER_PLIST_URL}" \
@@ -310,7 +309,7 @@ CMD sudo chown -R $(id -u):$(id -g) /dev/kvm /dev/snd "${IMAGE_PATH}" "${BOOTDIS
             --bootdisks \
             --width "${WIDTH:-1920}" \
             --height "${HEIGHT:-1080}" \
-            --output-bootdisk "${BOOTDISK:-/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore.qcow2}" \
+            --output-bootdisk "${BOOTDISK:=/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore.qcow2}" \
             --output-env "${ENV:=/env}" \
     ; } \
     ; [[ "${GENERATE_SPECIFIC}" == true ]] && { \
@@ -324,7 +323,7 @@ CMD sudo chown -R $(id -u):$(id -g) /dev/kvm /dev/snd "${IMAGE_PATH}" "${BOOTDIS
             --mac-address "${MAC_ADDRESS}" \
             --width "${WIDTH:-1920}" \
             --height "${HEIGHT:-1080}" \
-            --output-bootdisk "${BOOTDISK:-/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore.qcow2}" \
+            --output-bootdisk "${BOOTDISK:=/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore.qcow2}" \
     ; } \
     ; ./enable-ssh.sh && envsubst < ./Launch.sh | bash
 
