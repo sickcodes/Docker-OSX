@@ -133,6 +133,8 @@ ENV BOOTDISK=/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore-nopicker.qcow2
 
 ENV DISPLAY=:99
 
+ENV HEADLESS=false
+
 ENV ENV=/env
 
 ENV IMAGE_PATH=/home/arch/OSX-KVM/mac_hdd_ng.img
@@ -175,21 +177,10 @@ CMD echo "${BOILERPLATE}" \
             --height "${HEIGHT:-1080}" \
             --output-bootdisk "${BOOTDISK:-/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore.qcow2}"  \
     ; } \
-    ; case "$(file --brief /bootdisk)" in \
-        QEMU\ QCOW2\ Image* ) export BOOTDISK=/bootdisk \
-            ;; \
-        directory* ) export BOOTDISK=/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore.qcow2 \
-            ;; \
-    esac \
-    ; [[ "${DISPLAY}" = ':99' ]] && { \
+    ; { [[ "${DISPLAY}" = ':99' ]] || [[ "${HEADLESS}" == true ]] ; } && { \
         nohup Xvfb :99 -screen 0 1920x1080x16 \
-        & until [[ "$(xrandr --query 2>/dev/null)" ]]; do sleep 0.1 ; done \
+        & until [[ "$(xrandr --query 2>/dev/null)" ]]; do sleep 1 ; done \
     ; } \
-    ; echo "Checking whether /image is a directory or a QEMU disk." \
-    ; case "$(file --brief /image)" in \
-        QEMU*) export IMAGE_PATH=/image;; \
-        directory*) export IMAGE_PATH=/home/arch/OSX-KVM/mac_hdd_ng.img;; \
-    esac \
     ; stat "${IMAGE_PATH}" \
     ; echo "Large image is being copied between layers, please wait a minute..." \
     ; ./enable-ssh.sh \

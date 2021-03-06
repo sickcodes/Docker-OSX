@@ -106,6 +106,8 @@ ENV BOOTDISK=/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore.qcow2
 
 ENV DISPLAY=:99
 
+ENV HEADLESS=false
+
 ENV ENV=/env
 
 ENV IMAGE_PATH=/image
@@ -113,7 +115,7 @@ ENV IMAGE_PATH=/image
 ENV NOPICKER=true
 
 CMD sudo chown -R $(id -u):$(id -g) /dev/kvm /dev/snd "${IMAGE_PATH}" "${BOOTDISK}" "${ENV}" 2>/dev/null || true \
-    ; [[ "${DISPLAY}" = ':99' ]] && { \
+    ; { [[ "${DISPLAY}" = ':99' ]] || [[ "${HEADLESS}" == true ]] ; } && { \
         nohup Xvfb :99 -screen 0 1920x1080x16 \
         & until [[ "$(xrandr --query 2>/dev/null)" ]]; do sleep 1 ; done \
     ; } \
@@ -145,10 +147,4 @@ CMD sudo chown -R $(id -u):$(id -g) /dev/kvm /dev/snd "${IMAGE_PATH}" "${BOOTDIS
             --height "${HEIGHT:-1080}" \
             --output-bootdisk "${BOOTDISK:-/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore.qcow2}" \
     ; } \
-    ; case "$(file --brief /bootdisk)" in \
-        QEMU\ QCOW2\ Image* ) export BOOTDISK=/bootdisk \
-            ;; \
-        directory* ) export BOOTDISK=/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore.qcow2 \
-            ;; \
-    esac \
     ; ./enable-ssh.sh && envsubst < ./Launch.sh | bash
