@@ -11,55 +11,50 @@
 # Version:          3.1
 # License:          GPLv3+
 
-help_text="Usage: generate-unique-machine-values.sh
+help_text="Usage: ./generate-unique-machine-values.sh
 
 General options:
     --count, -n, -c <count>         Number of serials to generate
     --model, -m <model>             Device model, e.g. 'iMacPro1,1'
-    --csv <filename>                Optionally change the CSV output filename.
-    --tsv <filename>                Optionally change the TSV output filename.
-    --output-bootdisk <filename>    Optionally change the bootdisk qcow output filename. Useless when count > 1.
-    --output-env <filename>         Optionally change the bootdisk env filename. Useless when count > 1.
-    --output-dir <directory>        Optionally change the script output location.
-    --width <string>                Resolution x axis length in pixels (default 1920)
-    --height <string>               Resolution y axis length in pixels (default 1080
-
-    --master-plist-url <url>        Specify an alternative master plist, via URL.
-    --master-plist | --custom-plist <filename>
-                                    Optionally change the input plist. Placeholders:
-                                        {{DEVICE_MODEL}}, {{SERIAL}}, {{BOARD_SERIAL}},
-                                        {{UUID}}, {{ROM}}, {{WIDTH}}, {{HEIGHT}}
-
+    --csv <filename>                Optionally change the CSV output filename
+    --tsv <filename>                Optionally change the TSV output filename
+    --output-dir <directory>        Optionally change the script output location
+    --width <string>                Resolution x axis length in px, default 1920
+    --height <string>               Resolution y axis length in px, default 1080
+    --master-plist-url <url>        Specify an alternative master plist, via URL
+    --master-plist <filename>       Optionally change the input plist
+    --custom-plist <filename>       Same as --master-plist
+    --output-bootdisk <filename>    Optionally change the bootdisk filename
+    --envs                          Create all corresponding sourcable envs
+    --plists                        Create all corresponding config.plists
+    --bootdisks                     Create all corresponding bootdisks [SLOW]
     --help, -h, help                Display this help and exit
-    --plists                        Create corresponding config.plists for each serial set.
-    --bootdisks                     [SLOW] Create corresponding boot disk images for each serial set.
+
+Additional options only if you are creating only ONE serial set:
+    --output-bootdisk <filename>    Optionally change the bootdisk filename
+    --output-env <filename>         Optionally change the serials env filename
+
+Custom plist placeholders:
+    {{DEVICE_MODEL}}, {{SERIAL}}, {{BOARD_SERIAL}},
+    {{UUID}}, {{ROM}}, {{WIDTH}}, {{HEIGHT}}
 
 Example:
-    ./generate-unique-machine-values.sh --count 1 --model='iMacPro1,1' --plists --bootdisks
+    ./generate-unique-machine-values.sh --count 1 --plists --bootdisks --envs
 
-        The above example will generate a
-            - serial
-            - board serial
-            - uuid
-            - MAC address
-            - ROM value based on lowercase MAC address
-            - Boot disk qcow image.
-            - config.plist
-
-Notes:
-    - Default is 1 serial for 'iMacPro1,1' in the current working directory.
-    - Default output is CSV, whereas setting the TSV option will output as tab-separated.
-    - CSV is double quoted.
-    - If you do not set a CSV filename, the output will be sent to the output-dir.
-    - If you do not set an output-dir, the current directory will be the output directory.
-    - Sourcable environment variable shell files will be written to a folder, 'envs'.
-    - config.plist files will be written to a folder, 'plists'.
+Defaults:
+    - One serial, for 'iMacPro1,1', in the current working directory
+    - CSV and TSV output
+    - plists in ./plists/ & bootdisks in ./bootdisks/ & envs in ./envs
+    - if you set --bootdisk name, --bootdisks is assumed
+    - if you set --custom-plist, --plists is assumed
+    - if you set --output-env, --envs is assumed
 
 Author:  Sick.Codes https://sick.codes/
 Project: https://github.com/sickcodes/Docker-OSX/
 "
 
 MACINFOPKG_VERSION=2.1.2
+OPENCORE_IMAGE_MAKER_URL='https://raw.githubusercontent.com/sickcodes/Docker-OSX/master/custom/opencore-image-ng.sh'
 
 # gather arguments
 while (( "$#" )); do
@@ -110,7 +105,7 @@ while (( "$#" )); do
             ;;
 
     --output-bootdisk=* )
-                export OUTPUT_QCOW="${1#*=}"
+                export OUTPUT_BOOTDISK="${1#*=}"
                 shift
             ;;
     --output-bootdisk* )
@@ -198,7 +193,11 @@ while (( "$#" )); do
                 shift
             ;;
     --bootdisks ) 
-                export CREATE_QCOWS=1
+                export CREATE_BOOTDISKS=1
+                shift
+            ;;
+    --envs ) 
+                export CREATE_ENVS=1
                 shift
             ;;
 
@@ -245,38 +244,19 @@ download_qcow_efi_folder () {
 
 generate_serial_sets () {
 
-    if [[ "${MASTER_PLIST}" ]]; then
-        [[ -e "${MASTER_PLIST}" ]] || echo "Could not find: ${MASTER_PLIST}"
-    elif [[ "${MASTER_PLIST}" ]] && [[ "${MASTER_PLIST_URL}" ]]; then
-        echo 'You specified both a custom plist file AND a custom plist url. Use one or the other.'
-    elif [[ "${MASTER_PLIST_URL}" ]]; then
-        wget -O "${MASTER_PLIST:=./config-custom.plist}" "${MASTER_PLIST_URL}" \
-            || { echo "Could not download ${MASTER_PLIST_URL}" && exit 1 ; }
-    else
-        MASTER_PLIST_URL='https://raw.githubusercontent.com/sickcodes/Docker-OSX/master/custom/config-nopicker-custom.plist'
-        wget -O "${MASTER_PLIST:=./config-nopicker-custom.plist}" "${MASTER_PLIST_URL}" \
-            || { echo "Could not download ${MASTER_PLIST_URL}" && exit 1 ; }
-    fi
 
-    [[ -e ./opencore-image-ng.sh ]] || wget https://raw.githubusercontent.com/sickcodes/Docker-OSX/master/custom/opencore-image-ng.sh && chmod +x opencore-image-ng.sh
-
-    mkdir -p "${OUTPUT_DIRECTORY}/envs"
-    export DATE_NOW="$(date +%F-%T)"
-    export DEVICE_MODEL="${DEVICE_MODEL:=iMacPro1,1}"
-    export VENDOR_REGEX="${VENDOR_REGEX:=Apple, Inc.}"
     
-    if [[ "${CSV_OUTPUT_FILENAME}" ]] || [[ "${TSV_OUTPUT_FILENAME}" ]]; then
+    if [[ "${CSV_OUTPUT_FILENAME}" ]]; then
         [[ ${CSV_OUTPUT_FILENAME} ]] && export CSV_SERIAL_SETS_FILE="${CSV_OUTPUT_FILENAME}"
+    elif [[ "${TSV_OUTPUT_FILENAME}" ]]; then
         [[ ${TSV_OUTPUT_FILENAME} ]] && export TSV_SERIAL_SETS_FILE="${TSV_OUTPUT_FILENAME}"
-    else
-        export SERIAL_SETS_FILE="${OUTPUT_DIRECTORY}/serial_sets-${DATE_NOW}.csv"
+    else    
+        export CSV_SERIAL_SETS_FILE="${OUTPUT_DIRECTORY}/serial_sets-${DATE_NOW}.csv"
+        export TSV_SERIAL_SETS_FILE="${OUTPUT_DIRECTORY}/serial_sets-${DATE_NOW}.tsv"
     fi
     
-    touch "${SERIAL_SETS_FILE}"
-    echo "Writing serial sets to ${SERIAL_SETS_FILE}"
-
     ./macserial \
-        --num "${SERIAL_SET_COUNT:=1}" \
+        --num "${SERIAL_SET_COUNT}" \
         --model "${DEVICE_MODEL}" \
         | while IFS='\ \|\ ' read -r SERIAL BOARD_SERIAL; do
             # make a uuid...
@@ -288,30 +268,54 @@ generate_serial_sets () {
             RANDOM_MAC_PREFIX="$(cut -d$'\t' -f1 <<< "${RANDOM_MAC_PREFIX}")"
             MAC_ADDRESS="$(printf "${RANDOM_MAC_PREFIX}:%02X:%02X:%02X" $[RANDOM%256] $[RANDOM%256] $[RANDOM%256])"
 
+            [[ -z "${WIDTH}" ]] && WIDTH=1920
+            [[ -z "${HEIGHT}" ]] && HEIGHT=1080
+
             # append to csv file
-            if [[ "${CSV_SERIAL_SETS_FILE}" ]]; then
-                echo "\"${DEVICE_MODEL}\",\"${SERIAL}\",\"${BOARD_SERIAL}\",\"${UUID}\",\"${MAC_ADDRESS}\"" >> "${CSV_SERIAL_SETS_FILE}"
-            fi
+            cat <<EOF >> "${CSV_SERIAL_SETS_FILE}"
+"${DEVICE_MODEL}","${SERIAL}","${BOARD_SERIAL}","${UUID}","${MAC_ADDRESS}","${WIDTH}","${HEIGHT}"
+EOF
 
             # append to tsv file
-            if [[ "${TSV_SERIAL_SETS_FILE}" ]]; then
-                printf "${DEVICE_MODEL}\t${SERIAL}\t${BOARD_SERIAL}\t${UUID}\t${MAC_ADDRESS}\n" >> "${TSV_SERIAL_SETS_FILE}"
-            fi 
+            T=$'\t'
+            cat <<EOF >> "${TSV_SERIAL_SETS_FILE}"
+${DEVICE_MODEL}${T}${SERIAL}${T}${BOARD_SERIAL}${T}${UUID}${T}${MAC_ADDRESS}${T}${WIDTH}${T}${HEIGHT}
+EOF
 
-            OUTPUT_ENV_FILE="${OUTPUT_ENV:-"${OUTPUT_DIRECTORY}/envs/${SERIAL}.env.sh"}"
-            touch "${OUTPUT_ENV_FILE}"
-            cat <<EOF > "${OUTPUT_ENV_FILE}"
+            # make envs if --envs, but also if you set the env filename it will switch on by itself
+            if [[ "${CREATE_ENVS}" ]] || [[ "${OUTPUT_ENV}" ]]; then
+                mkdir -p "${OUTPUT_DIRECTORY}/envs"
+                OUTPUT_ENV_FILE="${OUTPUT_ENV:-"${OUTPUT_DIRECTORY}/envs/${SERIAL}.env.sh"}"
+                touch "${OUTPUT_ENV_FILE}"
+                cat <<EOF > "${OUTPUT_ENV_FILE}"
 export DEVICE_MODEL="${DEVICE_MODEL}"
 export SERIAL="${SERIAL}"
 export BOARD_SERIAL="${BOARD_SERIAL}"
 export UUID="${UUID}"
 export MAC_ADDRESS="${MAC_ADDRESS}"
-export WIDTH="${WIDTH:=1920}"
-export HEIGHT="${HEIGHT:=1080}"
+export WIDTH="${WIDTH}"
+export HEIGHT="${HEIGHT}"
 EOF
 
+            fi
+
             # plist required for bootdisks, so create anyway.
-            if [[ "${CREATE_PLISTS}" ]] || [[ "${CREATE_QCOWS}" ]]; then
+            if [[ "${CREATE_PLISTS}" ]] || [[ "${CREATE_BOOTDISKS}" ]]; then
+
+                # need a config.plist
+                if [[ "${MASTER_PLIST}" ]]; then
+                    [[ -e "${MASTER_PLIST}" ]] || echo "Could not find: ${MASTER_PLIST}"
+                elif [[ "${MASTER_PLIST}" ]] && [[ "${MASTER_PLIST_URL}" ]]; then
+                    echo 'You specified both a custom plist FILE AND a custom plist URL. Only use one of those options.'
+                elif [[ "${MASTER_PLIST_URL}" ]]; then
+                    wget -O "${MASTER_PLIST:=./config-custom.plist}" "${MASTER_PLIST_URL}" \
+                        || { echo "Could not download ${MASTER_PLIST_URL}" && exit 1 ; }
+                else
+                    MASTER_PLIST_URL='https://raw.githubusercontent.com/sickcodes/Docker-OSX/master/custom/config-nopicker-custom.plist'
+                    wget -O "${MASTER_PLIST:=./config-nopicker-custom.plist}" "${MASTER_PLIST_URL}" \
+                        || { echo "Could not download ${MASTER_PLIST_URL}" && exit 1 ; }
+                fi
+
                 mkdir -p "${OUTPUT_DIRECTORY}/plists"
                 source "${OUTPUT_ENV_FILE}"
                 ROM_VALUE="${MAC_ADDRESS//\:/}"
@@ -326,11 +330,15 @@ EOF
                     "${MASTER_PLIST}" > "${OUTPUT_DIRECTORY}/plists/${SERIAL}.config.plist" || exit 1
             fi
 
-            if [[ "${CREATE_QCOWS}" ]]; then
-                mkdir -p "${OUTPUT_DIRECTORY}/qcows"
+            # make bootdisk qcow2 format if --bootdisks, but also if you set the bootdisk filename
+            if [[ "${CREATE_BOOTDISKS}" ]] || [[ "${OUTPUT_BOOTDISK}" ]]; then
+                [[ -e ./opencore-image-ng.sh ]] \
+                    || { wget "${OPENCORE_IMAGE_MAKER_URL}" \
+                        && chmod +x opencore-image-ng.sh ; }
+                mkdir -p "${OUTPUT_DIRECTORY}/bootdisks"
                 ./opencore-image-ng.sh \
                     --cfg "${OUTPUT_DIRECTORY}/plists/${SERIAL}.config.plist" \
-                    --img "${OUTPUT_QCOW:-${OUTPUT_DIRECTORY}/qcows/${SERIAL}.OpenCore-nopicker.qcow2}" || exit 1
+                    --img "${OUTPUT_BOOTDISK:-${OUTPUT_DIRECTORY}/bootdisks/${SERIAL}.OpenCore-nopicker.qcow2}" || exit 1
             fi
 
         done
@@ -341,12 +349,14 @@ EOF
 
         [[ -e "${TSV_SERIAL_SETS_FILE}" ]] && \
             cat <(printf "DEVICE_MODEL\tSERIAL\tBOARD_SERIAL\tUUID\tMAC_ADDRESS\n") "${TSV_SERIAL_SETS_FILE}"
-    
+
 }
 
 main () {
     # setting default variables if there are no options
+    export DATE_NOW="$(date +%F-%T)"
     export DEVICE_MODEL="${DEVICE_MODEL:=iMacPro1,1}"
+    export VENDOR_REGEX="${VENDOR_REGEX:=Apple, Inc.}"
     export SERIAL_SET_COUNT="${SERIAL_SET_COUNT:=1}"
     export OUTPUT_DIRECTORY="${OUTPUT_DIRECTORY:=.}"
     cat <<EOF
