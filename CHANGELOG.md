@@ -1,5 +1,6 @@
 |Version|Date|Notes|
 |---|---|---|
+|   |2021-03-06|Change envs to require --envs. Automatically enable --envs if --output-env is used. Same for plists, bootdisks. Fix help ugliness and sanity of generate serial scripts. Fix bootdisk not getting written to persistent file when using NOPICKER=true. NOPICKER=true is overridden by a custom plist now anyway.|
 |4.1|2021-03-04|Add `-e MASTER_PLIST_URL` to all images to allow using your own remote plist.|
 |   |2021-03-03|Add `WIDTH` and `HEIGHT` to set the x and y resolutions, use in conjuction with serial numbers.|
 |   |2021-03-02|Add ADDITIONAL_PORTS, for example `-e ADDITIONAL_PORTS='hostfwd=tcp::23-:23,'`|

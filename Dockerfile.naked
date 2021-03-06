@@ -119,7 +119,7 @@ CMD sudo chown -R $(id -u):$(id -g) /dev/kvm /dev/snd "${IMAGE_PATH}" "${BOOTDIS
     ; } \
     ; [[ "${NOPICKER}" == true ]] && { \
         sed -i '/^.*InstallMedia.*/d' Launch.sh \
-        && export BOOTDISK=/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore-nopicker.qcow2 \
+        && export BOOTDISK="${BOOTDISK:-/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore-nopicker.qcow2}" \
     ; } \
     ; [[ "${GENERATE_UNIQUE}" == true ]] && { \
         ./Docker-OSX/custom/generate-unique-machine-values.sh \
