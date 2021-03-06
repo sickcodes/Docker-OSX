@@ -298,15 +298,9 @@ VOLUME ["/tmp/.X11-unix"]
 # And the default serial numbers
 
 CMD sudo chown -R $(id -u):$(id -g) /dev/kvm /dev/snd "${IMAGE_PATH}" "${BOOTDISK}" "${ENV}" 2>/dev/null || true \
-    ; case "$(file --brief /image)" in \
-        QEMU\ QCOW2\ Image* ) export IMAGE_PATH=/image \
-            ;; \
-        directory* ) export IMAGE_PATH=/home/arch/OSX-KVM/mac_hdd_ng.img \
-            ;; \
-    esac \
     ; [[ "${NOPICKER}" == true ]] && { \
         sed -i '/^.*InstallMedia.*/d' Launch.sh \
-        && export BOOTDISK=/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore-nopicker.qcow2 \
+        && export BOOTDISK="${BOOTDISK:-/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore-nopicker.qcow2}" \
     ; } \
     ; [[ "${GENERATE_UNIQUE}" == true ]] && { \
         ./Docker-OSX/custom/generate-unique-machine-values.sh \
@@ -332,12 +326,6 @@ CMD sudo chown -R $(id -u):$(id -g) /dev/kvm /dev/snd "${IMAGE_PATH}" "${BOOTDIS
             --height "${HEIGHT:-1080}" \
             --output-bootdisk "${BOOTDISK:-/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore.qcow2}" \
     ; } \
-    ; case "$(file --brief /bootdisk)" in \
-        QEMU\ QCOW2\ Image* ) export BOOTDISK=/bootdisk \
-            ;; \
-        directory* ) export BOOTDISK=/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore.qcow2 \
-            ;; \
-    esac \
     ; ./enable-ssh.sh && envsubst < ./Launch.sh | bash
 
 # virt-manager mode: eta son
