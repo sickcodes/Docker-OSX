@@ -272,7 +272,7 @@ ENV NOPICKER=false
 ENV WIDTH=1920
 ENV HEIGHT=1080
 
-ENV MASTER_PLIST_URL="https://raw.githubusercontent.com/sickcodes/Docker-OSX/master/custom/config-nopicker-custom.plist"
+ENV MASTER_PLIST_URL="https://raw.githubusercontent.com/sickcodes/osx-serial-generator/master/config-nopicker-custom.plist"
 
 VOLUME ["/tmp/.X11-unix"]
 
