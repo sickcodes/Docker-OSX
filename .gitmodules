@@ -1,0 +1,3 @@
+[submodule "osx-serial-generator"]
+	path = osx-serial-generator
+	url = https://github.com/sickcodes/osx-serial-generator.git
