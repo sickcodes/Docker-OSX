@@ -79,7 +79,7 @@ RUN patched_glibc=glibc-linux4-2.33-4-x86_64.pkg.tar.zst \
 RUN pacman -Syu xorg-server-xvfb wget xterm xorg-xhost xorg-xrandr sshpass --noconfirm \
     && if [[ "${SCROT}" ]]; then \
         pacman -Syu scrot base-devel --noconfirm \
-        && git clone https://github.com/stolk/imcat.git \
+        && git clone --recurse-submodules --depth 1 https://github.com/stolk/imcat.git \
         && cd imcat \
         && make \
         && sudo cp imcat /usr/bin/imcat \
@@ -155,7 +155,7 @@ CMD echo "${BOILERPLATE}" \
     ; } \
     || export BOOTDISK="${BOOTDISK:=/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore.qcow2}" \
     ; [[ "${GENERATE_UNIQUE}" == true ]] && { \
-        ./Docker-OSX/custom/generate-unique-machine-values.sh \
+        ./Docker-OSX/osx-serial-generator/generate-unique-machine-values.sh \
             --master-plist-url="${MASTER_PLIST_URL}" \
             --count 1 \
             --tsv ./serial.tsv \
@@ -167,7 +167,7 @@ CMD echo "${BOILERPLATE}" \
     ; } \
     ; [[ "${GENERATE_SPECIFIC}" == true ]] && { \
             source "${ENV:=/env}" 2>/dev/null \
-            ; ./Docker-OSX/custom/generate-specific-bootdisk.sh \
+            ; ./Docker-OSX/osx-serial-generator/generate-specific-bootdisk.sh \
             --master-plist-url="${MASTER_PLIST_URL}" \
             --model "${DEVICE_MODEL}" \
             --serial "${SERIAL}" \
