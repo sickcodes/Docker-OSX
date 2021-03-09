@@ -126,7 +126,7 @@ RUN tee -a sshd_config <<< 'AllowTcpForwarding yes' \
 USER arch
 
 # download OSX-KVM
-RUN git clone --depth 1 https://github.com/kholia/OSX-KVM.git /home/arch/OSX-KVM
+RUN git clone --recurse-submodules --depth 1 https://github.com/kholia/OSX-KVM.git /home/arch/OSX-KVM
 
 # enable ssh
 # docker exec .... ./enable-ssh.sh
@@ -201,7 +201,7 @@ RUN if [[ "${LINUX}" == true ]]; then \
 # optional --build-arg to change branches for testing
 ARG BRANCH=master
 ARG REPO='https://github.com/sickcodes/Docker-OSX.git'
-RUN git clone --branch "${BRANCH}" "${REPO}"
+RUN git clone --recurse-submodules --depth 1 --branch "${BRANCH}" "${REPO}"
 
 # env -e ADDITIONAL_PORTS with a comma
 # for example, -e ADDITIONAL_PORTS=hostfwd=tcp::23-:23,
@@ -302,7 +302,7 @@ CMD sudo chown -R $(id -u):$(id -g) /dev/kvm /dev/snd "${IMAGE_PATH}" "${BOOTDIS
     ; } \
     || export BOOTDISK="${BOOTDISK:=/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore.qcow2}" \
     ; [[ "${GENERATE_UNIQUE}" == true ]] && { \
-        ./Docker-OSX/custom/generate-unique-machine-values.sh \
+        ./Docker-OSX/osx-serial-generator/generate-unique-machine-values.sh \
             --master-plist-url="${MASTER_PLIST_URL}" \
             --count 1 \
             --tsv ./serial.tsv \
@@ -314,7 +314,7 @@ CMD sudo chown -R $(id -u):$(id -g) /dev/kvm /dev/snd "${IMAGE_PATH}" "${BOOTDIS
     ; } \
     ; [[ "${GENERATE_SPECIFIC}" == true ]] && { \
             source "${ENV:=/env}" 2>/dev/null \
-            ; ./Docker-OSX/custom/generate-specific-bootdisk.sh \
+            ; ./Docker-OSX/osx-serial-generator/generate-specific-bootdisk.sh \
             --master-plist-url="${MASTER_PLIST_URL}" \
             --model "${DEVICE_MODEL}" \
             --serial "${SERIAL}" \

@@ -43,6 +43,32 @@ Thank you to @cephasara for this major contribution.
 
 #### Follow [@sickcodes on Twitter](https://twitter.com/sickcodes) for updates or feature requests!
 
+# Basic Quick Start Docker-OSX
+
+```bash
+
+docker pull sickcodes/docker-osx:latest
+
+# Catalina
+docker run -it \
+    --device /dev/kvm \
+    -p 50922:10022 \
+    -v /tmp/.X11-unix:/tmp/.X11-unix \
+    -e "DISPLAY=${DISPLAY:-:0.0}" \
+    sickcodes/docker-osx:latest
+
+# Big Sur
+docker run -it \
+    --device /dev/kvm \
+    -p 50922:10022 \
+    -v /tmp/.X11-unix:/tmp/.X11-unix \
+    -e "DISPLAY=${DISPLAY:-:0.0}" \
+    sickcodes/docker-osx:big-sur
+
+# Wait 2-3 minutes until you see the logo.
+
+```
+
 # How to use
 
 ### There are 3 images: **latest**, **auto** and **naked**.
@@ -79,32 +105,6 @@ Use `docker commit`, copy the ID, and then `docker start ID`
 
 [Pull out the .img file](https://github.com/sickcodes/Docker-OSX#backup-the-disk-wheres-my-disk), and then use that [.img file with :naked](https://github.com/sickcodes/Docker-OSX#quick-start-own-image-naked-container-image)
 
-
-# Basic Quick Start Docker-OSX
-
-```bash
-
-docker pull sickcodes/docker-osx:latest
-
-# catalina
-docker run -it \
-    --device /dev/kvm \
-    -p 50922:10022 \
-    -v /tmp/.X11-unix:/tmp/.X11-unix \
-    -e "DISPLAY=${DISPLAY:-:0.0}" \
-    sickcodes/docker-osx:latest
-
-# big sur
-docker run -it \
-    --device /dev/kvm \
-    -p 50922:10022 \
-    -v /tmp/.X11-unix:/tmp/.X11-unix \
-    -e "DISPLAY=${DISPLAY:-:0.0}" \
-    sickcodes/docker-osx:big-sur
-
-# Wait 2-3 minutes until you see the logo.
-
-```
 
 # Quick Start Large Pre-Made Image
 
