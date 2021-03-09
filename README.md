@@ -787,12 +787,12 @@ docker run -it \
 ### This example generates a specific set of serial numbers at runtime, with your existing image, at 1000x1000 display resolution.
 
 ```bash
-# run an existing image in current directory, with a screen, with SSH, with nopicker, and save the bootdisk for later.
+# run an existing image in current directory, with a screen, with SSH, with nopicker.
 
 stat mac_hdd_ng.img # make sure you have an image if you're using :naked
-touch ./mynewbootdisk.qcow
 
 docker run -it \
+    -v "${PWD}/mac_hdd_ng.img:/image" \
     --device /dev/kvm \
     -e "DISPLAY=${DISPLAY:-:0.0}" \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
@@ -806,9 +806,6 @@ docker run -it \
     -e MAC_ADDRESS="A8:5C:2C:9A:46:2F" \
     -e WIDTH=1000 \
     -e HEIGHT=1000 \
-    -e BOOTDISK=/bootdisk \
-    -v "${PWD}/mynewbootdisk.qcow:/bootdisk" \
-    -v "${PWD}/mac_hdd_ng.img:/image" \
     sickcodes/docker-osx:naked
 ```
 
@@ -829,10 +826,9 @@ Or you can generate them inside the `./custom` folder. And then use:
 ```bash
 
 stat mac_hdd_ng_testing.img
-touch ./output.qcow 
 touch ./output.env
 
-# generate fresh random serial numbers, with a screen, using my own image, and save the bootdisk AND env file with my new serial numbers for later.
+# generate fresh random serial numbers, with a screen, using your own image, and save env file with your new serial numbers for later.
 
 docker run -it \
     --device /dev/kvm \
@@ -843,8 +839,6 @@ docker run -it \
     -e GENERATE_UNIQUE=true \
     -e GENERATE_SPECIFIC=true \
     -e DEVICE_MODEL="iMacPro1,1" \
-    -e BOOTDISK=/bootdisk \
-    -v "${PWD}/output.qcow:/bootdisk" \
     -v "${PWD}/output.env:/env" \
     -v "${PWD}/mac_hdd_ng_testing.img:/image" \
     sickcodes/docker-osx:naked
