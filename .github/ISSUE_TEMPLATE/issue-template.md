@@ -9,6 +9,7 @@ assignees: ''
 
 # OS related issued, please help us identify the issue by posting the output of this
 uname -a \
+; echo "${DISPLAY}" \
 ; echo 1 | sudo tee /sys/module/kvm/parameters/ignore_msrs \
 ; grep NAME /etc/os-release \
 ; df -h . \
