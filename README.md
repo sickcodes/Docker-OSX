@@ -85,17 +85,17 @@ Create your personal image using `:latest`. And then pull your image out. And th
 `sickcodes/docker-osx:naked` - [I need iMessage/iCloud for security research.](https://github.com/sickcodes/Docker-OSX#serial-numbers)
 
 #### I need a screen.
-**KEEP** these two lines are in your command. Works in ANY of the machines:
+**KEEP** these two lines are in your command. Works in `auto` & `naked` machines:
 ```dockerfile
     -v /tmp/.X11-unix:/tmp/.X11-unix \
     -e "DISPLAY=${DISPLAY:-:0.0}" \
 ```
 
 #### I need headless.
-**REMOVE** these two lines from ANY of the machines:
+**REMOVE** these two lines from `auto` or `naked` machines:
 ```dockerfile
-    -v /tmp/.X11-unix:/tmp/.X11-unix \
-    -e "DISPLAY=${DISPLAY:-:0.0}" \
+    # -v /tmp/.X11-unix:/tmp/.X11-unix \
+    # -e "DISPLAY=${DISPLAY:-:0.0}" \
 ```
 
 #### I have used it already, and want to copy this image.
@@ -768,7 +768,6 @@ docker run --rm -it \
 ```bash
 # run the same as above 17gb auto image, with SSH, with nopicker, and save the bootdisk for later.
 # you don't need to save the bootdisk IF you supply specific serial numbers!
-touch ./C02TW0WAHX87.qcow
 
 docker run -it \
     --device /dev/kvm \
@@ -1004,6 +1003,39 @@ Here's a few other resolutions! If you resolution is invalid, it will default to
     -e WIDTH=2560 \
     -e HEIGHT=1600 \
 ```
+
+# Mount a disk inside OSX from the host
+
+Pass the disk into the container as a volume and then pass the disk again into QEMU command line extras with.
+
+Use the `config-custom.plist` because you probably want to see the boot menu, otherwise omit the first line:
+
+```bash
+DISK_TWO="${PWD}/mount_me.img"
+```
+```dockerfile
+-e MASTER_PLIST_URL='https://raw.githubusercontent.com/sickcodes/osx-serial-generator/master/config-custom.plist' \
+-v "${DISK_TWO}:/disktwo" \
+-e EXTRA='-device ide-hd,bus=sata.5,drive=DISK-TWO -drive id=DISK-TWO,if=none,file=/disktwo,format=qcow2' \
+```
+
+Example:
+
+```bash
+OSX_IMAGE="${PWD}/mac_hdd_ng_xcode_bigsur.img"
+DISK_TWO="${PWD}/mount_me.img"
+
+docker run -it \
+    --device /dev/kvm \
+    -e "DISPLAY=${DISPLAY:-:0.0}" \
+    -v /tmp/.X11-unix:/tmp/.X11-unix \
+    -e MASTER_PLIST_URL='https://raw.githubusercontent.com/sickcodes/osx-serial-generator/master/config-custom.plist' \
+    -v "${OSX_IMAGE}":/image \
+    -v "${DISK_TWO}":/disktwo \
+    -e EXTRA='-device ide-hd,bus=sata.5,drive=DISK-TWO -drive id=DISK-TWO,if=none,file=/disktwo,format=qcow2' \
+    sickcodes/docker-osx:naked
+```
+
 
 # Allow USB passthrough
 
