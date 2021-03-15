@@ -857,7 +857,7 @@ _`ROM` is just the lowercased mac address, without `:` between each word._
 
 You can tell the container to generate them for you using `-e GENERATE_UNIQUE=true`
 
-Or tell the container to use specific ones using `-e GENERATE_UNIQUE=true`
+Or tell the container to use specific ones using `-e GENERATE_SPECIFIC=true`
 
 ```bash
     -e GENERATE_SPECIFIC=true \
