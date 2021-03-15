@@ -7,7 +7,7 @@
 # 
 # Title:            Docker-OSX (Mac on Docker)
 # Author:           Sick.Codes https://twitter.com/sickcodes
-# Version:          4.1
+# Version:          4.2
 # License:          GPLv3+
 # Repository:       https://github.com/sickcodes/Docker-OSX
 # Website:          https://sick.codes
@@ -141,9 +141,17 @@ ENV IMAGE_PATH=/home/arch/OSX-KVM/mac_hdd_ng.img
 
 ENV NOPICKER=true
 
+# The x and y coordinates for resolution.
+# Must be used with either -e GENERATE_UNIQUE=true or -e GENERATE_SPECIFIC=true.
+ENV WIDTH=1920
+ENV HEIGHT=1080
+
+ENV MASTER_PLIST_URL=
+ENV MASTER_PLIST=./Docker-OSX/osx-serial-generator/config-nopicker-custom.plist
+
 ENV TERMS_OF_USE=i_agree
 
-ENV BOILERPLATE="By using this Dockerfile, you hereby agree that you are a security reseacher or developer and agree to use this Dockerfile to make the world a safer place. Examples include: making your apps safer, finding your mobile phone, compiling security products, etc. You understand that Docker-OSX is an Open Source project, which is released to the public under the GNU Pulic License version 3 and above. You acknowledge that the Open Source project is absolutely unaffiliated with any third party, in any form whatsoever. Any trademarks or intelectual property which happen to be mentioned anywhere in or around the project are owned by their respective owners. By using this Dockerfile, you agree to agree to the EULA of each piece of upstream or downstream software. The following code is released for the sole purpose of security research, under the GNU Public License version 3. If you are concerned about the licensing, please note that this project is not AGPL. A copy of the license is available online: https://github.com/sickcodes/Docker-OSX/blob/master/LICENSE. In order to use the following Dockerfile you must read and understand the terms. Once you have read the terms, use the -e TERMS_OF_USE=i_agree or -e TERMS_OF_USE=i_disagree"
+ENV BOILERPLATE="By using this Dockerfile, you hereby agree that you are a security reseacher or developer and agree to use this Dockerfile to make the world a safer place. Examples include: making your apps safer, finding your mobile phone, compiling security products, etc. You understand that Docker-OSX is an Open Source project, which is released to the public under the GNU Pulic License version 3 and above. You acknowledge that the Open Source project is absolutely unaffiliated with any third party, in any form whatsoever. Any trademarks or intelectual property which happen to be mentioned anywhere in or around the project are owned by their respective owners. By using this Dockerfile, you agree to agree to the EULA of each piece of upstream or downstream software. The following code is released for the sole purpose of security research, under the GNU Public License version 3. If you are concerned about the licensing, please note that this project is not AGPL. A copy of the license is available online: https://github.com/sickcodes/Docker-OSX/blob/master/LICENSE. In order to use the following Dockerfile you must read and understand the terms."
 
 CMD echo "${BOILERPLATE}" \
     ; [[ "${TERMS_OF_USE}" = i_agree ]] || exit 1 \
@@ -152,12 +160,13 @@ CMD echo "${BOILERPLATE}" \
     ; sudo chown -R $(id -u):$(id -g) /dev/kvm /dev/snd "${IMAGE_PATH}" "${BOOTDISK}" "${ENV}" || true \
     ; [[ "${NOPICKER}" == true ]] && { \
         sed -i '/^.*InstallMedia.*/d' Launch.sh \
-        && export BOOTDISK="${BOOTDISK:=/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore-nopicker.qcow2}" \
+        && export MASTER_PLIST="${MASTER_PLIST:-./Docker-OSX/osx-serial-generator/config-nopicker-custom.plist}" \
     ; } \
-    || export BOOTDISK="${BOOTDISK:=/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore.qcow2}" \
+    || export MASTER_PLIST="${MASTER_PLIST:-./Docker-OSX/osx-serial-generator/config-custom.plist}" \
+    ; [[ "${MASTER_PLIST_URL}" ]] && wget -O "${MASTER_PLIST}" "${MASTER_PLIST_URL}" \
     ; [[ "${GENERATE_UNIQUE}" == true ]] && { \
         ./Docker-OSX/osx-serial-generator/generate-unique-machine-values.sh \
-            --master-plist-url="${MASTER_PLIST_URL}" \
+            --master-plist="${MASTER_PLIST}" \
             --count 1 \
             --tsv ./serial.tsv \
             --bootdisks \
@@ -169,7 +178,7 @@ CMD echo "${BOILERPLATE}" \
     ; [[ "${GENERATE_SPECIFIC}" == true ]] && { \
             source "${ENV:=/env}" 2>/dev/null \
             ; ./Docker-OSX/osx-serial-generator/generate-specific-bootdisk.sh \
-            --master-plist-url="${MASTER_PLIST_URL}" \
+            --master-plist="${MASTER_PLIST}" \
             --model "${DEVICE_MODEL}" \
             --serial "${SERIAL}" \
             --board-serial "${BOARD_SERIAL}" \

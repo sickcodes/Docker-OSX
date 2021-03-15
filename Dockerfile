@@ -7,7 +7,7 @@
 #
 # Title:            Docker-OSX (Mac on Docker)
 # Author:           Sick.Codes https://twitter.com/sickcodes
-# Version:          4.1
+# Version:          4.2
 # License:          GPLv3+
 # Repository:       https://github.com/sickcodes/Docker-OSX
 # Website:          https://sick.codes
@@ -272,7 +272,8 @@ ENV NOPICKER=false
 ENV WIDTH=1920
 ENV HEIGHT=1080
 
-ENV MASTER_PLIST_URL="https://raw.githubusercontent.com/sickcodes/osx-serial-generator/master/config-nopicker-custom.plist"
+ENV MASTER_PLIST_URL=
+ENV MASTER_PLIST=./Docker-OSX/osx-serial-generator/config-custom.plist
 
 VOLUME ["/tmp/.X11-unix"]
 
@@ -288,23 +289,31 @@ VOLUME ["/tmp/.X11-unix"]
     # -e UUID="5CCB366D-9118-4C61-A00A-E5BAF3BED451" \
     # -e MAC_ADDRESS="A8:5C:2C:9A:46:2F" \
 
+### DEPRECATED:
 # the output will be /bootdisk.
 # /bootdisk is a useful persistent place to store the 15Mb serial number bootdisk.
+### WHY? Pointless as bootdisk will be made at runtime.
 
 # if you don't set any of the above:
 # the default serial numbers are already contained in ./OpenCore-Catalina/OpenCore.qcow2
 # And the default serial numbers
 
+# First, the container touches files. This will cause the host to give the file to that container
+# Second, the container chowns all those files, so that it can use them
+# If NOPICKER is true, the config-nopicker-custom.plist is used
+## If you set a URL instead, it will download that over whatever you set for the MASTER_PLIST
+
 CMD sudo touch /dev/kvm /dev/snd "${IMAGE_PATH}" "${BOOTDISK}" "${ENV}" || true \
     ; sudo chown -R $(id -u):$(id -g) /dev/kvm /dev/snd "${IMAGE_PATH}" "${BOOTDISK}" "${ENV}" || true \
     ; [[ "${NOPICKER}" == true ]] && { \
         sed -i '/^.*InstallMedia.*/d' Launch.sh \
-        && export BOOTDISK="${BOOTDISK:=/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore-nopicker.qcow2}" \
+        && export MASTER_PLIST="${MASTER_PLIST:-./Docker-OSX/osx-serial-generator/config-nopicker-custom.plist}" \
     ; } \
-    || export BOOTDISK="${BOOTDISK:=/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore.qcow2}" \
+    || export MASTER_PLIST="${MASTER_PLIST:-./Docker-OSX/osx-serial-generator/config-custom.plist}" \
+    ; [[ "${MASTER_PLIST_URL}" ]] && wget -O "${MASTER_PLIST}" "${MASTER_PLIST_URL}" \
     ; [[ "${GENERATE_UNIQUE}" == true ]] && { \
         ./Docker-OSX/osx-serial-generator/generate-unique-machine-values.sh \
-            --master-plist-url="${MASTER_PLIST_URL}" \
+            --master-plist="${MASTER_PLIST}" \
             --count 1 \
             --tsv ./serial.tsv \
             --bootdisks \
@@ -316,7 +325,7 @@ CMD sudo touch /dev/kvm /dev/snd "${IMAGE_PATH}" "${BOOTDISK}" "${ENV}" || true 
     ; [[ "${GENERATE_SPECIFIC}" == true ]] && { \
             source "${ENV:=/env}" 2>/dev/null \
             ; ./Docker-OSX/osx-serial-generator/generate-specific-bootdisk.sh \
-            --master-plist-url="${MASTER_PLIST_URL}" \
+            --master-plist="${MASTER_PLIST}" \
             --model "${DEVICE_MODEL}" \
             --serial "${SERIAL}" \
             --board-serial "${BOARD_SERIAL}" \
