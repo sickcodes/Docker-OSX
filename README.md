@@ -182,9 +182,12 @@ docker start -i containerid
 
 This is my favourite container. You can supply an existing disk image as a docker command line argument.
 
+Pull images out using `sudo find /var/lib/docker -size +10G | grep mac_hdd_ng.img` 
+
 Supply your own local image with `-v "${PWD}/mac_hdd_ng.img:/image"` and use `sickcodes/docker-osx:naked`
 
-- Naked image is for booting any existing .img file.
+- Naked image is for booting any existing .img file, e.g in the current working directory (`$PWD`)
+
 - By default, this image has a variable called `NOPICKER` which is `"true"`. This skips the disk selection menu. Use `-e NOPICKER=false` or any other string than the word `true` to enter the boot menu. This lets you use other disks instead of skipping the boot menu, e.g. recovery disk or disk utility.
 
 ```bash
@@ -298,7 +301,6 @@ docker run -it \
 docker run -it \
     --device /dev/kvm \
     --device /dev/snd \
-    -e RAM=4 \
     -p 50922:10022 \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
     -e "DISPLAY=${DISPLAY:-:0.0}" \

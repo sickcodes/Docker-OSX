@@ -1,5 +1,6 @@
 |Version|Date|Notes|
 |---|---|---|
+|   |2021-03-17|Add RAM=max and RAM=half to dynamically select ram at runtime (DEFAULT).|
 |   |2021-03-06|Change envs to require --envs. Automatically enable --envs if --output-env is used. Same for plists, bootdisks. Fix help ugliness and sanity of generate serial scripts. Fix bootdisk not getting written to persistent file when using NOPICKER=true. NOPICKER=true is overridden by a custom plist now anyway. Remove useless case statements. Allow -e HEADLESS=true as human readable alternative to -e DISPLAY=:99.|
 |4.1|2021-03-04|Add `-e MASTER_PLIST_URL` to all images to allow using your own remote plist.|
 |   |2021-03-03|Add `WIDTH` and `HEIGHT` to set the x and y resolutions, use in conjuction with serial numbers.|
