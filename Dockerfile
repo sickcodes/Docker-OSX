@@ -208,7 +208,8 @@ RUN git clone --recurse-submodules --depth 1 --branch "${BRANCH}" "${REPO}"
 ENV ADDITIONAL_PORTS=
 
 # dynamic RAM options for runtime
-ENV RAM=max
+ENV RAM=3
+# ENV RAM=max
 # ENV RAM=half
 
 RUN touch Launch.sh \
