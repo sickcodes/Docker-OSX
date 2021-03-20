@@ -360,14 +360,12 @@ sudo apt install qemu qemu-kvm libvirt-clients libvirt-daemon-system bridge-util
 sudo yum install libvirt qemu-kvm
 
 # then run
-sudo systemctl enable libvirtd.service
-sudo systemctl enable virtlogd.service
+sudo systemctl enable --now libvirtd
+sudo systemctl enable --now virtlogd
 
 echo 1 | sudo tee /sys/module/kvm/parameters/ignore_msrs
 
 sudo modprobe kvm
-
-# reboot
 ```
 
 # Start the same container later (persistent disk)
@@ -501,7 +499,7 @@ sudo dockerd
 sudo nohup dockerd &
 
 # or enable it in systemd
-sudo systemctl enable docker
+sudo systemctl enable --now docker
 ```
 
 # How to Forward Additional Ports from the guest.
