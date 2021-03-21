@@ -1,52 +1,72 @@
-# Docker-OSX
-## [Follow @sickcodes on Twitter](https://twitter.com/sickcodes)
+# Docker-OSX · [Follow @sickcodes on Twitter](https://twitter.com/sickcodes)
 
-![Running mac osx in a docker container](/running-mac-inside-docker-qemu.png?raw=true "OSX KVM DOCKER")
+![Running Mac OS X in a Docker container](/running-mac-inside-docker-qemu.png?raw=true "OSX KVM DOCKER")
 
-Run Mac in a Docker container! Run near native OSX-KVM in Docker! X11 Forwarding! iMessage security research!
+Run Mac OS X in Docker with near-native performance! X11 Forwarding! iMessage security research!
 
-Author: Sick.Codes https://sick.codes/ & https://twitter.com/sickcodes
+## Author
 
-Documentation: everything is on this page!
+This project is maintained by [Sick.Codes](https://sick.codes/) [(Twitter)](https://twitter.com/sickcodes)
 
-### PR & Contributor Credits
+Additional credits can be found here: https://github.com/sickcodes/Docker-OSX/blob/master/CREDITS.md
 
-https://github.com/sickcodes/Docker-OSX/blob/master/CREDITS.md
+Additionally, comprehensive list of all contributors can be found here: https://github.com/sickcodes/Docker-OSX/graphs/contributors
 
-Docker Hub: https://hub.docker.com/r/sickcodes/docker-osx
+Special thanks to [@kholia](https://twitter.com/kholia) for maintaining the upstream project, which Docker-OSX is built on top of: [OSX-KVM](https://github.com/kholia/OSX-KVM)
 
-- sickcodes/docker-osx:latest - base recovery image (10)
+## Docker
 
-- sickcodes/docker-osx:big-sur - base recovery image (11)
+Images built on top of the contents of this repository are also available on **Docker Hub** for convenience: https://hub.docker.com/r/sickcodes/docker-osx
 
-- sickcodes/docker-osx:naked - supply your own .img file
+A comprehensive list of the available Docker images and their intended purpose can be found in the [Instructions](README.md#Instructions)
 
-- sickcodes/docker-osx:auto - 17.5GB image boot to OSX shell
+## Kubernetes
 
-## Professional Support Available!
+Docker-OSX supports Kubernetes.
 
-Small questions & issues: open an issue!
+Kubernetes Helm Chart & Documentation can be found under the [helm directory](helm/README.md)
 
-For big projects, DM on Twitter [@sickcodes on Twitter](https://twitter.com/sickcodes) or write to us at https://sick.codes/contact.
-
-- Enterprise support, Business support, or casual support.
-- Custom images, custom scripts, consulting (per hour available!)
-- One-on-one with you, or your development team.
-
-## Kubernetes Support
-
-Kubernetes Helm Chart & Documentation [available at ./helm](https://github.com/sickcodes/Docker-OSX/tree/master/helm)
-
-Thank you to @cephasara for this major contribution.
+Thanks [cephasara](https://github.com/cephasara) for contributing this major contribution.
 
 [![Artifact HUB](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/docker-osx)](https://artifacthub.io/packages/search?repo=docker-osx)
 
-#### Follow [@sickcodes on Twitter](https://twitter.com/sickcodes) for updates or feature requests!
+## Support
 
-# Basic Quick Start Docker-OSX
+### Small questions & issues
+
+Feel free to open an [issue](https://github.com/sickcodes/Docker-OSX/issues/new/choose), should you come across minor issues with running Docker-OSX or have any questions.
+
+#### Resolved issues
+
+Before you open an issue, however, please check the [closed issues](https://github.com/sickcodes/Docker-OSX/issues?q=is%3Aissue+is%3Aclosed) and confirm that you're using the latest version of this repository — your issues may have already been resolved!
+
+### Features requests and updates
+
+Follow [@sickcodes](https://twitter.com/sickcodes)!
+
+### Professional support
+
+For more sophisticated endeavours, we offer the following support services: 
+
+- Enterprise support, business support, or casual support.
+- Custom images, custom scripts, consulting (per hour available!)
+- One-on-one conversations with you or your development team.
+
+In case you're interested, contact [@sickcodes on Twitter](https://twitter.com/sickcodes) or click [here](https://sick.codes/contact).
+
+## License/Contributing
+
+Docker-OSX is licensed under the [GPL v3](LICENSE). Contributions are welcomed and immensely appreciated.
+
+## Disclaimer
+
+Product names, logos, brands and other trademarks referred to within this project are the property of their respective trademark holders. These trademark holders are not affiliated with our repository in any capacity. They do not sponsor or endorse our materials.
+
+## Instructions
+
+#### Quick Start
 
 ```bash
-
 docker pull sickcodes/docker-osx:latest
 
 # Catalina
@@ -65,67 +85,69 @@ docker run -it \
     -e "DISPLAY=${DISPLAY:-:0.0}" \
     sickcodes/docker-osx:big-sur
 
-# Wait 2-3 minutes until you see the logo.
-
+# Wait 2-3 minutes until the logo appears.
 ```
 
-# How to use
+### Container images
 
-### There are 3 images: **latest**, **auto** and **naked**.
+There are three different Docker images available, which are suitable for different purposes:  **latest**, **auto** and **naked**.
 
-`sickcodes/docker-osx:latest` - [I want to try it out.](https://github.com/sickcodes/Docker-OSX#quick-start-large-pre-made-image)
+- `sickcodes/docker-osx:latest` - [I just want to try it out.](https://github.com/sickcodes/Docker-OSX#quick-start-large-pre-made-image)
+- `sickcodes/docker-osx:latest` - [I want to use Docker-OSX to develop/secure apps in Xcode (sign into Xcode, Transporter)](https://github.com/sickcodes/Docker-OSX#basic-quick-start-docker-osx)
+- `sickcodes/docker-osx:naked` - [I want to use Docker-OSX for CI/CD-related purposes (sign into Xcode, Transporter)](https://github.com/sickcodes/Docker-OSX#fully-headless-using-my-own-image-for-cicd)
 
-`sickcodes/docker-osx:latest` - [I want to use Docker-OSX to develop/secure Apps in Xcode (sign into Xcode, Transporter)](https://github.com/sickcodes/Docker-OSX#basic-quick-start-docker-osx)
+Create your personal image using `:latest`. Then, extract the image. Afterwards, you will be able to duplicate that image and import it to the `:naked` container, in order to revert the container to a previous state repeatedly.
 
-`sickcodes/docker-osx:naked` - [I want to use Docker-OSX in CI/CD (sign into Xcode, Transporter)](https://github.com/sickcodes/Docker-OSX#fully-headless-using-my-own-image-for-cicd)
-Create your personal image using `:latest`. And then pull your image out. And then use duplicate that image again & again for use in `:naked`.
+- `sickcodes/docker-osx:auto` - [I'm only interested in using the command line. (Useful for compiling software or using Homebrew headlessly).](https://github.com/sickcodes/Docker-OSX#pre-built-image-arbitrary-command-line-arguments)
+- `sickcodes/docker-osx:naked` - [I need iMessage/iCloud for security research.](https://github.com/sickcodes/Docker-OSX#serial-numbers)
 
-`sickcodes/docker-osx:auto` - [I want to boot into command line only. (compile software, homebrew headless).](https://github.com/sickcodes/Docker-OSX#pre-built-image-arbitrary-command-line-arguments)
+#### I need video output.
 
-`sickcodes/docker-osx:naked` - [I need iMessage/iCloud for security research.](https://github.com/sickcodes/Docker-OSX#serial-numbers)
+The Quick Start command should work out of the box, provided that you keep the following lines. Works in `auto` & `naked` machines:
 
-#### I need a screen.
-**KEEP** these two lines are in your command. Works in `auto` & `naked` machines:
 ```dockerfile
     -v /tmp/.X11-unix:/tmp/.X11-unix \
     -e "DISPLAY=${DISPLAY:-:0.0}" \
 ```
 
-#### I need headless.
-**REMOVE** these two lines from `auto` or `naked` machines:
+#### I need to use Docker-OSX headlessly.
+
+In that case, **remove** the two lines in your command:
+
 ```dockerfile
     # -v /tmp/.X11-unix:/tmp/.X11-unix \
     # -e "DISPLAY=${DISPLAY:-:0.0}" \
 ```
 
-#### I have used it already, and want to copy this image.
-Use `docker commit`, copy the ID, and then `docker start ID`
+#### I have used Docker-OSX before and wish to extract my Mac OS X image.
 
-**OR**
+Use `docker commit`, copy the ID, and then run `docker start <Replace this with your ID>`.
 
-[Pull out the .img file](https://github.com/sickcodes/Docker-OSX#backup-the-disk-wheres-my-disk), and then use that [.img file with :naked](https://github.com/sickcodes/Docker-OSX#quick-start-own-image-naked-container-image)
+**Alternatively:**
 
+[Extract the .img file](https://github.com/sickcodes/Docker-OSX#backup-the-disk-wheres-my-disk), and then use that [.img file with :naked](https://github.com/sickcodes/Docker-OSX#quick-start-own-image-naked-container-image)
 
-# Quick Start Large Pre-Made Image
+# Technical details
 
-Current large image size: 17.5GB
+**Current large image size:** 17.5GB
 
-This starts a container with an existing installation. This special auto image was made by @sickcodes:
+The images (excluding `:naked`) launch a container with an existing installation with a couple of premade configurations. This special image was developed by [Sick.Codes](https://sick.codes):
 
 - SSH enabled
 - username is `user`
 - password is `alpine`
-- auto-updates off
+- auto-updates are disabled
 
-You will need around *50GB* of space to run this image: half for the base image + half for your runtime image.
+## Requirements
+
+You will need around *50 GB* of space to run this image: half for the base image + half for your runtime image.
 
 If you run out of space, you can delete all your old Docker images/history/cache by simply deleting `/var/lib/docker`, and restarting `dockerd`.
 
 ```bash
-
 docker pull sickcodes/docker-osx:auto
 
-# boot directly into a real OSX shell with no display (Xvfb) [HEADLESS]
+# boot directly into a real OS X shell with no display (Xvfb) [HEADLESS]
 docker run -it \
     --device /dev/kvm \
     -p 50922:10022 \
@@ -138,7 +160,7 @@ docker run -it \
 
 docker pull sickcodes/docker-osx:auto
 
-# boot directly into a real OSX shell with a visual display [NOT HEADLESS]
+# boot directly into a real OS X shell with a visual display [NOT HEADLESS]
 docker run -it \
     --device /dev/kvm \
     -p 50922:10022 \
@@ -147,13 +169,13 @@ docker run -it \
     sickcodes/docker-osx:auto
 
 ```
+
 ### Pre-built Image + Arbitrary Command Line Arguments.
 
 ```bash
-
 docker pull sickcodes/docker-osx:auto
 
-# boot to OSX shell + display + specify commands to run inside OSX!
+# boot to OS X shell + display + specify commands to run inside OS X!
 docker run -it \
     --device /dev/kvm \
     -p 50922:10022 \
@@ -163,22 +185,21 @@ docker run -it \
     sickcodes/docker-osx:auto
 
 # Boots in a minute or two!
-
 ```
+
 ### Restart an auto container
 
-Containers that use `sickcodes/docker-osx:auto` can be stopped at started.
+Containers that use `sickcodes/docker-osx:auto` can be stopped while being started.
 
 ```bash
 # find last container
 docker ps -a
 
 # docker start old container with -i for interactive
-docker start -i containerid
-
+docker start -i <Replace this with your ID>
 ```
 
-# Quick Start Own Image (naked container image)
+### Quick Start Own Image (naked container image)
 
 This is my favourite container. You can supply an existing disk image as a docker command line argument.
 
@@ -212,10 +233,9 @@ docker run -it \
     -e "DISPLAY=${DISPLAY:-:0.0}" \
     -e "NOPICKER=false" \
     sickcodes/docker-osx:naked
-
 ```
 
-### Fully Headless, using my own image, for CI/CD
+### Fully Headless, using a custom image, for CI/CD
 
 ```bash
 # run your own image headless + SSH
@@ -227,12 +247,13 @@ docker run -it \
 ```
 
 # Features In Docker-OSX v4
+
 - `sickcodes/docker-osx:big-sur` - original base recovery image for latest OS (safe)
 - Serial number generators. [See below or ./custom](https://github.com/sickcodes/Docker-OSX/tree/master/custom)
-- Full auto mode: boot straight to OSX shell and even run commands as runtime arguments!
+- Full auto mode: boot straight to OS X shell and even run commands as runtime arguments!
 - `sickcodes/docker-osx:latest` - original base recovery image (safe)
 - `sickcodes/docker-osx:naked` - supply your own .img file (safe)
-- `sickcodes/docker-osx:auto` - Large docker image that boots to OSX shell (must trust @sickcodes)
+- `sickcodes/docker-osx:auto` - Large docker image that boots to OS X shell (must trust @sickcodes)
 - Supply your own image using `-v "${PWD}/disk.img:/image"`
 - Kubernetes Helm Chart. [See ./helm](https://github.com/sickcodes/Docker-OSX/tree/master/helm)
 - [OSX-KVM](https://github.com/kholia/OSX-KVM) inside a Docker container!
@@ -243,19 +264,7 @@ docker run -it \
 - Create an ARMY of the same exact container using `docker commit`
 - Xfvb headless mode
 
-### All Pull Requests Welcome!
-
-Docker-OSX is a GPLv3+ Dockerfile and we need contributors just like you :)
-
-Upstream: https://github.com/kholia/OSX-KVM && the great guy [@kholia](https://twitter.com/kholia)
-
-Upstream Credits (OSX-KVM project) among many others: https://github.com/kholia/OSX-KVM/blob/master/CREDITS.md
-
-# Download The Image for sickcodes/docker-osx:naked
-
-This is the current automated image. Username is `user`, passsword is `alpine`, SSH is on, and auto-updates are off.
-
-If the download is slow, just get the image from `docker pull sickcodes/docker-osx:auto` and find it in `/var/lib/docker`.
+# Download the image manually
 
 ```bash
 wget https://images2.sick.codes/mac_hdd_ng_auto.img
@@ -295,7 +304,7 @@ docker run -it \
 
 ```
 
-# Run but allow SSH into OSX (Original Version)!
+# Run but enable SSH in OS X (Original Version)!
 
 ```bash
 docker run -it \
@@ -306,12 +315,12 @@ docker run -it \
     -e "DISPLAY=${DISPLAY:-:0.0}" \
     sickcodes/docker-osx:latest
 
-# turn on SSH after you've installed OSX in the "Sharing" settings.
+# turn on SSH after you've installed OS X in the "Sharing" settings.
 ssh fullname@localhost -p 50922
 
 ```
 
-# Autoboot into OSX after you've installed everything
+# Autoboot into OS X after you've installed everything
 
 You can use `-e NOPICKER=true`.
 
@@ -351,14 +360,12 @@ sudo apt install qemu qemu-kvm libvirt-clients libvirt-daemon-system bridge-util
 sudo yum install libvirt qemu-kvm
 
 # then run
-sudo systemctl enable libvirtd.service
-sudo systemctl enable virtlogd.service
+sudo systemctl enable --now libvirtd
+sudo systemctl enable --now virtlogd
 
 echo 1 | sudo tee /sys/module/kvm/parameters/ignore_msrs
 
 sudo modprobe kvm
-
-# reboot
 ```
 
 # Start the same container later (persistent disk)
@@ -492,7 +499,7 @@ sudo dockerd
 sudo nohup dockerd &
 
 # or enable it in systemd
-sudo systemctl enable docker
+sudo systemctl enable --now docker
 ```
 
 # How to Forward Additional Ports from the guest.
@@ -602,7 +609,7 @@ docker cp oldcontainerid:/home/arch/OSX-KVM/mac_hdd_ng.img .
 Or if you lost your container, find it with this:
 
 ```bash
-# fast way, find 10 gigabyte OSX disks hiding in your docker container storage
+# fast way, find 10 gigabyte OS X disks hiding in your docker container storage
 sudo find /var/lib/docker -size +10G | grep mac_hdd_ng.img
 
 # you can move (mv) it somewhere, using cp can take loads of disk space
@@ -745,7 +752,7 @@ For serial numbers, generate them in `./custom` OR make docker generate them at 
 At any time, verify your serial number before logging in iCloud, etc.
 
 ```bash
-# this is a quick way to check your serial number via cli inside OSX
+# this is a quick way to check your serial number via cli inside OS X
 ioreg -l | grep IOPlatformSerialNumber
 
 # or from the host
@@ -1006,7 +1013,7 @@ Here's a few other resolutions! If you resolution is invalid, it will default to
     -e HEIGHT=1600 \
 ```
 
-# Mount a disk inside OSX from the host
+# Mount a disk inside OS X from the host
 
 Pass the disk into the container as a volume and then pass the disk again into QEMU command line extras with.
 
