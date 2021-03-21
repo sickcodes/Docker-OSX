@@ -57,3 +57,9 @@ These credits refer to the contributors to this repository:
 [@MrBenFTW](https://github.com/MrBenFTW) - Tempfix for arch #150
 
 [@edsonboldrini](https://github.com/edsonboldrini) - Update README.md #161
+
+[@TheHackerCoding](https://github.com/TheHackerCoding) - Typo in README.md #194
+
+[@panos](https://github.com/panos) -  Improved README #212 
+
+[@ggjulio](https://github.com/ggjulio) - Restarting an "auto" container #216

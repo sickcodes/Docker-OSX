@@ -121,7 +121,7 @@ In that case, **remove** the two lines in your command:
 
 #### I have used Docker-OSX before and wish to extract my Mac OS X image.
 
-Use `docker commit`, copy the ID, and then run `docker start <Replace this with your ID>`.
+Use `docker commit`, copy the ID, and then run `docker start -ai <Replace this with your ID>`.
 
 **Alternatively:**
 
@@ -195,8 +195,8 @@ Containers that use `sickcodes/docker-osx:auto` can be stopped while being start
 # find last container
 docker ps -a
 
-# docker start old container with -i for interactive
-docker start -i <Replace this with your ID>
+# docker start old container with -i for interactive, -a for attach STDIN/STDOUT
+docker start -ai -i <Replace this with your ID>
 ```
 
 ### Quick Start Own Image (naked container image)
@@ -381,7 +381,7 @@ If you don't run this you will have a new image every time.
 docker ps --all
 
 # docker start the container ID
-docker start abc123xyz567
+docker start -ai abc123xyz567
 
 # if you have many containers, you can try automate it with filters like this
 # docker ps --all --filter "ancestor=sickcodes/docker-osx"
