@@ -1,8 +1,12 @@
 # Credits
 
-The upstream credits are available at [@Kholia](https://github.com/Kholia)'s repo https://github.com/kholia/OSX-KVM/blob/master/CREDITS.md
+## Upstream Acknowledgements:
 
-These credits refer to the contributors to this repository:
+This project uses OSX-KVM from https://github.com/kholia/OSX-KVM/ and fully appreciates the work done by [@Kholia](https://github.com/Kholia) and all the contributors who are listed: [https://github.com/kholia/OSX-KVM/blob/master/CREDITS.md](https://github.com/kholia/OSX-KVM/blob/master/CREDITS.md)
+
+This project now uses the fantastic OpenCore bootloader from the community OpenCore project: https://github.com/acidanthera/OpenCorePkg. You can join their [Subreddit here](https://www.reddit.com/r/hackintosh/)!
+
+## These credits refer to the contributors to this repository:
 
 [@GreeFine](https://github.com/GreeFine) - Readme Typo #9 
 

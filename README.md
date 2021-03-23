@@ -14,6 +14,10 @@ Additionally, comprehensive list of all contributors can be found here: https://
 
 Special thanks to [@kholia](https://twitter.com/kholia) for maintaining the upstream project, which Docker-OSX is built on top of: [OSX-KVM](https://github.com/kholia/OSX-KVM)
 
+Big thanks to the OpenCore team over at: https://github.com/acidanthera/OpenCorePkg. Their well-maintained bootloader provides much of the great functionality that Docker-OSX users enjoy :)
+
+If you like this project, consider contributing upstream!
+
 ## Docker
 
 Images built on top of the contents of this repository are also available on **Docker Hub** for convenience: https://hub.docker.com/r/sickcodes/docker-osx
@@ -56,11 +60,13 @@ In case you're interested, contact [@sickcodes on Twitter](https://twitter.com/s
 
 ## License/Contributing
 
-Docker-OSX is licensed under the [GPL v3](LICENSE). Contributions are welcomed and immensely appreciated.
+Docker-OSX is licensed under the [GPL v3+](LICENSE). Contributions are welcomed and immensely appreciated. You are in-fact permitted to use Docker-OSX as a tool to create proprietary software.
 
 ## Disclaimer
 
-Product names, logos, brands and other trademarks referred to within this project are the property of their respective trademark holders. These trademark holders are not affiliated with our repository in any capacity. They do not sponsor or endorse our materials.
+If you are serious about Apple Security, and possibly finding 6-figure bug bounties within the Apple Bug Bounty Program, then you're in the right place! Further notes: [Is Hackintosh, OSX-KVM, or Docker-OSX legal?](https://sick.codes/is-hackintosh-osx-kvm-or-docker-osx-legal/).
+
+Product names, logos, brands and other trademarks referred to within this project are the property of their respective trademark holders. These trademark holders are not affiliated with our repository in any capacity. They do not sponsor or endorse this project in any way.
 
 ## Instructions
 
