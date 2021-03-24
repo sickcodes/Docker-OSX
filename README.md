@@ -83,6 +83,7 @@ docker run -it \
     -e "DISPLAY=${DISPLAY:-:0.0}" \
     sickcodes/docker-osx:latest
 
+docker pull sickcodes/docker-osx:big-sur
 # Big Sur
 docker run -it \
     --device /dev/kvm \
@@ -111,7 +112,7 @@ Create your personal image using `:latest`. Then, extract the image. Afterwards,
 
 The Quick Start command should work out of the box, provided that you keep the following lines. Works in `auto` & `naked` machines:
 
-```dockerfile
+```
     -v /tmp/.X11-unix:/tmp/.X11-unix \
     -e "DISPLAY=${DISPLAY:-:0.0}" \
 ```
@@ -120,10 +121,47 @@ The Quick Start command should work out of the box, provided that you keep the f
 
 In that case, **remove** the two lines in your command:
 
-```dockerfile
+```
     # -v /tmp/.X11-unix:/tmp/.X11-unix \
     # -e "DISPLAY=${DISPLAY:-:0.0}" \
 ```
+
+#### I need VNC to a Remote Host (Secure)
+
+Now you can direct connect VNC to any image!
+
+Add the following line:
+
+`-e EXTRA="-display none -vnc 0.0.0.0:99,password"`
+
+In the Docker terminal, press `enter` until you see `(qemu)`.
+
+Type `change vnc password`
+
+`ip n` will usually show the container IP first.
+
+Port is `5999`.
+
+Now VNC connect using the Docker container IP, for example `172.17.0.2:5999`
+
+You can also find the container IP: `docker inspect <containerid> | jq -r '.[0].NetworkSettings.IPAddress'`
+
+Remote VNC over SSH: `ssh -N root@1.1.1.1 -L  5999:172.17.0.2:5999`, where `1.1.1.1` is your remote server IP and `172.17.0.2` is your LAN container IP.
+
+#### I need VNC on localhost (Local use only!)
+
+##### VNC Insecure
+
+**NOT TLS/HTTPS Encrypted at all!**
+```
+-p 5999:5999
+-e EXTRA="-display none -vnc 0.0.0.0:99,password"
+```
+VNC Connect to `localhost:5999`.
+
+Or `ssh -N root@1.1.1.1 -L  5999:127.0.0.1:5999`, where `1.1.1.1` is your remote server IP.
+
+(Note: if you close port 5999 and use the SSH tunnel, this becomes secure.)
 
 #### I have used Docker-OSX before and wish to extract my Mac OS X image.
 

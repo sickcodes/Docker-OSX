@@ -7,7 +7,7 @@
 #
 # Title:            Docker-OSX (Mac on Docker)
 # Author:           Sick.Codes https://twitter.com/sickcodes
-# Version:          4.2
+# Version:          4.3
 # License:          GPLv3+
 # Repository:       https://github.com/sickcodes/Docker-OSX
 # Website:          https://sick.codes
@@ -205,8 +205,8 @@ RUN git clone --recurse-submodules --depth 1 --branch "${BRANCH}" "${REPO}"
 
 RUN touch Launch.sh \
     && chmod +x ./Launch.sh \
-    && tee -a Launch.sh <<< '#!/bin/sh' \
-    && tee -a Launch.sh <<< 'set -eu' \
+    && tee -a Launch.sh <<< '#!/bin/bash' \
+    && tee -a Launch.sh <<< 'set -eux' \
     && tee -a Launch.sh <<< 'sudo chown    $(id -u):$(id -g) /dev/kvm 2>/dev/null || true' \
     && tee -a Launch.sh <<< 'sudo chown -R $(id -u):$(id -g) /dev/snd 2>/dev/null || true' \
     && tee -a Launch.sh <<< '[[ "${RAM}" = max ]] && export RAM="$(("$(head -n1 /proc/meminfo | tr -dc "[:digit:]") / 1000000"))"' \
@@ -340,7 +340,7 @@ CMD sudo touch /dev/kvm /dev/snd "${IMAGE_PATH}" "${BOOTDISK}" "${ENV}" || true 
             --height "${HEIGHT:-1080}" \
             --output-bootdisk "${BOOTDISK:=/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore.qcow2}" \
     ; } \
-    ; ./enable-ssh.sh && envsubst < ./Launch.sh | bash
+    ; ./enable-ssh.sh && ./Launch.sh
 
 # virt-manager mode: eta son
 # CMD virsh define <(envsubst < Docker-OSX.xml) && virt-manager || virt-manager

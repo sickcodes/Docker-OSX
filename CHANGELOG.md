@@ -1,5 +1,6 @@
 |Version|Date|Notes|
 |---|---|---|
+|4.3|2021-03-24|Enable interactive QEMU again. Remove envsubst since we are already using bash... Add set -x flag| 
 |4.2|2021-03-24|Add all ENV variables to each dockerfile for readability. Add RAM allocation buffer and cache drop bug fix. Add kvm and libvirt groups. Add `IMAGE_FORMAT=qcow2` to allow `IMAGE_FORMAT=raw` too.|
 |   |2021-03-19|Use RAM=3 as the default RAM allocation. Add instructions to clear buff/cache.|
 |   |2021-03-17|Add RAM=max and RAM=half to dynamically select ram at runtime (DEFAULT).|
