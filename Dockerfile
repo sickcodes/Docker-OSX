@@ -7,7 +7,7 @@
 #
 # Title:            Docker-OSX (Mac on Docker)
 # Author:           Sick.Codes https://twitter.com/sickcodes
-# Version:          4.1
+# Version:          4.2
 # License:          GPLv3+
 # Repository:       https://github.com/sickcodes/Docker-OSX
 # Website:          https://sick.codes
@@ -203,15 +203,6 @@ ARG BRANCH=master
 ARG REPO='https://github.com/sickcodes/Docker-OSX.git'
 RUN git clone --recurse-submodules --depth 1 --branch "${BRANCH}" "${REPO}"
 
-# env -e ADDITIONAL_PORTS with a comma
-# for example, -e ADDITIONAL_PORTS=hostfwd=tcp::23-:23,
-ENV ADDITIONAL_PORTS=
-
-# dynamic RAM options for runtime
-ENV RAM=3
-# ENV RAM=max
-# ENV RAM=half
-
 RUN touch Launch.sh \
     && chmod +x ./Launch.sh \
     && tee -a Launch.sh <<< '#!/bin/sh' \
@@ -223,7 +214,7 @@ RUN touch Launch.sh \
     && tee -a Launch.sh <<< 'sudo chown -R $(id -u):$(id -g) /dev/snd 2>/dev/null || true' \
     && tee -a Launch.sh <<< 'exec qemu-system-x86_64 -m ${RAM:-2}000 \' \
     && tee -a Launch.sh <<< '-cpu Penryn,vendor=GenuineIntel,+invtsc,vmware-cpuid-freq=on,+pcid,+ssse3,+sse4.2,+popcnt,+avx,+aes,+xsave,+xsaveopt,check \' \
-    && tee -a Launch.sh <<< '-machine q35,accel=kvm:tcg \' \
+    && tee -a Launch.sh <<< '-machine q35,${KVM:-"accel=kvm:tcg"} \' \
     && tee -a Launch.sh <<< '-smp ${CPU_STRING:-${SMP:-4},cores=${CORES:-4}} \' \
     && tee -a Launch.sh <<< '-usb -device usb-kbd -device usb-tablet \' \
     && tee -a Launch.sh <<< '-device isa-applesmc,osk=ourhardworkbythesewordsguardedpleasedontsteal\(c\)AppleComputerInc \' \
@@ -236,7 +227,7 @@ RUN touch Launch.sh \
     && tee -a Launch.sh <<< '-device ide-hd,bus=sata.2,drive=OpenCoreBoot \' \
     && tee -a Launch.sh <<< '-device ide-hd,bus=sata.3,drive=InstallMedia \' \
     && tee -a Launch.sh <<< '-drive id=InstallMedia,if=none,file=/home/arch/OSX-KVM/BaseSystem.img,format=qcow2 \' \
-    && tee -a Launch.sh <<< '-drive id=MacHDD,if=none,file=${IMAGE_PATH:-/home/arch/OSX-KVM/mac_hdd_ng.img},format=qcow2 \' \
+    && tee -a Launch.sh <<< '-drive id=MacHDD,if=none,file=${IMAGE_PATH:-/home/arch/OSX-KVM/mac_hdd_ng.img},format=${IMAGE_FORMAT:-qcow2} \' \
     && tee -a Launch.sh <<< '-device ide-hd,bus=sata.4,drive=MacHDD \' \
     && tee -a Launch.sh <<< '-netdev user,id=net0,hostfwd=tcp::${INTERNAL_SSH_PORT:-10022}-:22,hostfwd=tcp::${SCREEN_SHARE_PORT:-5900}-:5900,${ADDITIONAL_PORTS} \' \
     && tee -a Launch.sh <<< '-device ${NETWORKING:-vmxnet3},netdev=net0,id=net0,mac=${MAC_ADDRESS:-52:54:00:09:49:17} \' \
@@ -255,16 +246,17 @@ USER arch
 
 ENV USER arch
 
+#### SPECIAL RUNTIME ARGUMENTS BELOW
+
+# env -e ADDITIONAL_PORTS with a comma
+# for example, -e ADDITIONAL_PORTS=hostfwd=tcp::23-:23,
+ENV ADDITIONAL_PORTS=
+
 ENV BOOTDISK=
 
 ENV DISPLAY=:0.0
 
 ENV ENV=/env
-
-ENV IMAGE_PATH=/home/arch/OSX-KVM/mac_hdd_ng.img
-
-# ENV NETWORKING=e1000-82545em
-ENV NETWORKING=vmxnet3
 
 # Boolean for generating a bootdisk with new random serials.
 ENV GENERATE_UNIQUE=false
@@ -272,15 +264,29 @@ ENV GENERATE_UNIQUE=false
 # Boolean for generating a bootdisk with specific serials.
 ENV GENERATE_SPECIFIC=false
 
+ENV IMAGE_PATH=/home/arch/OSX-KVM/mac_hdd_ng.img
+ENV IMAGE_FORMAT=qcow2
+
+ENV KVM='accel=kvm:tcg'
+
+ENV MASTER_PLIST_URL="https://raw.githubusercontent.com/sickcodes/osx-serial-generator/master/config-nopicker-custom.plist"
+
+# ENV NETWORKING=e1000-82545em
+ENV NETWORKING=vmxnet3
+
 # boolean for skipping the disk selection menu at in the boot process
 ENV NOPICKER=false
+
+# dynamic RAM options for runtime
+ENV RAM=3
+# ENV RAM=max
+# ENV RAM=half
 
 # The x and y coordinates for resolution.
 # Must be used with either -e GENERATE_UNIQUE=true or -e GENERATE_SPECIFIC=true.
 ENV WIDTH=1920
 ENV HEIGHT=1080
 
-ENV MASTER_PLIST_URL="https://raw.githubusercontent.com/sickcodes/osx-serial-generator/master/config-nopicker-custom.plist"
 
 VOLUME ["/tmp/.X11-unix"]
 

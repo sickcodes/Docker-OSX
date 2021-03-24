@@ -7,7 +7,7 @@
 # 
 # Title:            Docker-OSX (Mac on Docker)
 # Author:           Sick.Codes https://twitter.com/sickcodes
-# Version:          4.1
+# Version:          4.2
 # License:          GPLv3+
 # Repository:       https://github.com/sickcodes/Docker-OSX
 # Website:          https://sick.codes
@@ -115,19 +115,24 @@ RUN mkdir -p ~/.ssh \
 
 ARG COMPLETE=true
 
-# Feel free to take a copy of this image and then host it internally
-ARG IMAGE_URL='https://images2.sick.codes/mac_hdd_ng_auto.img'
-
 # use the COMPLETE arg, for a complete image, ready to boot.
 # otherwise use your own image: -v "$PWD/disk.img":/image
 ARG WGET_OPTIONS=
 # ARG WGET_OPTIONS='--no-verbose'
 
+# Feel free to take a copy of this image and then host it internally
+ARG IMAGE_URL='https://images.sick.codes/mac_hdd_ng_auto.img'
+# ARG IMAGE_URL='https://images.sick.codes/mac_hdd_ng_auto_big_sur.img'
+
 RUN if [[ "${COMPLETE}" ]]; then \
-        echo "Downloading 20GB+ image... This step might take a while... Press Ctrl+C if you want to abort." \
+        echo "Downloading 20GB image... This step might take a while... Press Ctrl+C if you want to abort." \
         ; rm -f /home/arch/OSX-KVM/mac_hdd_ng.img \
         && wget ${WGET_OPTIONS} -O /home/arch/OSX-KVM/mac_hdd_ng.img "${IMAGE_URL}" \
     ; fi
+
+#### SPECIAL RUNTIME ARGUMENTS BELOW
+
+ENV ADDITIONAL_PORTS=
 
 ENV BOOTDISK=
 
@@ -137,9 +142,33 @@ ENV HEADLESS=false
 
 ENV ENV=/env
 
+# Boolean for generating a bootdisk with new random serials.
+ENV GENERATE_UNIQUE=false
+
+# Boolean for generating a bootdisk with specific serials.
+ENV GENERATE_SPECIFIC=false
+
 ENV IMAGE_PATH=/home/arch/OSX-KVM/mac_hdd_ng.img
+ENV IMAGE_FORMAT=qcow2
+
+ENV KVM='accel=kvm:tcg'
+
+# ENV MASTER_PLIST_URL="https://raw.githubusercontent.com/sickcodes/osx-serial-generator/master/config-custom.plist"
+
+# ENV NETWORKING=e1000-82545em
+ENV NETWORKING=vmxnet3
 
 ENV NOPICKER=true
+
+# dynamic RAM options for runtime
+ENV RAM=3
+# ENV RAM=max
+# ENV RAM=half
+
+# The x and y coordinates for resolution.
+# Must be used with either -e GENERATE_UNIQUE=true or -e GENERATE_SPECIFIC=true.
+ENV WIDTH=1920
+ENV HEIGHT=1080
 
 ENV TERMS_OF_USE=i_agree
 
