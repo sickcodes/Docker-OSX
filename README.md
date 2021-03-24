@@ -430,7 +430,11 @@ docker run \
 
 # Troubleshooting
 
-libgtk permissions denied error, thanks @raoulh + @arsham
+Big thank you to our contributors who have worked out almost every conceivable issue so far!
+
+[https://github.com/sickcodes/Docker-OSX/blob/master/CREDITS.md](https://github.com/sickcodes/Docker-OSX/blob/master/CREDITS.md)
+
+#### libgtk permissions denied error
 ```bash
 echo $DISPLAY
 
@@ -447,6 +451,38 @@ sudo yum install xorg-x11-server-utils
 xhost +
 
 ```
+#### RAM over-allocation Error
+Cause by trying to allocate more ram to the container than you currently have available for allocation: `cannot set up guest memory 'pc.ram': Cannot allocate memory`.
+
+For example:
+
+```console
+[user@hostname ~]$ free -mh
+               total        used        free      shared  buff/cache   available
+Mem:            30Gi       3.5Gi       7.0Gi       728Mi        20Gi        26Gi
+Swap:           11Gi          0B        11Gi
+```
+
+In the example above, the `buff/cache` already contains 20 Gigabytes of allocated RAM.
+
+Clear the buffer and the cache:
+
+```bash
+sudo tee /proc/sys/vm/drop_caches <<< 3
+```
+
+Now check the ram again:
+
+```console
+[user@hostname ~]$ free -mh
+               total        used        free      shared  buff/cache   available
+Mem:            30Gi       3.3Gi        26Gi       697Mi       1.5Gi        26Gi
+Swap:           11Gi          0B        11Gi
+```
+
+Of course you cannot allocate more RAM that your have. The default is 3 Gigabytes: `-e RAM=3`.
+
+#### PulseAudio
 
 PulseAudio for sound (note neither [AppleALC](https://github.com/acidanthera/AppleALC) and varying [`alcid`](https://dortania.github.io/OpenCore-Post-Install/universal/audio.html) or [VoodooHDA-OC](https://github.com/chris1111/VoodooHDA-OC) have [codec support](https://osy.gitbook.io/hac-mini-guide/details/hda-fix#hda-codec) though [IORegistryExplorer](https://github.com/vulgo/IORegistryExplorer) does show the controller component working):
 
@@ -470,29 +506,31 @@ docker run \
     sickcodes/docker-osx pactl list
 ```
 
-Alternative run, thanks @roryrjb
+#### Nested Hardware Virtualization
+
+Check if your PC has hardware virtualization enabled:
 
 ```bash
-docker run \
-    --privileged \
-    --net host \
-    --cap-add=ALL \
-    -v /tmp/.X11-unix:/tmp/.X11-unix \
-    -v /dev:/dev \
-    -v /lib/modules:/lib/modules \
-    sickcodes/docker-osx
-```
+sudo tee /sys/module/kvm/parameters/ignore_msrs <<< 1
 
-Check if your hardware virt is on
-
-```bash
 egrep -c '(svm|vmx)' /proc/cpuinfo
 ```
 
-Try adding yourself to the docker group
+#### Add yourself to the Docker group, KVM group, libvirt group.
+
+If you use `sudo dockerd` or dockerd is controlled by systemd/systemctl, then you must be in the Docker group:
+
+To add yourself to the docker group:
 
 ```bash
 sudo usermod -aG docker "${USER}"
+```
+
+and for the rest:
+
+```bash
+sudo usermod -aG libvirt "${USER}"
+sudo usermod -aG kvm "${USER}"
 ```
 
 Turn on docker daemon
