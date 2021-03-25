@@ -165,6 +165,8 @@ RUN patched_glibc=glibc-linux4-2.33-4-x86_64.pkg.tar.zst \
 
 WORKDIR /home/arch/OSX-KVM
 
+RUN wget https://raw.githubusercontent.com/sickcodes/Docker-OSX/master/fetch-macOS.py
+
 RUN [[ "${VERSION%%.*}" -lt 11 ]] && { python fetch-macOS.py --version "${VERSION}" \
         && qemu-img convert BaseSystem.dmg -O qcow2 -p -c BaseSystem.img \
         && qemu-img create -f qcow2 mac_hdd_ng.img "${SIZE}" \
@@ -340,7 +342,7 @@ CMD sudo touch /dev/kvm /dev/snd "${IMAGE_PATH}" "${BOOTDISK}" "${ENV}" || true 
             --height "${HEIGHT:-1080}" \
             --output-bootdisk "${BOOTDISK:=/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore.qcow2}" \
     ; } \
-    ; ./enable-ssh.sh && ./Launch.sh
+    ; ./enable-ssh.sh && /bin/bash -c ./Launch.sh
 
 # virt-manager mode: eta son
 # CMD virsh define <(envsubst < Docker-OSX.xml) && virt-manager || virt-manager
