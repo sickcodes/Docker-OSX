@@ -14,37 +14,70 @@ Additionally, comprehensive list of all contributors can be found here: https://
 
 Special thanks to [@kholia](https://twitter.com/kholia) for maintaining the upstream project, which Docker-OSX is built on top of: [OSX-KVM](https://github.com/kholia/OSX-KVM).
 
+Big thanks to the OpenCore team over at: https://github.com/acidanthera/OpenCorePkg. Their well-maintained bootloader provides much of the great functionality that Docker-OSX users enjoy :)
+
+If you like this project, consider contributing here or upstream!
+
+## Quick Start Docker-OSX
+
+### Catalina [![https://img.shields.io/docker/image-size/sickcodes/docker-osx/latest?label=sickcodes%2Fdocker-osx%3Alatest](https://img.shields.io/docker/image-size/sickcodes/docker-osx/latest?label=sickcodes%2Fdocker-osx%3Alatest)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
+
+```bash
+docker run -it \
+    --device /dev/kvm \
+    -p 50922:10022 \
+    -v /tmp/.X11-unix:/tmp/.X11-unix \
+    -e "DISPLAY=${DISPLAY:-:0.0}" \
+    sickcodes/docker-osx:latest
+```
+### Big Sur [![https://img.shields.io/docker/image-size/sickcodes/docker-osx/big-sur?label=sickcodes%2Fdocker-osx%3Abig-sur](https://img.shields.io/docker/image-size/sickcodes/docker-osx/big-sur?label=sickcodes%2Fdocker-osx%3Abig-sur)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
+
+```bash
+docker run -it \
+    --device /dev/kvm \
+    -p 50922:10022 \
+    -v /tmp/.X11-unix:/tmp/.X11-unix \
+    -e "DISPLAY=${DISPLAY:-:0.0}" \
+    sickcodes/docker-osx:big-sur
+```
+
 ## Technical details
 
-**Current large image size:** 17.5GB
+There currently 4 images, each with different use-cases (explained below):
+
+[![https://img.shields.io/docker/image-size/sickcodes/docker-osx/latest?label=sickcodes%2Fdocker-osx%3Alatest](https://img.shields.io/docker/image-size/sickcodes/docker-osx/latest?label=sickcodes%2Fdocker-osx%3Alatest)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
+
+[![https://img.shields.io/docker/image-size/sickcodes/docker-osx/naked?label=sickcodes%2Fdocker-osx%3Anaked](https://img.shields.io/docker/image-size/sickcodes/docker-osx/naked?label=sickcodes%2Fdocker-osx%3Anaked)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
+
+[![https://img.shields.io/docker/image-size/sickcodes/docker-osx/big-sur?label=sickcodes%2Fdocker-osx%3Abig-sur](https://img.shields.io/docker/image-size/sickcodes/docker-osx/big-sur?label=sickcodes%2Fdocker-osx%3Abig-sur)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
+
+[![https://img.shields.io/docker/image-size/sickcodes/docker-osx/auto?label=sickcodes%2Fdocker-osx%3Aauto](https://img.shields.io/docker/image-size/sickcodes/docker-osx/auto?label=sickcodes%2Fdocker-osx%3Aauto)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
 
 The images (excluding `:naked`) launch a container with an existing installation with a couple of premade configurations. This special image was developed by [Sick.Codes](https://sick.codes):
 
 - username: `user`, password: `alpine`
-- ssh enabled (`localhost:50922`)
-- vnc enabled (`localhost:8888`)
+- SSH enabled (`localhost:50922`)
+- VNC enabled (`localhost:8888`) if using ./vnc version
+- VNC enabled (`localhost:8888`) if using ./vnc version
 - auto-updates disabled
-- serial number generators!
-- x11 forwarding is enabled
+- [serial number generator!](https://github.com/sickcodes/osx-serial-generator)
+- X11 forwarding is enabled
 - runs on top of QEMU + KVM
-- supports big sur, custom images, xfvb headless mode
+- supports Big Sur, custom images, Xvfb headless mode
 - you can clone your container with `docker commit`
 
 ### Requirements
 
-- at least 50 GBs (half for the base image, half for your runtime image
-- virtualization should be enabled in your bios settings
+- 20GB disk space for bare minimum installation
+- virtualization should be enabled in your BIOS settings
 - a kvm-capable host
+- at least 50 GBs for `:auto` (half for the base image, half for your runtime image
 
-### To be done
+### TODO
 
 - documentation for security researchers
 - gpu acceleration
 - support for virt-manager
-
-Big thanks to the OpenCore team over at: https://github.com/acidanthera/OpenCorePkg. Their well-maintained bootloader provides much of the great functionality that Docker-OSX users enjoy :)
-
-If you like this project, consider contributing upstream!
 
 ## Docker
 
@@ -102,31 +135,6 @@ Product names, logos, brands and other trademarks referred to within this projec
 
 ## Instructions
 
-#### Quick Start
-
-```bash
-docker pull sickcodes/docker-osx:latest
-
-# Catalina
-docker run -it \
-    --device /dev/kvm \
-    -p 50922:10022 \
-    -v /tmp/.X11-unix:/tmp/.X11-unix \
-    -e "DISPLAY=${DISPLAY:-:0.0}" \
-    sickcodes/docker-osx:latest
-
-docker pull sickcodes/docker-osx:big-sur
-# Big Sur
-docker run -it \
-    --device /dev/kvm \
-    -p 50922:10022 \
-    -v /tmp/.X11-unix:/tmp/.X11-unix \
-    -e "DISPLAY=${DISPLAY:-:0.0}" \
-    sickcodes/docker-osx:big-sur
-
-# Wait 2-3 minutes until the logo appears.
-```
-
 ### Container images
 
 There are three different Docker images available, which are suitable for different purposes:  **latest**, **auto** and **naked**.
@@ -140,7 +148,7 @@ Create your personal image using `:latest`. Then, extract the image. Afterwards,
 - `sickcodes/docker-osx:auto` - [I'm only interested in using the command line. (Useful for compiling software or using Homebrew headlessly).](https://github.com/sickcodes/Docker-OSX#pre-built-image-arbitrary-command-line-arguments)
 - `sickcodes/docker-osx:naked` - [I need iMessage/iCloud for security research.](https://github.com/sickcodes/Docker-OSX#serial-numbers)
 
-#### I need video output.
+## I need video output.
 
 The Quick Start command should work out of the box, provided that you keep the following lines. Works in `auto` & `naked` machines:
 
@@ -149,7 +157,7 @@ The Quick Start command should work out of the box, provided that you keep the f
     -e "DISPLAY=${DISPLAY:-:0.0}" \
 ```
 
-#### I need to use Docker-OSX headlessly.
+## I need to use Docker-OSX headlessly.
 
 In that case, **remove** the two lines in your command:
 
@@ -158,7 +166,35 @@ In that case, **remove** the two lines in your command:
     # -e "DISPLAY=${DISPLAY:-:0.0}" \
 ```
 
-#### I need VNC to a Remote Host (Secure)
+## I need VNC on localhost (Local use only!)
+
+### VNC Insecure
+
+**Must change -it to -i to be able to interact with the QEMU console**
+
+Native QEMU VNC example
+
+```bash
+docker run -i \
+    --device /dev/kvm \
+    -p 50922:10022 \
+    -p 5999:5999 \
+    -v /tmp/.X11-unix:/tmp/.X11-unix \
+    -e "DISPLAY=${DISPLAY:-:0.0}" \
+    -e EXTRA="-display none -vnc 0.0.0.0:99,password" \
+    sickcodes/docker-osx:big-sur
+
+# type `change vnc password` into the docker terminal and set a password
+# connect to localhost:5999 using VNC
+```
+
+**NOT TLS/HTTPS Encrypted at all!**
+
+Or `ssh -N root@1.1.1.1 -L  5999:127.0.0.1:5999`, where `1.1.1.1` is your remote server IP.
+
+(Note: if you close port 5999 and use the SSH tunnel, this becomes secure.)
+
+## I need VNC to a Remote Host (Secure)
 
 Now you can direct connect VNC to any image!
 
@@ -170,30 +206,13 @@ In the Docker terminal, press `enter` until you see `(qemu)`.
 
 Type `change vnc password`
 
-`ip n` will usually show the container IP first.
+You also need the container IP: `docker inspect <containerid> | jq -r '.[0].NetworkSettings.IPAddress'`
 
-Port is `5999`.
+Or `ip n` will usually show the container IP first.
 
 Now VNC connect using the Docker container IP, for example `172.17.0.2:5999`
 
-You can also find the container IP: `docker inspect <containerid> | jq -r '.[0].NetworkSettings.IPAddress'`
-
 Remote VNC over SSH: `ssh -N root@1.1.1.1 -L  5999:172.17.0.2:5999`, where `1.1.1.1` is your remote server IP and `172.17.0.2` is your LAN container IP.
-
-#### I need VNC on localhost (Local use only!)
-
-##### VNC Insecure
-
-**NOT TLS/HTTPS Encrypted at all!**
-```
--p 5999:5999
--e EXTRA="-display none -vnc 0.0.0.0:99,password"
-```
-VNC Connect to `localhost:5999`.
-
-Or `ssh -N root@1.1.1.1 -L  5999:127.0.0.1:5999`, where `1.1.1.1` is your remote server IP.
-
-(Note: if you close port 5999 and use the SSH tunnel, this becomes secure.)
 
 #### I have used Docker-OSX before and wish to extract my Mac OS X image.
 
@@ -205,21 +224,9 @@ Use `docker commit`, copy the ID, and then run `docker start -ai <Replace this w
 
 #### Further examples
 
-Apart from the previous examples, there's a myriad of other potential use cases that can work perfectly with Docker-OSX.
+Apart from the previous examples, there's a myriad of other potential use cases that can work perfectly with Docker-OSX, which you'll see below!
 
-### Run Mac OS X
-
-```bash
-docker pull sickcodes/docker-osx:auto
-
-# boot directly into a real OS X shell with no display (Xvfb) [HEADLESS]
-docker run -it \
-    --device /dev/kvm \
-    -p 50922:10022 \
-    sickcodes/docker-osx:auto
-
-# Wait 2-3 minutes until you drop into the shell.
-```
+### Run Catalina Pre-Installed [![https://img.shields.io/docker/image-size/sickcodes/docker-osx/auto?label=sickcodes%2Fdocker-osx%3Aauto](https://img.shields.io/docker/image-size/sickcodes/docker-osx/auto?label=sickcodes%2Fdocker-osx%3Aauto)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
 
 ```bash
 docker pull sickcodes/docker-osx:auto
@@ -231,9 +238,28 @@ docker run -it \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
     -e "DISPLAY=${DISPLAY:-:0.0}" \
     sickcodes/docker-osx:auto
+
+# username is user
+# passsword is alpine
 ```
 
-### Download the image manually and use it in Docker
+```bash
+docker pull sickcodes/docker-osx:auto
+
+# boot directly into a real OS X shell with no display (Xvfb) [HEADLESS]
+docker run -it \
+    --device /dev/kvm \
+    -p 50922:10022 \
+    sickcodes/docker-osx:auto
+
+# username is user
+# passsword is alpine
+# Wait 2-3 minutes until you drop into the shell.
+```
+
+
+### Download the image manually and use it in Docker [![https://img.shields.io/docker/image-size/sickcodes/docker-osx/naked?label=sickcodes%2Fdocker-osx%3Anaked](https://img.shields.io/docker/image-size/sickcodes/docker-osx/naked?label=sickcodes%2Fdocker-osx%3Anaked)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
+
 
 This is a particularly good way for downloading the container, in case Docker's CDN (or your connection) happens to be slow.
 
@@ -249,7 +275,7 @@ docker run -it \
     sickcodes/docker-osx:naked
 ```
 
-### Use a pre-built image + arbitrary command line arguments.
+### Use a pre-built image + arbitrary command line arguments. [![https://img.shields.io/docker/image-size/sickcodes/docker-osx/auto?label=sickcodes%2Fdocker-osx%3Aauto](https://img.shields.io/docker/image-size/sickcodes/docker-osx/auto?label=sickcodes%2Fdocker-osx%3Aauto)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
 
 ```bash
 docker pull sickcodes/docker-osx:auto
@@ -266,7 +292,8 @@ docker run -it \
 # Boots in a minute or two!
 ```
 
-### Run Mac OS X headlessly with a custom image
+### Run Mac OS X headlessly with a custom image [![https://img.shields.io/docker/image-size/sickcodes/docker-osx/naked?label=sickcodes%2Fdocker-osx%3Anaked](https://img.shields.io/docker/image-size/sickcodes/docker-osx/naked?label=sickcodes%2Fdocker-osx%3Anaked)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
+
 
 This is particularly helpful for CI/CD pipelines.
 

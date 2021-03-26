@@ -67,3 +67,5 @@ This project now uses the fantastic OpenCore bootloader from the community OpenC
 [@panos](https://github.com/panos) -  Improved README #212 
 
 [@ggjulio](https://github.com/ggjulio) - Restarting an "auto" container #216
+
+[@panos](https://github.com/panos) - Made further improvements to the README #219
