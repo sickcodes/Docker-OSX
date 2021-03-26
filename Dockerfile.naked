@@ -7,7 +7,7 @@
 # 
 # Title:            Docker-OSX (Mac on Docker)
 # Author:           Sick.Codes https://twitter.com/sickcodes
-# Version:          4.1
+# Version:          4.3
 # License:          GPLv3+
 # Repository:       https://github.com/sickcodes/Docker-OSX
 # Website:          https://sick.codes
@@ -102,6 +102,10 @@ RUN mkdir -p ~/.ssh \
     && tee -a ~/.ssh/config <<< '    StrictHostKeyChecking no' \
     && tee -a ~/.ssh/config <<< '    UserKnownHostsFile=/dev/null'
 
+#### SPECIAL RUNTIME ARGUMENTS BELOW
+
+ENV ADDITIONAL_PORTS=
+
 ENV BOOTDISK=
 
 ENV DISPLAY=:99
@@ -110,9 +114,33 @@ ENV HEADLESS=false
 
 ENV ENV=/env
 
+# Boolean for generating a bootdisk with new random serials.
+ENV GENERATE_UNIQUE=false
+
+# Boolean for generating a bootdisk with specific serials.
+ENV GENERATE_SPECIFIC=false
+
 ENV IMAGE_PATH=/image
+ENV IMAGE_FORMAT=qcow2
+
+ENV KVM='accel=kvm:tcg'
+
+# ENV MASTER_PLIST_URL="https://raw.githubusercontent.com/sickcodes/osx-serial-generator/master/config-custom.plist"
+
+# ENV NETWORKING=e1000-82545em
+ENV NETWORKING=vmxnet3
 
 ENV NOPICKER=true
+
+# dynamic RAM options for runtime
+ENV RAM=3
+# ENV RAM=max
+# ENV RAM=half
+
+# The x and y coordinates for resolution.
+# Must be used with either -e GENERATE_UNIQUE=true or -e GENERATE_SPECIFIC=true.
+ENV WIDTH=1920
+ENV HEIGHT=1080
 
 CMD sudo touch /dev/kvm /dev/snd "${IMAGE_PATH}" "${BOOTDISK}" "${ENV}" || true \
     ; sudo chown -R $(id -u):$(id -g) /dev/kvm /dev/snd "${IMAGE_PATH}" "${BOOTDISK}" "${ENV}" || true \

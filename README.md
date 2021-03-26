@@ -42,6 +42,10 @@ The images (excluding `:naked`) launch a container with an existing installation
 - gpu acceleration
 - support for virt-manager
 
+Big thanks to the OpenCore team over at: https://github.com/acidanthera/OpenCorePkg. Their well-maintained bootloader provides much of the great functionality that Docker-OSX users enjoy :)
+
+If you like this project, consider contributing upstream!
+
 ## Docker
 
 Images built on top of the contents of this repository are also available on **Docker Hub** for convenience: https://hub.docker.com/r/sickcodes/docker-osx
@@ -84,7 +88,7 @@ In case you're interested, contact [@sickcodes on Twitter](https://twitter.com/s
 
 ## License/Contributing
 
-Docker-OSX is licensed under the [GPL v3](LICENSE). Contributions are welcomed and immensely appreciated.
+Docker-OSX is licensed under the [GPL v3+](LICENSE). Contributions are welcomed and immensely appreciated. You are in-fact permitted to use Docker-OSX as a tool to create proprietary software.
 
 ### Other cool Docker/QEMU based projects
 
@@ -92,7 +96,9 @@ Docker-OSX is licensed under the [GPL v3](LICENSE). Contributions are welcomed a
 
 ## Disclaimer
 
-Product names, logos, brands and other trademarks referred to within this project are the property of their respective trademark holders. These trademark holders are not affiliated with our repository in any capacity. They do not sponsor or endorse our materials.
+If you are serious about Apple Security, and possibly finding 6-figure bug bounties within the Apple Bug Bounty Program, then you're in the right place! Further notes: [Is Hackintosh, OSX-KVM, or Docker-OSX legal?](https://sick.codes/is-hackintosh-osx-kvm-or-docker-osx-legal/).
+
+Product names, logos, brands and other trademarks referred to within this project are the property of their respective trademark holders. These trademark holders are not affiliated with our repository in any capacity. They do not sponsor or endorse this project in any way.
 
 ## Instructions
 
@@ -109,6 +115,7 @@ docker run -it \
     -e "DISPLAY=${DISPLAY:-:0.0}" \
     sickcodes/docker-osx:latest
 
+docker pull sickcodes/docker-osx:big-sur
 # Big Sur
 docker run -it \
     --device /dev/kvm \
@@ -137,7 +144,7 @@ Create your personal image using `:latest`. Then, extract the image. Afterwards,
 
 The Quick Start command should work out of the box, provided that you keep the following lines. Works in `auto` & `naked` machines:
 
-```dockerfile
+```
     -v /tmp/.X11-unix:/tmp/.X11-unix \
     -e "DISPLAY=${DISPLAY:-:0.0}" \
 ```
@@ -146,10 +153,47 @@ The Quick Start command should work out of the box, provided that you keep the f
 
 In that case, **remove** the two lines in your command:
 
-```dockerfile
+```
     # -v /tmp/.X11-unix:/tmp/.X11-unix \
     # -e "DISPLAY=${DISPLAY:-:0.0}" \
 ```
+
+#### I need VNC to a Remote Host (Secure)
+
+Now you can direct connect VNC to any image!
+
+Add the following line:
+
+`-e EXTRA="-display none -vnc 0.0.0.0:99,password"`
+
+In the Docker terminal, press `enter` until you see `(qemu)`.
+
+Type `change vnc password`
+
+`ip n` will usually show the container IP first.
+
+Port is `5999`.
+
+Now VNC connect using the Docker container IP, for example `172.17.0.2:5999`
+
+You can also find the container IP: `docker inspect <containerid> | jq -r '.[0].NetworkSettings.IPAddress'`
+
+Remote VNC over SSH: `ssh -N root@1.1.1.1 -L  5999:172.17.0.2:5999`, where `1.1.1.1` is your remote server IP and `172.17.0.2` is your LAN container IP.
+
+#### I need VNC on localhost (Local use only!)
+
+##### VNC Insecure
+
+**NOT TLS/HTTPS Encrypted at all!**
+```
+-p 5999:5999
+-e EXTRA="-display none -vnc 0.0.0.0:99,password"
+```
+VNC Connect to `localhost:5999`.
+
+Or `ssh -N root@1.1.1.1 -L  5999:127.0.0.1:5999`, where `1.1.1.1` is your remote server IP.
+
+(Note: if you close port 5999 and use the SSH tunnel, this becomes secure.)
 
 #### I have used Docker-OSX before and wish to extract my Mac OS X image.
 
@@ -421,9 +465,13 @@ docker run \
 
 ## Troubleshooting
 
+Big thank you to our contributors who have worked out almost every conceivable issue so far!
+
 ### LibGTK - Permission denied
 
-Thanks [@raoulh](https://github.com/raoulh) and [@arsham](https://github.com/arsham) for contributing this section.
+[https://github.com/sickcodes/Docker-OSX/blob/master/CREDITS.md](https://github.com/sickcodes/Docker-OSX/blob/master/CREDITS.md)
+
+#### libgtk permissions denied error
 
 ```bash
 echo $DISPLAY
@@ -441,6 +489,38 @@ sudo yum install xorg-x11-server-utils
 xhost +
 
 ```
+#### RAM over-allocation Error
+Cause by trying to allocate more ram to the container than you currently have available for allocation: `cannot set up guest memory 'pc.ram': Cannot allocate memory`.
+
+For example:
+
+```console
+[user@hostname ~]$ free -mh
+               total        used        free      shared  buff/cache   available
+Mem:            30Gi       3.5Gi       7.0Gi       728Mi        20Gi        26Gi
+Swap:           11Gi          0B        11Gi
+```
+
+In the example above, the `buff/cache` already contains 20 Gigabytes of allocated RAM.
+
+Clear the buffer and the cache:
+
+```bash
+sudo tee /proc/sys/vm/drop_caches <<< 3
+```
+
+Now check the ram again:
+
+```console
+[user@hostname ~]$ free -mh
+               total        used        free      shared  buff/cache   available
+Mem:            30Gi       3.3Gi        26Gi       697Mi       1.5Gi        26Gi
+Swap:           11Gi          0B        11Gi
+```
+
+Of course you cannot allocate more RAM that your have. The default is 3 Gigabytes: `-e RAM=3`.
+
+#### PulseAudio
 
 ### Use PulseAudio for sound 
 
@@ -467,33 +547,34 @@ docker run \
     sickcodes/docker-osx pactl list
 ```
 
-#### Alternative soltuion
+#### Nested Hardware Virtualization
 
-Thanks [@roryrjb](https://github.com/roryrjb) for contributing this section.
+Check if your PC has hardware virtualization enabled:
 
 ```bash
-docker run \
-    --privileged \
-    --net host \
-    --cap-add=ALL \
-    -v /tmp/.X11-unix:/tmp/.X11-unix \
-    -v /dev:/dev \
-    -v /lib/modules:/lib/modules \
-    sickcodes/docker-osx
+sudo tee /sys/module/kvm/parameters/ignore_msrs <<< 1
+
+egrep -c '(svm|vmx)' /proc/cpuinfo
 ```
 
 ### Routine checks
 
 #### Confirm that your CPU supports virtualization
 
-```bash
-egrep -c '(svm|vmx)' /proc/cpuinfo
-```
+#### Add yourself to the Docker group, KVM group, libvirt group.
+
+If you use `sudo dockerd` or dockerd is controlled by systemd/systemctl, then you must be in the Docker group:
 
 #### Try adding yourself to the docker group
 
 ```bash
 sudo usermod -aG docker "${USER}"
+```
+and also to the kvm and libvirt groups:
+
+```bash
+sudo usermod -aG libvirt "${USER}"
+sudo usermod -aG kvm "${USER}"
 ```
 
 #### Enable docker daemon

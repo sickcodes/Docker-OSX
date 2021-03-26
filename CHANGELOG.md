@@ -1,5 +1,8 @@
 |Version|Date|Notes|
 |---|---|---|
+|4.3|2021-03-24|Enable interactive QEMU again. Remove envsubst since we are already using bash... Add set -x flag| 
+|4.2|2021-03-24|Add all ENV variables to each dockerfile for readability. Add RAM allocation buffer and cache drop bug fix. Add kvm and libvirt groups. Add `IMAGE_FORMAT=qcow2` to allow `IMAGE_FORMAT=raw` too.|
+|   |2021-03-19|Use RAM=3 as the default RAM allocation. Add instructions to clear buff/cache.|
 |   |2021-03-17|Add RAM=max and RAM=half to dynamically select ram at runtime (DEFAULT).|
 |   |2021-03-06|Change envs to require --envs. Automatically enable --envs if --output-env is used. Same for plists, bootdisks. Fix help ugliness and sanity of generate serial scripts. Fix bootdisk not getting written to persistent file when using NOPICKER=true. NOPICKER=true is overridden by a custom plist now anyway. Remove useless case statements. Allow -e HEADLESS=true as human readable alternative to -e DISPLAY=:99.|
 |4.1|2021-03-04|Add `-e MASTER_PLIST_URL` to all images to allow using your own remote plist.|
