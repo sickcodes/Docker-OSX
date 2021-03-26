@@ -6,13 +6,41 @@ Run Mac OS X in Docker with near-native performance! X11 Forwarding! iMessage se
 
 ## Author
 
-This project is maintained by [Sick.Codes](https://sick.codes/) [(Twitter)](https://twitter.com/sickcodes)
+This project is maintained by [Sick.Codes](https://sick.codes/). [(Twitter)](https://twitter.com/sickcodes)
 
 Additional credits can be found here: https://github.com/sickcodes/Docker-OSX/blob/master/CREDITS.md
 
 Additionally, comprehensive list of all contributors can be found here: https://github.com/sickcodes/Docker-OSX/graphs/contributors
 
-Special thanks to [@kholia](https://twitter.com/kholia) for maintaining the upstream project, which Docker-OSX is built on top of: [OSX-KVM](https://github.com/kholia/OSX-KVM)
+Special thanks to [@kholia](https://twitter.com/kholia) for maintaining the upstream project, which Docker-OSX is built on top of: [OSX-KVM](https://github.com/kholia/OSX-KVM).
+
+## Technical details
+
+**Current large image size:** 17.5GB
+
+The images (excluding `:naked`) launch a container with an existing installation with a couple of premade configurations. This special image was developed by [Sick.Codes](https://sick.codes):
+
+- username: `user`, password: `alpine`
+- ssh enabled (`localhost:50922`)
+- vnc enabled (`localhost:8888`)
+- auto-updates disabled
+- serial number generators!
+- x11 forwarding is enabled
+- runs on top of QEMU + KVM
+- supports big sur, custom images, xfvb headless mode
+- you can clone your container with `docker commit`
+
+### Requirements
+
+- at least 50 GBs (half for the base image, half for your runtime image
+- virtualization should be enabled in your bios settings
+- a kvm-capable host
+
+### To be done
+
+- documentation for security researchers
+- gpu acceleration
+- support for virt-manager
 
 Big thanks to the OpenCore team over at: https://github.com/acidanthera/OpenCorePkg. Their well-maintained bootloader provides much of the great functionality that Docker-OSX users enjoy :)
 
@@ -22,13 +50,13 @@ If you like this project, consider contributing upstream!
 
 Images built on top of the contents of this repository are also available on **Docker Hub** for convenience: https://hub.docker.com/r/sickcodes/docker-osx
 
-A comprehensive list of the available Docker images and their intended purpose can be found in the [Instructions](README.md#Instructions)
+A comprehensive list of the available Docker images and their intended purpose can be found in the [Instructions](README.md#Instructions).
 
 ## Kubernetes
 
 Docker-OSX supports Kubernetes.
 
-Kubernetes Helm Chart & Documentation can be found under the [helm directory](helm/README.md)
+Kubernetes Helm Chart & Documentation can be found under the [helm directory](helm/README.md).
 
 Thanks [cephasara](https://github.com/cephasara) for contributing this major contribution.
 
@@ -44,7 +72,7 @@ Feel free to open an [issue](https://github.com/sickcodes/Docker-OSX/issues/new/
 
 Before you open an issue, however, please check the [closed issues](https://github.com/sickcodes/Docker-OSX/issues?q=is%3Aissue+is%3Aclosed) and confirm that you're using the latest version of this repository — your issues may have already been resolved!
 
-### Features requests and updates
+### Feature requests and updates
 
 Follow [@sickcodes](https://twitter.com/sickcodes)!
 
@@ -61,6 +89,10 @@ In case you're interested, contact [@sickcodes on Twitter](https://twitter.com/s
 ## License/Contributing
 
 Docker-OSX is licensed under the [GPL v3+](LICENSE). Contributions are welcomed and immensely appreciated. You are in-fact permitted to use Docker-OSX as a tool to create proprietary software.
+
+### Other cool Docker/QEMU based projects
+
+- [Run iOS in a Docker container with Docker-eyeOS](https://github.com/sickcodes/Docker-eyeOS) - [https://github.com/sickcodes/Docker-eyeOS](https://github.com/sickcodes/Docker-eyeOS)
 
 ## Disclaimer
 
@@ -171,22 +203,11 @@ Use `docker commit`, copy the ID, and then run `docker start -ai <Replace this w
 
 [Extract the .img file](https://github.com/sickcodes/Docker-OSX#backup-the-disk-wheres-my-disk), and then use that [.img file with :naked](https://github.com/sickcodes/Docker-OSX#quick-start-own-image-naked-container-image)
 
-# Technical details
+#### Further examples
 
-**Current large image size:** 17.5GB
+Apart from the previous examples, there's a myriad of other potential use cases that can work perfectly with Docker-OSX.
 
-The images (excluding `:naked`) launch a container with an existing installation with a couple of premade configurations. This special image was developed by [Sick.Codes](https://sick.codes):
-
-- SSH enabled
-- username is `user`
-- password is `alpine`
-- auto-updates are disabled
-
-## Requirements
-
-You will need around *50 GB* of space to run this image: half for the base image + half for your runtime image.
-
-If you run out of space, you can delete all your old Docker images/history/cache by simply deleting `/var/lib/docker`, and restarting `dockerd`.
+### Run Mac OS X
 
 ```bash
 docker pull sickcodes/docker-osx:auto
@@ -201,7 +222,6 @@ docker run -it \
 ```
 
 ```bash
-
 docker pull sickcodes/docker-osx:auto
 
 # boot directly into a real OS X shell with a visual display [NOT HEADLESS]
@@ -211,10 +231,25 @@ docker run -it \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
     -e "DISPLAY=${DISPLAY:-:0.0}" \
     sickcodes/docker-osx:auto
-
 ```
 
-### Pre-built Image + Arbitrary Command Line Arguments.
+### Download the image manually and use it in Docker
+
+This is a particularly good way for downloading the container, in case Docker's CDN (or your connection) happens to be slow.
+
+```bash
+wget https://images2.sick.codes/mac_hdd_ng_auto.img
+
+docker run -it \
+    --device /dev/kvm \
+    -p 50922:10022 \
+    -v "${PWD}/mac_hdd_ng_auto.img:/image" \
+    -v /tmp/.X11-unix:/tmp/.X11-unix \
+    -e "DISPLAY=${DISPLAY:-:0.0}" \
+    sickcodes/docker-osx:naked
+```
+
+### Use a pre-built image + arbitrary command line arguments.
 
 ```bash
 docker pull sickcodes/docker-osx:auto
@@ -231,7 +266,20 @@ docker run -it \
 # Boots in a minute or two!
 ```
 
-### Restart an auto container
+### Run Mac OS X headlessly with a custom image
+
+This is particularly helpful for CI/CD pipelines.
+
+```bash
+# run your own image headless + SSH
+docker run -it \
+    --device /dev/kvm \
+    -p 50922:10022 \
+    -v "${PWD}/mac_hdd_ng.img:/image" \
+    sickcodes/docker-osx:naked
+```
+
+### Restart a container that starts automatically
 
 Containers that use `sickcodes/docker-osx:auto` can be stopped while being started.
 
@@ -243,17 +291,18 @@ docker ps -a
 docker start -ai -i <Replace this with your ID>
 ```
 
-### Quick Start Own Image (naked container image)
+### Quick Start your own image (naked container image)
 
-This is my favourite container. You can supply an existing disk image as a docker command line argument.
+This is my favourite container. You can supply an existing disk image as a Docker command line argument.
 
-Pull images out using `sudo find /var/lib/docker -size +10G | grep mac_hdd_ng.img` 
+- Pull images out using `sudo find /var/lib/docker -size +10G | grep mac_hdd_ng.img` 
 
-Supply your own local image with `-v "${PWD}/mac_hdd_ng.img:/image"` and use `sickcodes/docker-osx:naked`
+- Supply your own local image with the command argument `-v "${PWD}/mac_hdd_ng.img:/image"` and use `sickcodes/docker-osx:naked` when instructing Docker to create your container.
 
-- Naked image is for booting any existing .img file, e.g in the current working directory (`$PWD`)
-
-- By default, this image has a variable called `NOPICKER` which is `"true"`. This skips the disk selection menu. Use `-e NOPICKER=false` or any other string than the word `true` to enter the boot menu. This lets you use other disks instead of skipping the boot menu, e.g. recovery disk or disk utility.
+  - Naked image is for booting any existing .img file, e.g in the current working directory (`$PWD`)
+  - By default, this image has a variable called `NOPICKER` which is `"true"`. This skips the disk selection menu. Use `-e NOPICKER=false` or any other string than the word `true` to enter the boot menu.
+    
+    This lets you use other disks instead of skipping the boot menu, e.g. recovery disk or disk utility.
 
 ```bash
 docker pull sickcodes/docker-osx:naked
@@ -279,55 +328,7 @@ docker run -it \
     sickcodes/docker-osx:naked
 ```
 
-### Fully Headless, using a custom image, for CI/CD
-
-```bash
-# run your own image headless + SSH
-docker run -it \
-    --device /dev/kvm \
-    -p 50922:10022 \
-    -v "${PWD}/mac_hdd_ng.img:/image" \
-    sickcodes/docker-osx:naked
-```
-
-# Features In Docker-OSX v4
-
-- `sickcodes/docker-osx:big-sur` - original base recovery image for latest OS (safe)
-- Serial number generators. [See below or ./custom](https://github.com/sickcodes/Docker-OSX/tree/master/custom)
-- Full auto mode: boot straight to OS X shell and even run commands as runtime arguments!
-- `sickcodes/docker-osx:latest` - original base recovery image (safe)
-- `sickcodes/docker-osx:naked` - supply your own .img file (safe)
-- `sickcodes/docker-osx:auto` - Large docker image that boots to OS X shell (must trust @sickcodes)
-- Supply your own image using `-v "${PWD}/disk.img:/image"`
-- Kubernetes Helm Chart. [See ./helm](https://github.com/sickcodes/Docker-OSX/tree/master/helm)
-- [OSX-KVM](https://github.com/kholia/OSX-KVM) inside a Docker container!
-- X11 Forwarding
-- SSH on `localhost:50922`
-- QEMU + KVM!
-- VNC version on `localhost:8888` [vnc version is inside a separate directory, there are security risks involved with using VNC, see insid the Dockerfile](https://github.com/sickcodes/Docker-OSX/blob/master/vnc-version/Dockerfile)
-- Create an ARMY of the same exact container using `docker commit`
-- Xfvb headless mode
-
-# Download the image manually
-
-```bash
-wget https://images2.sick.codes/mac_hdd_ng_auto.img
-
-docker run -it \
-    --device /dev/kvm \
-    -p 50922:10022 \
-    -v "${PWD}/mac_hdd_ng_auto.img:/image" \
-    -v /tmp/.X11-unix:/tmp/.X11-unix \
-    -e "DISPLAY=${DISPLAY:-:0.0}" \
-    sickcodes/docker-osx:naked
-
-```
-
-### Other cool Docker-QEMU based projects:
-
-[Run iOS in a Docker with Docker-eyeOS](https://github.com/sickcodes/Docker-eyeOS) - [https://github.com/sickcodes/Docker-eyeOS](https://github.com/sickcodes/Docker-eyeOS)
-
-# Run Docker-OSX (Original Version)
+### Run the original version of Docker-OSX
 
 ```bash
 
@@ -340,12 +341,9 @@ docker run -it \
     -e "DISPLAY=${DISPLAY:-:0.0}" \
     sickcodes/docker-osx:latest
 
-# press ctrl G if your mouse gets stuck
-
+# press CTRL + G if your mouse gets stuck
 # scroll down to troubleshooting if you have problems
-
 # need more RAM and SSH on localhost -p 50922?
-
 ```
 
 # Run but enable SSH in OS X (Original Version)!
@@ -360,11 +358,10 @@ docker run -it \
     sickcodes/docker-osx:latest
 
 # turn on SSH after you've installed OS X in the "Sharing" settings.
-ssh fullname@localhost -p 50922
-
+ssh user@localhost -p 50922
 ```
 
-# Autoboot into OS X after you've installed everything
+### Autoboot into OS X after you've installed everything
 
 You can use `-e NOPICKER=true`.
 
@@ -466,13 +463,16 @@ docker run \
     newImageName
 ```
 
-# Troubleshooting
+## Troubleshooting
 
 Big thank you to our contributors who have worked out almost every conceivable issue so far!
+
+### LibGTK - Permission denied
 
 [https://github.com/sickcodes/Docker-OSX/blob/master/CREDITS.md](https://github.com/sickcodes/Docker-OSX/blob/master/CREDITS.md)
 
 #### libgtk permissions denied error
+
 ```bash
 echo $DISPLAY
 
@@ -522,7 +522,9 @@ Of course you cannot allocate more RAM that your have. The default is 3 Gigabyte
 
 #### PulseAudio
 
-PulseAudio for sound (note neither [AppleALC](https://github.com/acidanthera/AppleALC) and varying [`alcid`](https://dortania.github.io/OpenCore-Post-Install/universal/audio.html) or [VoodooHDA-OC](https://github.com/chris1111/VoodooHDA-OC) have [codec support](https://osy.gitbook.io/hac-mini-guide/details/hda-fix#hda-codec) though [IORegistryExplorer](https://github.com/vulgo/IORegistryExplorer) does show the controller component working):
+### Use PulseAudio for sound 
+
+Note: [AppleALC](https://github.com/acidanthera/AppleALC), [`alcid`](https://dortania.github.io/OpenCore-Post-Install/universal/audio.html) and [VoodooHDA-OC](https://github.com/chris1111/VoodooHDA-OC) do not have [codec support](https://osy.gitbook.io/hac-mini-guide/details/hda-fix#hda-codec). However, [IORegistryExplorer](https://github.com/vulgo/IORegistryExplorer) does show the controller component working.
 
 ```bash
 docker run \
@@ -533,7 +535,8 @@ docker run \
     sickcodes/docker-osx
 ```
 
-PulseAudio debugging:
+#### PulseAudio debugging
+
 ```bash
 docker run \
     --device /dev/kvm \
@@ -554,44 +557,49 @@ sudo tee /sys/module/kvm/parameters/ignore_msrs <<< 1
 egrep -c '(svm|vmx)' /proc/cpuinfo
 ```
 
+### Routine checks
+
+#### Confirm that your CPU supports virtualization
+
 #### Add yourself to the Docker group, KVM group, libvirt group.
 
 If you use `sudo dockerd` or dockerd is controlled by systemd/systemctl, then you must be in the Docker group:
 
-To add yourself to the docker group:
+#### Try adding yourself to the docker group
 
 ```bash
 sudo usermod -aG docker "${USER}"
 ```
-
-and for the rest:
+and also to the kvm and libvirt groups:
 
 ```bash
 sudo usermod -aG libvirt "${USER}"
 sudo usermod -aG kvm "${USER}"
 ```
 
-Turn on docker daemon
+#### Enable docker daemon
 
 ```bash
-# run ad hoc
+# enable it in systemd
+sudo systemctl enable --now docker
+
+# or run ad hoc
 sudo dockerd
 
 # or daemonize it
 sudo nohup dockerd &
-
-# or enable it in systemd
-sudo systemctl enable --now docker
 ```
 
-# How to Forward Additional Ports from the guest.
+#### Forward additional ports (nginx)
 
-This is how it visually looks:
+It's possible to forward additional ports depending on your needs. In this example, we're going to use Mac OS X to host nginx in a way that looks like this:
 
-`host:10023 <-> 10023:container:10023 <-> 80:guest`
+```
+host:10023 <-> 10023:container:10023 <-> 80:guest
+```
 
-```bash
-On the host
+On the host machine, you should run:
+
 ```bash
 docker run -it \
     --device /dev/kvm \
@@ -601,7 +609,8 @@ docker run -it \
     sickcodes/docker-osx:auto
 ```
 
-Inside the container:
+In a Terminal session running the container, you should run:
+
 ```bash
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
@@ -611,9 +620,9 @@ sudo sed -i -e 's/8080/80/' /usr/local/etc/nginx/nginx.confcd
 sudo nginx
 ```
 
-nginx should appear on the host at port 10023.
+**nginx should now be reachable on the port 10023.**
 
-You can string multiple statements, for example:
+Additionally, you can string multiple statements, for example:
 
 ```bash
     -e ADDITIONAL_PORTS='hostfwd=tcp::10023-:80,hostfwd=tcp::10043-:443,'
@@ -621,13 +630,11 @@ You can string multiple statements, for example:
     -p 10043:10043 \
 ```
 
-# How to Enable Network Forwarding
+### Enable IPv4 forwarding for bridged network connections
 
-Allow ipv4 forwarding for bridged networking connections:
+This is not required for LOCAL installations and may [cause the host to leak your IP, even if you're using a VPN in the container](https://sick.codes/cve-2020-15590/).
 
-This is not required for LOCAL installations and may cause containers behind [VPN's to leak host IP](https://sick.codes/cve-2020-15590/).
-
-If you are connecting to a REMOTE Docker-OSX, e.g. a "Mac Mini" in a datacenter, then this may boost networking:
+However, if you're trying to connect to an instance of Docker-OSX remotely (e.g. an instance of Docker-OSX hosted in a datacenter), this may improve your performance:
 
 ```bash
 # enable for current session
@@ -642,36 +649,15 @@ sudo tee -a /etc/sysctl.conf <<EOF
 net.ipv4.ip_forward = 1
 EOF
 
-# OR edit manually
+# or edit manually with the editor of your choice
 nano /etc/sysctl.conf || vi /etc/sysctl.conf || vim /etc/sysctl.conf
 
 # now reboot
 ```
 
-# How to install Docker if you don't have Docker already
+### Fedora: No internet connectivity with a bridged network
 
-```bash
-### Arch
-sudo pacman -S docker
-sudo groupadd docker
-sudo usermod -aG docker "${USER}"
-
-### Ubuntu
-
-sudo apt remove docker docker-engine docker.io containerd runc -y
-sudo apt install apt-transport-https ca-certificates curl gnupg-agent software-properties-common -y
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
-apt-key fingerprint 0EBFCD88
-sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
-sudo apt update -y
-sudo apt install docker-ce docker-ce-cli containerd.io -y
-sudo groupadd docker
-sudo usermod -aG docker "${USER}"
-
-
-```
-
-### Fedora: if you have no internet connectivity from the VM, and you are using bridge networking:
+Fedora's default firewall settings may prevent Docker's network interface from reaching the internet. In order to reoslve this, you will need to whitelist the interface in your firewall:
 
 ```bash
 # Set the docker0 bridge to the trusted zone
@@ -679,66 +665,49 @@ sudo firewall-cmd --permanent --zone=trusted --add-interface=docker0
 sudo firewall-cmd --reload
 ```
 
-# Backup the disk (Where's my disk?)
+### Virtual network adapters
 
-You can use `docker cp`
+#### Fast internet connectivity
 
-```bash
-# docker copy your image OUT of your container (warning, double disk space)
-docker cp oldcontainerid:/home/arch/OSX-KVM/mac_hdd_ng.img .
-```
-
-Or if you lost your container, find it with this:
-
-```bash
-# fast way, find 10 gigabyte OS X disks hiding in your docker container storage
-sudo find /var/lib/docker -size +10G | grep mac_hdd_ng.img
-
-# you can move (mv) it somewhere, using cp can take loads of disk space
-sudo mv somedir/mac_hdd_ng.img .
-
-```
-
-# Use an Old Docker-OSX Disk in a Fresh Container (Replication)
-
-[Use the sickcodes/docker-osx:naked image.](https://github.com/sickcodes/Docker-OSX/tree/master#quick-start-own-image)
-
-# Internet Speeds
-
-### FAST internet
 `-e NETWORKING=vmxnet3`
 
-### SLOW internet
+#### Slow internet connectivity
+
 `-e NETWORKING=e1000-82545em`
 
-# DESTROY: Wipe old images to free disk space
 
-The easiest way to clean out your entire Docker (ALL images, layers, and containers) is to `sudo rm -rf /var/lib/docker`
+### I'd like to use SPICE instead of VNC
 
-This is useful for getting disk space back.
+Optionally, you can enable the SPICE protocol, which allows you to use `remote-viewer` to access it rather than VNC.
 
-It will delete ALL your old (and new) docker containers.
+Note: `-disable-ticketing` will allow unauthenticated access to the VM. See the [spice manual](https://www.spice-space.org/spice-user-manual.html) for help setting up authenticated access ("Ticketing").
 
 ```bash
-# WARNING deletes all old images, but saves disk space if you make too many containers
-# The following command will make your containers RIP
-docker system prune --all
-docker image prune --all
+  docker run \
+    --device /dev/kvm \
+    -p 50922:10022 \
+    -e "DISPLAY=${DISPLAY:-:0.0}" \
+    -e EXTRA="-monitor telnet::45454,server,nowait -nographic -serial null -spice disable-ticketing,port=3001" \
+    mycustomimage
 ```
 
-# CI/CD Related Improvements
-## How to reduce the size of the image
-* Start up the container as usual, and remove unnecessary files. A useful way
+Then simply do `remote-viewer spice://localhost:3001` and add `--spice-debug` for debugging.
+
+### CI/CD Related Improvements
+
+#### Tips for reducing the size of the image
+
+- Start the container as usual, and remove unnecessary files. A useful way
   to do this is to use `du -sh *` starting from the `/` directory, and find
   large directories where files can be removed. E.g. unnecessary cached files,
   Xcode platforms, etc.
-* Once you are satisfied with the amount of free space, enable trim with `sudo trimforce enable`, and reboot.
-* Zero out the empty space on the disk with `dd if=/dev/zero of=./empty && rm -f empty`
-* Shut down the VM and copy out the qcow image with `docker cp stoppedcontainer:/home/arch/OSX-KVM/mac_hdd_ng.img .`
-* Run `qemu-img check -r all mac_hdd_ng.img` to fix any errors.
-* Run `qemu-img convert -O qcow2 mac_hdd_ng.img deduped.img` and check for errors again
-* OPTIONAL: Run `qemu-img convert -c -O qcow2 deduped.img compressed.img` to further compress the image. This may reduce the runtime speed though, but it should reduce the size by roughly 25%.
-* Check for errors again, and build a fresh docker image. E.g. with this Dockerfile
+- Once you are satisfied with the amount of free space, enable trim with `sudo trimforce enable`, and reboot.
+- Zero out the empty space on the disk with `dd if=/dev/zero of=./empty && rm -f empty`
+- Shut down the VM and copy out the qcow image with `docker cp stoppedcontainer:/home/arch/OSX-KVM/mac_hdd_ng.img .`
+- Run `qemu-img check -r all mac_hdd_ng.img` to fix any errors.
+- Run `qemu-img convert -O qcow2 mac_hdd_ng.img deduped.img` and check for errors again
+- **OPTIONAL:** Run `qemu-img convert -c -O qcow2 deduped.img compressed.img` to further compress the image. This may reduce the runtime speed though, but it should reduce the size by roughly 25%.
+- Check for errors again, and build a fresh docker image. E.g. with this Dockerfile
 
 ```
 FROM sickcodes/docker-osx
@@ -746,7 +715,8 @@ USER arch
 COPY --chown=arch ./deduped.img /home/arch/OSX-KVM/mac_hdd_ng.img
 ```
 
-## How to run in headless mode
+### Run Docker-OSX headlessly with Telnet
+
 First make sure [autoboot is enabled](#autoboot-into-osx-after-youve-installed-everything)
 
 Next, you will want to set up SSH to be automatically started.
@@ -769,25 +739,9 @@ Then run it with these arguments.
     mycustomimage
 ```
 
-Optionally, you can enable the SPICE protocol, which allows you to use `remote-viewer` to access it rather than VNC.
+## Setting the appropriate mirrors when building locally
 
-Note: `-disable-ticketing` will allow unauthenticated access to the VM. See the [spice manual](https://www.spice-space.org/spice-user-manual.html) for help setting up authenticated access ("Ticketing").
-
-```bash
-  docker run \
-    --device /dev/kvm \
-    -p 50922:10022 \
-    -e "DISPLAY=${DISPLAY:-:0.0}" \
-    -e EXTRA="-monitor telnet::45454,server,nowait -nographic -serial null -spice disable-ticketing,port=3001" \
-    mycustomimage
-```
-
-Then simply do `remote-viewer spice://localhost:3001` and add `--spice-debug` for debugging.
-
-
-# Custom Build or Local Development
-
-If you are building Docker-OSX locally, you will want to use Arch Linux mirrors.
+If you are building Docker-OSX locally, you'd probably want to use Arch Linux's mirrors.
 
 Mirror locations can be found here (use 2 letter country codes): https://archlinux.org/mirrorlist/all/
 
@@ -800,7 +754,7 @@ docker build -t docker-osx:latest \
     --build-arg SIZE=200G .
 ```
 
-# Custom QEMU Arguments (passthrough devices)
+### Custom QEMU Arguments (passthrough devices)
 
 Pass any devices/directories to the Docker container & the QEMU arguments using the handy `-e EXTRA=` runtime options.
 
@@ -822,12 +776,9 @@ docker run \
     --device /dev/snd \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
     docker-osx:latest
-
 ```
 
-# Serial Numbers
-
-The easiest way to show you is by these examples.
+### Generating serial numbers
 
 For serial numbers, generate them in `./custom` OR make docker generate them at runtime (see below).
 
@@ -874,7 +825,7 @@ docker run -it \
     sickcodes/docker-osx:auto
 ```
 
-### This example generates a specific set of serial numbers at runtime, with your existing image, at 1000x1000 display resolution.
+#### This example generates a specific set of serial numbers at runtime, with your existing image, at 1000x1000 display resolution.
 
 ```bash
 # run an existing image in current directory, with a screen, with SSH, with nopicker.
@@ -911,7 +862,7 @@ Or you can generate them inside the `./custom` folder. And then use:
     -e MAC_ADDRESS="" \
 ```
 
-#### Persistence from generating serial numbers is obviously ideal:
+#### Making serial numbers persist across reboots
 
 ```bash
 
@@ -936,13 +887,10 @@ docker run -it \
 
 To use iMessage or iCloud you need to change `5` values.
 
-`SERIAL`
-
-`BOARD_SERIAL`
-
-`UUID`
-
-`MAC_ADDRESS`
+- `SERIAL`
+- `BOARD_SERIAL`
+- `UUID`
+- `MAC_ADDRESS`
 
 _`ROM` is just the lowercased mac address, without `:` between each word._
 
@@ -959,7 +907,7 @@ Or tell the container to use specific ones using `-e GENERATE_SPECIFIC=true`
     -e MAC_ADDRESS="A8:5C:2C:9A:46:2F" \
 ```
 
-### Where do you get the serial numbers?
+#### How to obtain serial numbers
 
 ```bash
 apt install libguestfs -y
@@ -971,6 +919,7 @@ Inside the `./custom` folder you will find `4` scripts.
 
 - `config-nopicker-custom.plist`
 - `opencore-image-ng.sh`
+
 These two files are from OSX-KVM.
 
 You don't need to touch these two files.
@@ -1067,8 +1016,6 @@ docker run -it \
     -e WIDTH=800 \
     -e HEIGHT=600 \
     sickcodes/docker-osx:latest
-
-
 ```
 
 
@@ -1078,24 +1025,28 @@ Here's a few other resolutions! If you resolution is invalid, it will default to
     -e WIDTH=800 \
     -e HEIGHT=600 \
 ```
+
 ```
     -e WIDTH=1280 \
     -e HEIGHT=768 \
 ```
+
 ```
     -e WIDTH=1600 \
     -e HEIGHT=900 \
 ```
+
 ```
     -e WIDTH=1920 \
     -e HEIGHT=1080 \
 ```
+
 ```
     -e WIDTH=2560 \
     -e HEIGHT=1600 \
 ```
 
-# Mount a disk inside OS X from the host
+### Mounting physical disks in Mac OS X
 
 Pass the disk into the container as a volume and then pass the disk again into QEMU command line extras with.
 
@@ -1110,7 +1061,7 @@ DISK_TWO="${PWD}/mount_me.img"
 -e EXTRA='-device ide-hd,bus=sata.5,drive=DISK-TWO -drive id=DISK-TWO,if=none,file=/disktwo,format=qcow2' \
 ```
 
-Example:
+### Example
 
 ```bash
 OSX_IMAGE="${PWD}/mac_hdd_ng_xcode_bigsur.img"
@@ -1127,8 +1078,7 @@ docker run -it \
     sickcodes/docker-osx:naked
 ```
 
-
-# Allow USB passthrough
+### USB Passthrough
 
 The simplest way to do this is the following:
 
@@ -1183,7 +1133,7 @@ You should see the device show up when you do `system_profiler SPUSBDataType` in
 
 Important Note: this will cause the host system to lose access to the USB device while the VM is running!
 
-## What is `${DISPLAY:-:0.0}`?
+#### What is `${DISPLAY:-:0.0}`?
 
 `$DISPLAY` is the shell variable that refers to your X11 display server.
 
@@ -1201,12 +1151,14 @@ You can also use `${variable:=fallback}` to set that variable (in your current t
 In Docker-OSX, we assume, `:0.0` is your default `$DISPLAY` variable.
 
 You can see what yours is
+
 ```bash
 echo $DISPLAY
 ```
-Hence, `${DISPLAY:-:0.0}` will use whatever variable your X11 server has set for you, else `:0.0`
 
-## What is `-v /tmp/.X11-unix:/tmp/.X11-unix`?
+That way, `${DISPLAY:-:0.0}` will use whatever variable your X11 server has set for you, else `:0.0`
+
+#### What is `-v /tmp/.X11-unix:/tmp/.X11-unix`?
 
 `-v` is a Docker command-line option that lets you pass a volume to the container.
 
@@ -1215,11 +1167,3 @@ The directory that we are letting the Docker container use is a X server display
 `/tmp/.X11-unix`
 
 If we let the Docker container use the same display socket as our own environment, then any applications you run inside the Docker container will show up on your screen too! [https://www.x.org/archive/X11R6.8.0/doc/RELNOTES5.html](https://www.x.org/archive/X11R6.8.0/doc/RELNOTES5.html)
-
-
-## TODO:
-```
-- Security Documentation
-- GPU Acceleration: Coming Soon
-- Virt-manager
-```
