@@ -243,8 +243,8 @@ docker-osx:auto-big-sur () {
         "${NO_CACHE}" \
         --build-arg RANKMIRRORS=true \
         --build-arg MIRROR_COUNTRY="${MIRROR_COUNTRY}" \
-        --build-arg IMAGE_URL='https://images.sick.codes/mac_hdd_ng_auto_big_sur.img'
-        -f ./Dockerfile.auto-big-sur \
+        --build-arg IMAGE_URL='https://images.sick.codes/mac_hdd_ng_auto_big_sur.img' \
+        -f ./Dockerfile.auto \
         -t docker-osx:auto-big-sur .
     docker tag docker-osx:auto-big-sur sickcodes/docker-osx:auto-big-sur
 }
