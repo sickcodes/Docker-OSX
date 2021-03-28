@@ -177,4 +177,4 @@ CMD sudo touch /dev/kvm /dev/snd "${IMAGE_PATH}" "${BOOTDISK}" "${ENV}" || true 
             --height "${HEIGHT:-1080}" \
             --output-bootdisk "${BOOTDISK:=/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore.qcow2}" \
     ; } \
-    ; ./enable-ssh.sh && envsubst < ./Launch.sh | bash
+    ; ./enable-ssh.sh && /bin/bash -c ./Launch.sh

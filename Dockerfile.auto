@@ -219,7 +219,7 @@ CMD echo "${BOILERPLATE}" \
         /usr/bin/ssh-keygen -t rsa -f ~/.ssh/id_docker_osx -q -N "" \
         && chmod 600 ~/.ssh/id_docker_osx \
     ; } \
-    ; envsubst < ./Launch.sh | bash \
+    ; /bin/bash -c ./Launch.sh \
     & echo "Booting Docker-OSX in the background. Please wait..." \
     ; until [[ "$(sshpass -palpine ssh-copy-id -f -i ~/.ssh/id_docker_osx.pub -p 10022 user@127.0.0.1)" ]]; do \
         echo "Disk is being copied between layers. Repeating until able to copy SSH key into OSX..." \
