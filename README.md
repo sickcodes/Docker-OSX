@@ -172,6 +172,8 @@ In that case, **remove** the two lines in your command:
 
 **Must change -it to -i to be able to interact with the QEMU console**
 
+**To exit a container using -i you must `docker kill <containerid>`. For example, to kill everything, `docker ps | xargs docker kill`.**
+
 Native QEMU VNC example
 
 ```bash
