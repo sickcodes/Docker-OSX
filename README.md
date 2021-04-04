@@ -111,7 +111,7 @@ Follow [@sickcodes](https://twitter.com/sickcodes)!
 
 ### Professional support
 
-For more sophisticated endeavours, we offer the following support services: 
+For more sophisticated endeavours, we offer the following support services:
 
 - Enterprise support, business support, or casual support.
 - Custom images, custom scripts, consulting (per hour available!)
@@ -324,13 +324,13 @@ docker start -ai -i <Replace this with your ID>
 
 This is my favourite container. You can supply an existing disk image as a Docker command line argument.
 
-- Pull images out using `sudo find /var/lib/docker -size +10G | grep mac_hdd_ng.img` 
+- Pull images out using `sudo find /var/lib/docker -size +10G | grep mac_hdd_ng.img`
 
 - Supply your own local image with the command argument `-v "${PWD}/mac_hdd_ng.img:/image"` and use `sickcodes/docker-osx:naked` when instructing Docker to create your container.
 
   - Naked image is for booting any existing .img file, e.g in the current working directory (`$PWD`)
   - By default, this image has a variable called `NOPICKER` which is `"true"`. This skips the disk selection menu. Use `-e NOPICKER=false` or any other string than the word `true` to enter the boot menu.
-    
+
     This lets you use other disks instead of skipping the boot menu, e.g. recovery disk or disk utility.
 
 ```bash
@@ -496,11 +496,15 @@ docker run \
 
 Big thank you to our contributors who have worked out almost every conceivable issue so far!
 
-### LibGTK - Permission denied
-
 [https://github.com/sickcodes/Docker-OSX/blob/master/CREDITS.md](https://github.com/sickcodes/Docker-OSX/blob/master/CREDITS.md)
 
-#### libgtk permissions denied error
+#### LibGTK
+
+You may see a LibGTK-related error if you do not have everything you need set up for hardware virtualisation yet. If you have not yet done so, check out the [KVM on the host](https://github.com/kaoudis/Docker-OSX#requirements-kvm-on-the-host) section.
+
+##### LibGTK: permissions denied error
+
+If you are fully set up with KVM, the issue may be with X11/Xorg:
 
 ```bash
 echo $DISPLAY
@@ -549,9 +553,9 @@ Swap:           11Gi          0B        11Gi
 
 Of course you cannot allocate more RAM that your have. The default is 3 Gigabytes: `-e RAM=3`.
 
-#### PulseAudio
+### PulseAudio
 
-### Use PulseAudio for sound 
+#### Use PulseAudio for sound
 
 Note: [AppleALC](https://github.com/acidanthera/AppleALC), [`alcid`](https://dortania.github.io/OpenCore-Post-Install/universal/audio.html) and [VoodooHDA-OC](https://github.com/chris1111/VoodooHDA-OC) do not have [codec support](https://osy.gitbook.io/hac-mini-guide/details/hda-fix#hda-codec). However, [IORegistryExplorer](https://github.com/vulgo/IORegistryExplorer) does show the controller component working.
 
@@ -576,7 +580,7 @@ docker run \
     sickcodes/docker-osx pactl list
 ```
 
-#### Nested Hardware Virtualization
+### Nested Hardware Virtualization
 
 Check if your PC has hardware virtualization enabled:
 
@@ -586,7 +590,7 @@ sudo tee /sys/module/kvm/parameters/ignore_msrs <<< 1
 egrep -c '(svm|vmx)' /proc/cpuinfo
 ```
 
-### Routine checks
+## Routine checks
 
 #### Confirm that your CPU supports virtualization
 
@@ -982,7 +986,7 @@ generate-specific-bootdisk.sh \
     --output-bootdisk OpenCore-nopicker.qcow2
 ```
 
-# Change Resolution Docker-OSX - change resolution OpenCore OSX-KVM 
+# Change Resolution Docker-OSX - change resolution OpenCore OSX-KVM
 
 The display resolution is controlled by this line:
 
