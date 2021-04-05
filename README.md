@@ -20,6 +20,8 @@ If you like this project, consider contributing here or upstream!
 
 ## Quick Start Docker-OSX
 
+First time here? try [initial setup](#initial-setup), otherwise try the instructions below to use either Catalina or Big Sur.
+
 ### Catalina [![https://img.shields.io/docker/image-size/sickcodes/docker-osx/latest?label=sickcodes%2Fdocker-osx%3Alatest](https://img.shields.io/docker/image-size/sickcodes/docker-osx/latest?label=sickcodes%2Fdocker-osx%3Alatest)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
 
 ```bash
@@ -43,7 +45,7 @@ docker run -it \
 
 ## Technical details
 
-There currently four images, each with different use cases (explained [below](https://github.com/sickcodes/Docker-OSX#container-images)):
+There currently four images, each with different use cases (explained [below](#container-images)):
 
 [![https://img.shields.io/docker/image-size/sickcodes/docker-osx/latest?label=sickcodes%2Fdocker-osx%3Alatest](https://img.shields.io/docker/image-size/sickcodes/docker-osx/latest?label=sickcodes%2Fdocker-osx%3Alatest)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
 
@@ -53,8 +55,9 @@ There currently four images, each with different use cases (explained [below](ht
 
 [![https://img.shields.io/docker/image-size/sickcodes/docker-osx/auto?label=sickcodes%2Fdocker-osx%3Aauto](https://img.shields.io/docker/image-size/sickcodes/docker-osx/auto?label=sickcodes%2Fdocker-osx%3Aauto)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
 
-The images (excluding `:naked`) launch a container with an existing installation with a couple of premade configurations. This special image was developed by [Sick.Codes](https://sick.codes):
+This special set of images was developed by [Sick.Codes](https://sick.codes).
 
+The images (excluding `:naked`) launch a container with an existing installation with a couple of premade configurations:
 - username: `user`, password: `alpine`
 - SSH enabled (`localhost:50922`)
 - VNC enabled (`localhost:8888`) if using ./vnc version
@@ -83,7 +86,7 @@ The images (excluding `:naked`) launch a container with an existing installation
 
 Images built on top of the contents of this repository are also available on **Docker Hub** for convenience: https://hub.docker.com/r/sickcodes/docker-osx
 
-A comprehensive list of the available Docker images and their intended purpose can be found in the [Instructions](README.md#Instructions).
+A comprehensive list of the available Docker images and their intended purpose can be found in the [Instructions](#instructions).
 
 ## Kubernetes
 
@@ -103,7 +106,7 @@ Feel free to open an [issue](https://github.com/sickcodes/Docker-OSX/issues/new/
 
 #### Resolved issues
 
-Before you open an issue, however, please check the [closed issues](https://github.com/sickcodes/Docker-OSX/issues?q=is%3Aissue+is%3Aclosed) and confirm that you're using the latest version of this repository — your issues may have already been resolved! You might also see your answer in our questions and answers section [below](https://github.com/sickcodes/Docker-OSX#more-questions-and-answers).
+Before you open an issue, however, please check the [closed issues](https://github.com/sickcodes/Docker-OSX/issues?q=is%3Aissue+is%3Aclosed) and confirm that you're using the latest version of this repository — your issues may have already been resolved! You might also see your answer in our questions and answers section [below](#more-questions-and-answers).
 
 ### Feature requests and updates
 
@@ -129,7 +132,7 @@ Docker-OSX is licensed under the [GPL v3+](LICENSE). Contributions are welcomed 
 
 ## Disclaimer
 
-If you are serious about Apple Security, and possibly finding 6-figure bug bounties within the Apple Bug Bounty Program, then you're in the right place! Further notes: [Is Hackintosh, OSX-KVM, or Docker-OSX legal?](https://sick.codes/is-hackintosh-osx-kvm-or-docker-osx-legal/).
+If you are serious about Apple Security, and possibly finding 6-figure bug bounties within the Apple Bug Bounty Program, then you're in the right place! Further notes: [Is Hackintosh, OSX-KVM, or Docker-OSX legal?](https://sick.codes/is-hackintosh-osx-kvm-or-docker-osx-legal/)
 
 Product names, logos, brands and other trademarks referred to within this project are the property of their respective trademark holders. These trademark holders are not affiliated with our repository in any capacity. They do not sponsor or endorse this project in any way.
 
@@ -137,19 +140,19 @@ Product names, logos, brands and other trademarks referred to within this projec
 
 ## Container images
 
-### Already set up or just looking to make a container quickly? Check out our [container creation examples](https://github.com/sickcodes/Docker-OSX#container-creation-examples) section.
+### Already set up or just looking to make a container quickly? Check out our [quick start](#quick-start-docker-osx) or see a bunch more use cases under our [container creation examples](#container-creation-examples) section.
 
-There are several different Docker images available, which are suitable for different purposes.
+There are several different Docker-OSX images available which are suitable for different purposes.
 
-- `sickcodes/docker-osx:latest` - [I just want to try it out.](https://github.com/sickcodes/Docker-OSX#quick-start-large-pre-made-image)
-- `sickcodes/docker-osx:latest` - [I want to use Docker-OSX to develop/secure apps in Xcode (sign into Xcode, Transporter)](https://github.com/sickcodes/Docker-OSX#basic-quick-start-docker-osx)
-- `sickcodes/docker-osx:naked` - [I want to use Docker-OSX for CI/CD-related purposes (sign into Xcode, Transporter)](https://github.com/sickcodes/Docker-OSX#fully-headless-using-my-own-image-for-cicd)
+- `sickcodes/docker-osx:latest` - [I just want to try it out.](#quick-start-docker-osx)
+- `sickcodes/docker-osx:latest` - [I want to use Docker-OSX to develop/secure apps in Xcode (sign into Xcode, Transporter)](#quick-start-your-own-image-naked-container-image)
+- `sickcodes/docker-osx:naked` - [I want to use Docker-OSX for CI/CD-related purposes (sign into Xcode, Transporter)](#building-a-headless-container-from-a-custom-image)
 
 Create your personal image using `:latest`. Then, extract the image. Afterwards, you will be able to duplicate that image and import it to the `:naked` container, in order to revert the container to a previous state repeatedly.
 
-- `sickcodes/docker-osx:auto` - [I'm only interested in using the command line. (Useful for compiling software or using Homebrew headlessly).](https://github.com/sickcodes/Docker-OSX#pre-built-image-arbitrary-command-line-arguments)
-- `sickcodes/docker-osx:naked` - [I need iMessage/iCloud for security research.](https://github.com/sickcodes/Docker-OSX#generating-serial-numbers)
-- `sickcodes/docker-osx:big-sur` - [I want to run Big Sur.](https://github.com/sickcodes/Docker-OSX#technical-details)
+- `sickcodes/docker-osx:auto` - [I'm only interested in using the command line (useful for compiling software or using Homebrew headlessly).](#prebuilt-image-with-arbitrary-command-line-arguments)
+- `sickcodes/docker-osx:naked` - [I need iMessage/iCloud for security research.](#generating-serial-numbers)
+- `sickcodes/docker-osx:big-sur` - [I want to run Big Sur.](#quick-start-docker-osx)
 
 ## Initial setup
 Before you do anything else, you will need to turn on hardware virtualization in your BIOS. Precisely how will depend on your particular machine (and BIOS), but it should be straightforward.
@@ -178,7 +181,7 @@ echo 1 | sudo tee /sys/module/kvm/parameters/ignore_msrs
 sudo modprobe kvm
 ```
 
-## Additional boot instructions for when you are [creating your container](https://github.com/sickcodes/Docker-OSX#container-creation-examples)
+## Additional boot instructions for when you are [creating your container](#container-creation-examples)
 
 - Boot the macOS Base System
 
@@ -197,13 +200,13 @@ sudo modprobe kvm
 
 This is a great place to start if you are having trouble getting going, especially if you're not that familiar with Docker just yet.
 
-Just looking to make a container quickly? Check out our [container creation examples](https://github.com/sickcodes/Docker-OSX#container-creation-examples) section.
+Just looking to make a container quickly? Check out our [container creation examples](#container-creation-examples) section.
 
-More specific/advanced troubleshooting questions and answers may be found in [More Questions and Answers](https://github.com/sickcodes/Docker-OSX#more-questions-and-answers). You should also check out the [closed issues](https://github.com/sickcodes/Docker-OSX/issues?q=is%3Aissue+is%3Aclosed). Someone else might have gotten a question like yours answered already even if you can't find it in this document!
+More specific/advanced troubleshooting questions and answers may be found in [More Questions and Answers](#more-questions-and-answers). You should also check out the [closed issues](https://github.com/sickcodes/Docker-OSX/issues?q=is%3Aissue+is%3Aclosed). Someone else might have gotten a question like yours answered already even if you can't find it in this document!
 
 #### Confirm that your CPU supports virtualization
 
-See [initial setup](https://github.com/sickcodes/Docker-OSX#initial-setup).
+See [initial setup](#initial-setup).
 
 #### Confirm your user is part of the the Docker group, KVM group, libvirt group
 
@@ -220,7 +223,7 @@ sudo usermod -aG libvirt "${USER}"
 sudo usermod -aG kvm "${USER}"
 ```
 
-See also: [initial setup](https://github.com/sickcodes/Docker-OSX#initial-setup).
+See also: [initial setup](#initial-setup).
 
 #### Is the docker daemon enabled?
 
@@ -294,7 +297,7 @@ See also: [here](https://github.com/sickcodes/Docker-OSX/issues/174).
 
 Created a container with `docker run` and want to reuse the underlying image again later? 
 
-See [container creation examples](https://github.com/sickcodes/Docker-OSX#container-creation-examples) for how to get to the point where this is applicable.
+NB: see [container creation examples](#container-creation-examples) first for how to get to the point where this is applicable.
 
 This is for when you want to run the SAME container again later. You may need to use `docker commit` to save your container before you can reuse it. Check if your container is persisted with `docker ps --all`.
 
@@ -332,7 +335,7 @@ docker start -ai -i <Replace this with your ID>
 
 ### LibGTK errors
 
-You may see one or more libgtk-related errors if you do not have everything set up for hardware virtualisation yet. If you have not yet done so, check out the [initial setup](https://github.com/sickcodes/Docker-OSX#initial-setup) section and the [routine checks](https://github.com/sickcodes/Docker-OSX#routine-checks) section as you may have missed a setup step or may not have all the needed Docker dependencies ready to go.
+You may see one or more libgtk-related errors if you do not have everything set up for hardware virtualisation yet. If you have not yet done so, check out the [initial setup](#initial-setup) section and the [routine checks](#routine-checks) section as you may have missed a setup step or may not have all the needed Docker dependencies ready to go.
 
 See also: [here](https://github.com/sickcodes/Docker-OSX/issues/174).
 
@@ -699,7 +702,7 @@ docker run -it \
     sickcodes/docker-osx:auto
 ```
 
-#### This example generates a specific set of serial numbers at runtime, with your existing image, at 1000x1000 display resolution.
+#### This example generates a specific set of serial numbers at runtime, with your existing image, at 1000x1000 display resolution
 
 ```bash
 # run an existing image in current directory, with a screen, with SSH, with nopicker.
@@ -1017,7 +1020,9 @@ The Quick Start command should work out of the box, provided that you keep the f
     -e "DISPLAY=${DISPLAY:-:0.0}" \
 ```
 
-#### Download the image manually and use it in Docker [![https://img.shields.io/docker/image-size/sickcodes/docker-osx/naked?label=sickcodes%2Fdocker-osx%3Anaked](https://img.shields.io/docker/image-size/sickcodes/docker-osx/naked?label=sickcodes%2Fdocker-osx%3Anaked)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
+#### Download the image manually and use it in Docker 
+
+[![https://img.shields.io/docker/image-size/sickcodes/docker-osx/naked?label=sickcodes%2Fdocker-osx%3Anaked](https://img.shields.io/docker/image-size/sickcodes/docker-osx/naked?label=sickcodes%2Fdocker-osx%3Anaked)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
 
 
 This is a particularly good way for downloading the container, in case Docker's CDN (or your connection) happens to be slow.
@@ -1034,7 +1039,9 @@ docker run -it \
     sickcodes/docker-osx:naked
 ```
 
-#### Use a prebuilt image with arbitrary command line arguments [![https://img.shields.io/docker/image-size/sickcodes/docker-osx/auto?label=sickcodes%2Fdocker-osx%3Aauto](https://img.shields.io/docker/image-size/sickcodes/docker-osx/auto?label=sickcodes%2Fdocker-osx%3Aauto)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
+#### Prebuilt image with arbitrary command line arguments 
+
+[![https://img.shields.io/docker/image-size/sickcodes/docker-osx/auto?label=sickcodes%2Fdocker-osx%3Aauto](https://img.shields.io/docker/image-size/sickcodes/docker-osx/auto?label=sickcodes%2Fdocker-osx%3Aauto)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
 
 ```bash
 docker pull sickcodes/docker-osx:auto
@@ -1064,7 +1071,9 @@ For a headless container, **remove** the following two lines from your `docker r
     # -e "DISPLAY=${DISPLAY:-:0.0}" \
 ```
 
-#### Building a headless container from a custom image [![https://img.shields.io/docker/image-size/sickcodes/docker-osx/naked?label=sickcodes%2Fdocker-osx%3Anaked](https://img.shields.io/docker/image-size/sickcodes/docker-osx/naked?label=sickcodes%2Fdocker-osx%3Anaked)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
+#### Building a headless container from a custom image 
+
+[![https://img.shields.io/docker/image-size/sickcodes/docker-osx/naked?label=sickcodes%2Fdocker-osx%3Anaked](https://img.shields.io/docker/image-size/sickcodes/docker-osx/naked?label=sickcodes%2Fdocker-osx%3Anaked)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
 
 This is particularly helpful for CI/CD pipelines.
 
