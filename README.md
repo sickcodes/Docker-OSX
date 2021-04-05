@@ -244,6 +244,10 @@ Big thank you to our contributors who have worked out almost every conceivable i
 
 [https://github.com/sickcodes/Docker-OSX/blob/master/CREDITS.md](https://github.com/sickcodes/Docker-OSX/blob/master/CREDITS.md)
 
+### The big-sur image starts slowly after installation. Is this expected?
+
+Automatic updates are still on in the container's settings. You may wish to turn them off. [We have future plans for development around this.](https://github.com/sickcodes/Docker-OSX/issues/227)
+
 ### What is `${DISPLAY:-:0.0}`?
 
 `$DISPLAY` is the shell variable that refers to your X11 display server.
@@ -279,13 +283,22 @@ The directory that we are letting the Docker container use is a X server display
 
 If we let the Docker container use the same display socket as our own environment, then any applications you run inside the Docker container will show up on your screen too! [https://www.x.org/archive/X11R6.8.0/doc/RELNOTES5.html](https://www.x.org/archive/X11R6.8.0/doc/RELNOTES5.html)
 
-### I have used Docker-OSX before and would like to reuse the same container (persistent disk)
+### ALSA errors on startup or container creation
 
-1. You can now pull the `.img` file out of the container, which is stored in `/var/lib/docker`, and supply it as a runtime argument to the `:naked` Docker image. See above.
+You may when initialising or booting into a container see errors from the `(qemu)` console of the following form: 
+`ALSA lib blahblahblah: (function name) returned error: no such file or directory`. These are more or less expected. As long as you are able to boot into the container and everything is working, no reason to worry about these.
 
-2. This is for when you want to run the SAME container again later.
+See also: [here](https://github.com/sickcodes/Docker-OSX/issues/174).
 
-If you don't run this you will have a new image every time.
+### Start the same container later (persistent disk)
+
+Created a container with `docker run` and want to reuse the underlying image again later? 
+
+See [container creation examples](https://github.com/sickcodes/Docker-OSX#container-creation-examples) for how to get to the point where this is applicable.
+
+This is for when you want to run the SAME container again later. You may need to use `docker commit` to save your container before you can reuse it. Check if your container is persisted with `docker ps --all`.
+
+If you don't run this you will have a new image every time. 
 
 ```bash
 # look at your recent containers and copy the CONTAINER ID
@@ -301,13 +314,9 @@ docker start -ai abc123xyz567
 
 ```
 
-### I have used Docker-OSX before and would like to extract the Mac OSX image from my container
+You can also pull the `.img` file out of the container, which is stored in `/var/lib/docker`, and supply it as a runtime argument to the `:naked` Docker image. 
 
-Use `docker commit`, copy the ID, and then run `docker start -ai <Replace this with your ID>`.
-
-**Alternatively:**
-
-[Extract the .img file](https://github.com/sickcodes/Docker-OSX#backup-the-disk-wheres-my-disk), and then use that [.img file with :naked](https://github.com/sickcodes/Docker-OSX#quick-start-own-image-naked-container-image)
+See also: [here](https://github.com/sickcodes/Docker-OSX/issues/197).
 
 ### I have used Docker-OSX before and want to restart a container that starts automatically
 
@@ -324,6 +333,8 @@ docker start -ai -i <Replace this with your ID>
 ### LibGTK errors
 
 You may see one or more libgtk-related errors if you do not have everything set up for hardware virtualisation yet. If you have not yet done so, check out the [initial setup](https://github.com/sickcodes/Docker-OSX#initial-setup) section and the [routine checks](https://github.com/sickcodes/Docker-OSX#routine-checks) section as you may have missed a setup step or may not have all the needed Docker dependencies ready to go.
+
+See also: [here](https://github.com/sickcodes/Docker-OSX/issues/174).
 
 #### Permissions denied error
 
@@ -349,7 +360,7 @@ xhost +
 ### RAM over-allocation
 You cannot allocate more RAM than your machine has. The default is 3 Gigabytes: `-e RAM=3`.
 
-If you are trying to allocate more RAM to the container than you currently have available, you may see an error like the following: `cannot set up guest memory 'pc.ram': Cannot allocate memory`.
+If you are trying to allocate more RAM to the container than you currently have available, you may see an error like the following: `cannot set up guest memory 'pc.ram': Cannot allocate memory`. See also: [here](https://github.com/sickcodes/Docker-OSX/issues/188), [here](https://github.com/sickcodes/Docker-OSX/pull/189).
 
 For example (below) the `buff/cache` already contains 20 Gigabytes of allocated RAM:
 
@@ -441,6 +452,12 @@ Additionally, you can string multiple statements together, for example:
     -p 10023:10023 \
     -p 10043:10043 \
 ```
+
+### Bridged networking
+
+You might not need to do anything with the default setup to enable internet connectivity from inside the container. Additionally, `curl` may work even if `ping` doesn't.
+
+See discussion [here](https://github.com/sickcodes/Docker-OSX/issues/177) and [here](https://github.com/sickcodes/Docker-OSX/issues/72) and [here](https://github.com/sickcodes/Docker-OSX/issues/88).
 
 ### Enable IPv4 forwarding for bridged network connections for remote installations
 
@@ -764,7 +781,14 @@ Or tell the container to use specific ones using `-e GENERATE_SPECIFIC=true`
     -e MAC_ADDRESS="A8:5C:2C:9A:46:2F" \
 ```
 
-### Change Resolution Docker-OSX - change resolution OpenCore OSX-KVM
+### I'd like to run Docker-OSX with WSL2 (Windows, Ubuntu)
+
+Ensure KVM is enabled and `x11-apps` is installed. 
+
+See more in-depth discussion [here](https://github.com/sickcodes/Docker-OSX/issues/17) and [here](https://github.com/sickcodes/Docker-OSX/issues/60).
+
+
+### Changing display resolution
 
 The display resolution is controlled by this line:
 
@@ -887,6 +911,8 @@ docker run -it \
     -e EXTRA='-device ide-hd,bus=sata.5,drive=DISK-TWO -drive id=DISK-TWO,if=none,file=/disktwo,format=qcow2' \
     sickcodes/docker-osx:naked
 ```
+
+See also: [here](https://github.com/sickcodes/Docker-OSX/issues/222).
 
 ### USB Passthrough
 
