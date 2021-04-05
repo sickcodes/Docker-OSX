@@ -178,7 +178,7 @@ echo 1 | sudo tee /sys/module/kvm/parameters/ignore_msrs
 sudo modprobe kvm
 ```
 
-## Additional boot instructions for when you are creating your container using whatever [method](https://github.com/sickcodes/Docker-OSX#container-creation-examples) you choose
+## Additional boot instructions for when you are [creating your container](https://github.com/sickcodes/Docker-OSX#container-creation-examples)
 
 - Boot the macOS Base System
 
@@ -545,7 +545,7 @@ Then run it with these arguments.
     mycustomimage
 ```
 
-## Setting the appropriate mirrors when building Docker-OSX locally
+### What mirrors are appropriate to use to build Docker-OSX locally?
 
 If you are building Docker-OSX locally, you'll probably want to use Arch Linux's mirrors.
 
@@ -856,7 +856,7 @@ Here's a few other resolutions! If you resolution is invalid, it will default to
     -e HEIGHT=1600 \
 ```
 
-### Mounting physical disks in Mac OS X
+### Mounting physical disks in Mac OSX
 
 Pass the disk into the container as a volume and then pass the disk again into QEMU command line extras with.
 
@@ -871,7 +871,7 @@ DISK_TWO="${PWD}/mount_me.img"
 -e EXTRA='-device ide-hd,bus=sata.5,drive=DISK-TWO -drive id=DISK-TWO,if=none,file=/disktwo,format=qcow2' \
 ```
 
-### Example
+#### Physical disk mounting example
 
 ```bash
 OSX_IMAGE="${PWD}/mac_hdd_ng_xcode_bigsur.img"
@@ -890,9 +890,9 @@ docker run -it \
 
 ### USB Passthrough
 
-The simplest way to do this is the following:
+Firstly, QEMU must be started as root. 
 
-First of all, in order to do this, QEMU must be started as root. It is also potentially possible to do this by changing the permissions of the device in the container.
+It is also potentially possible to accomplish USB passthrough by changing the permissions of the device in the container.
 See [here](https://www.linuxquestions.org/questions/slackware-14/qemu-usb-permissions-744557/#post3628691).
 
 For example, create a new Dockerfile with the following
@@ -906,7 +906,7 @@ COPY --chown=arch ./new_image.img /home/arch/OSX-KVM/mac_hdd_ng.img
 
 Where `new_image.img` is the qcow2 image you extracted. Then rebuild with `docker build .`
 
-Find out the bus and port numbers of your USB device which you want to pass through to the VM.
+Next we need to find out the bus and port numbers of the USB device we want to pass through to the VM:
 
 ```bash
 lsusb -t
@@ -1008,7 +1008,7 @@ docker run -it \
     sickcodes/docker-osx:naked
 ```
 
-#### Use a pre-built image + arbitrary command line arguments. [![https://img.shields.io/docker/image-size/sickcodes/docker-osx/auto?label=sickcodes%2Fdocker-osx%3Aauto](https://img.shields.io/docker/image-size/sickcodes/docker-osx/auto?label=sickcodes%2Fdocker-osx%3Aauto)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
+#### Use a prebuilt image with arbitrary command line arguments [![https://img.shields.io/docker/image-size/sickcodes/docker-osx/auto?label=sickcodes%2Fdocker-osx%3Aauto](https://img.shields.io/docker/image-size/sickcodes/docker-osx/auto?label=sickcodes%2Fdocker-osx%3Aauto)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
 
 ```bash
 docker pull sickcodes/docker-osx:auto
