@@ -1,0 +1,208 @@
+#!/usr/bin/docker
+#     ____             __             ____  ______  __
+#    / __ \____  _____/ /_____  _____/ __ \/ ___/ |/ /
+#   / / / / __ \/ ___/ //_/ _ \/ ___/ / / /\__ \|   / 
+#  / /_/ / /_/ / /__/ ,< /  __/ /  / /_/ /___/ /   |  
+# /_____/\____/\___/_/|_|\___/_/   \____//____/_/|_|  :NAKED
+# 
+# Title:            Docker-OSX (Mac on Docker)
+# Author:           Sick.Codes https://twitter.com/sickcodes
+# Version:          4.3
+# License:          GPLv3+
+# Repository:       https://github.com/sickcodes/Docker-OSX
+# Website:          https://sick.codes
+# 
+# This image won't run unless you supply a disk image using:
+#       -v ${PWD}/mac_hdd_ng.img:/image
+# 
+# Take screenshots in the Arch container and display in terminal: scrotcat
+#
+# Build:
+# 
+#       docker build -t docker-osx:naked -f Dockerfile.naked .
+# 
+# Run headless:
+# 
+#       docker run -it --device /dev/kvm -p 50922:10022 -v ${PWD}/mac_hdd_ng.img:/image docker-osx:naked
+# 
+# Run with display:
+# 
+#       docker run -it --device /dev/kvm -p 50922:10022 -v ${PWD}/mac_hdd_ng.img:/image -e "DISPLAY=${DISPLAY:-:0.0}" -v /tmp/.X11-unix:/tmp/.X11-unix docker-osx:naked
+# 
+
+FROM sickcodes/docker-osx:latest
+
+MAINTAINER 'https://twitter.com/sickcodes' <https://sick.codes>
+
+USER root
+
+WORKDIR /root
+
+RUN rm -f /home/arch/OSX-KVM/mac_hdd_ng.img
+
+# OPTIONAL: Arch Linux server mirrors for super fast builds
+# set RANKMIRRORS to any value other that nothing, e.g. -e RANKMIRRORS=true
+ARG RANKMIRRORS
+ARG MIRROR_COUNTRY=US
+ARG MIRROR_COUNT=10
+RUN if [[ "${RANKMIRRORS}" ]]; then { pacman -Sy wget --noconfirm || pacman -Syu wget --noconfirm ; } \
+    ; wget -O ./rankmirrors "https://raw.githubusercontent.com/sickcodes/Docker-OSX/master/rankmirrors" \
+    ; wget -O- "https://www.archlinux.org/mirrorlist/?country=${MIRROR_COUNTRY:-US}&protocol=https&use_mirror_status=on" \
+    | sed -e 's/^#Server/Server/' -e '/^#/d' \
+    | head -n "$((${MIRROR_COUNT:-10}+1))" \
+    | bash ./rankmirrors --verbose --max-time 5 - > /etc/pacman.d/mirrorlist \
+    && tee -a /etc/pacman.d/mirrorlist <<< 'Server = http://mirrors.evowise.com/archlinux/$repo/os/$arch' \
+    && tee -a /etc/pacman.d/mirrorlist <<< 'Server = http://mirror.rackspace.com/archlinux/$repo/os/$arch' \
+    && tee -a /etc/pacman.d/mirrorlist <<< 'Server = https://mirror.rackspace.com/archlinux/$repo/os/$arch' \
+    && cat /etc/pacman.d/mirrorlist ; fi
+
+# TEMP-FIX for pacman issue
+RUN patched_glibc=glibc-linux4-2.33-4-x86_64.pkg.tar.zst \
+    && curl -LO "https://raw.githubusercontent.com/sickcodes/Docker-OSX/master/${patched_glibc}" \
+    && bsdtar -C / -xvf "${patched_glibc}" || echo "Everything is fine."
+# TEMP-FIX for pacman issue
+
+# For taking screenshots of the Xfvb screen, useful during development.
+ARG SCROT
+
+RUN pacman -Syu xorg-server-xvfb wget xterm xorg-xhost xorg-xrandr sshpass --noconfirm \
+    && if [[ "${SCROT}" ]]; then \
+        pacman -Syu scrot base-devel --noconfirm \
+        && git clone --recurse-submodules --depth 1 https://github.com/stolk/imcat.git \
+        && cd imcat \
+        && make \
+        && sudo cp imcat /usr/bin/imcat \
+        && touch /usr/bin/scrotcat \
+        && tee -a /usr/bin/scrotcat <<< '/usr/bin/imcat <(scrot -o /dev/stdout)' \
+        && chmod +x /usr/bin/scrotcat \
+    ; else \
+        touch /usr/bin/scrotcat \
+        && echo echo >> /usr/bin/scrotcat \
+        && chmod +x /usr/bin/scrotcat \
+    ; fi \
+    ; yes | pacman -Scc
+
+# TEMP-FIX for pacman issue
+RUN patched_glibc=glibc-linux4-2.33-4-x86_64.pkg.tar.zst \
+    && curl -LO "https://raw.githubusercontent.com/sickcodes/Docker-OSX/master/${patched_glibc}" \
+    && bsdtar -C / -xvf "${patched_glibc}" || echo "Everything is fine."
+# TEMP-FIX for pacman issue
+
+USER arch
+
+WORKDIR /home/arch/OSX-KVM
+
+RUN mkdir -p ~/.ssh \
+    && touch ~/.ssh/authorized_keys \
+    && touch ~/.ssh/config \
+    && chmod 700 ~/.ssh \
+    && chmod 600 ~/.ssh/config \
+    && chmod 600 ~/.ssh/authorized_keys \
+    && tee -a ~/.ssh/config <<< 'Host *' \
+    && tee -a ~/.ssh/config <<< '    StrictHostKeyChecking no' \
+    && tee -a ~/.ssh/config <<< '    UserKnownHostsFile=/dev/null'
+
+#### SPECIAL RUNTIME ARGUMENTS BELOW
+
+ENV ADDITIONAL_PORTS=
+
+ENV BOOTDISK=
+
+ENV DISPLAY=:99
+
+ENV HEADLESS=false
+
+ENV ENV=/env
+
+# Boolean for generating a bootdisk with new random serials.
+ENV GENERATE_UNIQUE=false
+
+# Boolean for generating a bootdisk with specific serials.
+ENV GENERATE_SPECIFIC=false
+
+ENV IMAGE_PATH=/image
+ENV IMAGE_FORMAT=qcow2
+
+ENV KVM='accel=kvm:tcg'
+
+# ENV MASTER_PLIST_URL="https://raw.githubusercontent.com/sickcodes/osx-serial-generator/master/config-custom.plist"
+
+# ENV NETWORKING=e1000-82545em
+ENV NETWORKING=vmxnet3
+
+ENV NOPICKER=true
+
+# dynamic RAM options for runtime
+ENV RAM=8
+# ENV RAM=max
+# ENV RAM=half
+
+# The x and y coordinates for resolution.
+# Must be used with either -e GENERATE_UNIQUE=true or -e GENERATE_SPECIFIC=true.
+ENV WIDTH=1920
+ENV HEIGHT=1080
+
+CMD sudo touch /dev/kvm /dev/snd "${IMAGE_PATH}" "${BOOTDISK}" "${ENV}" || true \
+    ; sudo chown -R $(id -u):$(id -g) /dev/kvm /dev/snd "${IMAGE_PATH}" "${BOOTDISK}" "${ENV}" || true \
+    ; { [[ "${DISPLAY}" = ':99' ]] || [[ "${HEADLESS}" == true ]] ; } && { \
+        nohup Xvfb :99 -screen 0 1920x1080x16 \
+        & until [[ "$(xrandr --query 2>/dev/null)" ]]; do sleep 1 ; done \
+    ; } \
+    ; [[ "${NOPICKER}" == true ]] && { \
+        sed -i '/^.*InstallMedia.*/d' Launch.sh \
+        && export BOOTDISK="${BOOTDISK:=/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore-nopicker.qcow2}" \
+    ; } \
+    || export BOOTDISK="${BOOTDISK:=/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore.qcow2}" \
+    ; [[ "${GENERATE_UNIQUE}" == true ]] && { \
+        ./Docker-OSX/osx-serial-generator/generate-unique-machine-values.sh \
+            --master-plist-url="${MASTER_PLIST_URL}" \
+            --count 1 \
+            --tsv ./serial.tsv \
+            --bootdisks \
+            --width "${WIDTH:-1920}" \
+            --height "${HEIGHT:-1080}" \
+            --output-bootdisk "${BOOTDISK:=/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore.qcow2}" \
+            --output-env "${ENV:=/env}" \
+    ; } \
+    ; [[ "${GENERATE_SPECIFIC}" == true ]] && { \
+            source "${ENV:=/env}" 2>/dev/null \
+            ; ./Docker-OSX/osx-serial-generator/generate-specific-bootdisk.sh \
+            --master-plist-url="${MASTER_PLIST_URL}" \
+            --model "${DEVICE_MODEL}" \
+            --serial "${SERIAL}" \
+            --board-serial "${BOARD_SERIAL}" \
+            --uuid "${UUID}" \
+            --mac-address "${MAC_ADDRESS}" \
+            --width "${WIDTH:-1920}" \
+            --height "${HEIGHT:-1080}" \
+            --output-bootdisk "${BOOTDISK:=/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore.qcow2}" \
+    ; } \
+    # ; ./enable-ssh.sh && /bin/bash -c ./Launch.sh
+
+WORKDIR /home/arch/OSX-KVM
+
+RUN sudo pacman -Syyuu --noconfirm \
+    && sudo pacman -S tigervnc xterm xorg-xhost xdotool ufw --noconfirm \
+    && mkdir -p ${HOME}/.vnc \
+    && touch ~/.vnc/config \
+    && tee -a ~/.vnc/config <<< 'geometry=1920x1080' \
+    && tee -a ~/.vnc/config <<< 'localhost' \
+    && tee -a ~/.vnc/config <<< 'alwaysshared'
+
+RUN printf '\n%s\n' \
+'sudo rm -f /tmp/.X99-lock' \
+'export DISPLAY=:99' \
+'/usr/bin/Xvnc -geometry 1920x1080 -rfbauth "${HOME}/.vnc/passwd" :99 &' > vnc.sh
+
+RUN cat vnc.sh Launch.sh > Launch_custom.sh
+
+RUN chmod +x Launch_custom.sh
+
+RUN tee vncpasswd_file <<< "${VNC_PASSWORD:="$(tr -dc '[:graph:]' </dev/urandom | head -c8)"}"
+RUN vncpasswd -f < vncpasswd_file > ${HOME}/.vnc/passwd
+
+RUN chmod 600 ~/.vnc/passwd
+RUN printf '\n\n\n\n%s\n%s\n\n\n\n' '===========VNC_PASSWORD========== ' "$(<vncpasswd_file)"
+
+CMD ./enable-ssh.sh && envsubst < ./Launch_custom.sh | bash
+
