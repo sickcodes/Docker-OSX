@@ -129,6 +129,7 @@ Docker-OSX is licensed under the [GPL v3+](LICENSE). Contributions are welcomed 
 ### Other cool Docker/QEMU based projects
 
 - [Run iOS in a Docker container with Docker-eyeOS](https://github.com/sickcodes/Docker-eyeOS) - [https://github.com/sickcodes/Docker-eyeOS](https://github.com/sickcodes/Docker-eyeOS)
+- [Run iMessage relayer in Docker with Bluebubbles.app](https://bluebubbles.app/) - [Getting started wiki](https://github.com/BlueBubblesApp/BlueBubbles-Server/wiki/Running-via-Docker)
 
 ## Disclaimer
 
