@@ -210,7 +210,7 @@ download_qcow_efi_folder () {
     # EFI Shell commands
     touch startup.nsh && echo 'fs0:\EFI\BOOT\BOOTx64.efi' > startup.nsh
 
-    cp -ra "${EFI_FOLDER}" .
+    cp -a "${EFI_FOLDER}" .
 
     mkdir -p ./EFI/OC/Resources
 

@@ -243,7 +243,7 @@ download_qcow_efi_folder () {
     # EFI Shell commands
     touch startup.nsh && echo 'fs0:\EFI\BOOT\BOOTx64.efi' > startup.nsh
 
-    cp -ra "${EFI_FOLDER}" .
+    cp -a "${EFI_FOLDER}" .
 
     mkdir -p ./EFI/OC/Resources
 
@@ -275,28 +275,30 @@ generate_serial_sets () {
         | while IFS='\ \|\ ' read -r SERIAL BOARD_SERIAL; do
             # make a uuid...
             UUID="$(uuidgen)"
-            UUID="${UUID^^}"
+            # bash 3-5 compatible
+            # UUID="${UUID^^}"
+            UUID="$(tr '[:lower:]' '[:upper:]' <<< "${UUID}")"
 
             # get a random vendor specific MAC address.
             RANDOM_MAC_PREFIX="$(grep -e "${VENDOR_REGEX}" < "${MAC_ADDRESSES_FILE:=vendor_macs.tsv}" | sort --random-sort | head -n1)"
             RANDOM_MAC_PREFIX="$(cut -d$'\t' -f1 <<< "${RANDOM_MAC_PREFIX}")"
-            MAC_ADDRESS="$(printf "${RANDOM_MAC_PREFIX}:%02X:%02X:%02X" $[RANDOM%256] $[RANDOM%256] $[RANDOM%256])"
+            MAC_ADDRESS="$(printf "${RANDOM_MAC_PREFIX}:%02X:%02X:%02X" "$((RANDOM%256))" "$((RANDOM%256))" "$((RANDOM%256))")"
 
             [ -z "${WIDTH}" ] && WIDTH=1920
             [ -z "${HEIGHT}" ] && HEIGHT=1080
 
             # append to csv file
-            cat <<EOF >> "${CSV_SERIAL_SETS_FILE}"
+            tee -a "${CSV_SERIAL_SETS_FILE}" <<EOF
 "${DEVICE_MODEL}","${SERIAL}","${BOARD_SERIAL}","${UUID}","${MAC_ADDRESS}","${WIDTH}","${HEIGHT}"
 EOF
             echo "Wrote CSV to: ${CSV_SERIAL_SETS_FILE}"
 
             # append to tsv file
             T=$'\t'
-            cat <<EOF >> "${TSV_SERIAL_SETS_FILE}"
+            tee -a "${TSV_SERIAL_SETS_FILE}" <<EOF
 ${DEVICE_MODEL}${T}${SERIAL}${T}${BOARD_SERIAL}${T}${UUID}${T}${MAC_ADDRESS}${T}${WIDTH}${T}${HEIGHT}
 EOF
-            echo "Wrote CSV to: ${TSV_SERIAL_SETS_FILE}"
+            echo "Wrote TSV to: ${TSV_SERIAL_SETS_FILE}"
 
             # if any of these are on, we need the env file.
             if [ "${CREATE_ENVS}" ] || [ "${CREATE_PLISTS}" ] || [ "${CREATE_BOOTDISKS}" ] || [ "${OUTPUT_BOOTDISK}" ] || [ "${OUTPUT_ENV}" ]; then
@@ -382,7 +384,9 @@ EOF
     [ -d "${OUTPUT_DIRECTORY}" ] || mkdir -p "${OUTPUT_DIRECTORY}"
     [ -e ./macserial ] || build_mac_serial
     download_vendor_mac_addresses
-    download_qcow_efi_folder
+    if [ "${CREATE_BOOTDISKS}" ] || [ "${OUTPUT_BOOTDISK}" ]; then
+        download_qcow_efi_folder
+    fi
     generate_serial_sets
     echo "${SERIAL_SETS_FILE}"    
 }
