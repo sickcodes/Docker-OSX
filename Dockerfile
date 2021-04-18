@@ -197,10 +197,12 @@ RUN if [[ "${LINUX}" == true ]]; then \
         && bsdtar -C / -xvf "${patched_glibc}" || echo "Everything is fine." \
     ; fi
 
-RUN yes | sudo pacman -U https://archive.archlinux.org/packages/f/file/file-5.39-1-x86_64.pkg.tar.zst \
+# TEMP-FIX for file 5.40 libguestfs issue
+RUN yes | pacman -U https://archive.archlinux.org/packages/f/file/file-5.39-1-x86_64.pkg.tar.zst \
     && patched_glibc=glibc-linux4-2.33-4-x86_64.pkg.tar.zst \
     && curl -LO "https://raw.githubusercontent.com/sickcodes/Docker-OSX/master/${patched_glibc}" \
     && bsdtar -C / -xvf "${patched_glibc}" || echo "Everything is fine."
+# TEMP-FIX for file 5.40 libguestfs issue
 
 # optional --build-arg to change branches for testing
 ARG BRANCH=master

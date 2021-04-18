@@ -77,3 +77,5 @@ This project now uses the fantastic OpenCore bootloader from the community OpenC
 [@a10kiloham](https://github.com/a10kiloham) - Dockerfile for :naked image with VNC support #245 
 
 [@a10kiloham](https://github.com/a10kiloham) - Adding Bluebubbles as an example use case #250 
+
+[@aronzvi](https://github.com/aronzvi) - Fixed Failed to boot OSX with GENERATE_UNIQUE #244
