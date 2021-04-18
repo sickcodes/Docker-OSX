@@ -185,9 +185,6 @@ RUN [[ "${VERSION%%.*}" -ge 11 ]] && { wget "${FETCH_MAC_OS_RAW}" \
         && rm -f BaseSystem.dmg \
     ; } || true
 
-# > Launch.sh
-# > Docker-OSX.xml
-
 WORKDIR /home/arch/OSX-KVM
 
 ARG LINUX=true
@@ -289,6 +286,9 @@ ENV RAM=3
 ENV WIDTH=1920
 ENV HEIGHT=1080
 
+# libguestfs verbose
+ENV LIBGUESTFS_DEBUG=1
+ENV LIBGUESTFS_TRACE=1
 
 VOLUME ["/tmp/.X11-unix"]
 
@@ -311,7 +311,7 @@ VOLUME ["/tmp/.X11-unix"]
 # the default serial numbers are already contained in ./OpenCore-Catalina/OpenCore.qcow2
 # And the default serial numbers
 
-CMD sudo touch /dev/kvm /dev/snd "${IMAGE_PATH}" "${BOOTDISK}" "${ENV}" || true \
+CMD sudo touch /dev/kvm /dev/snd "${IMAGE_PATH}" "${BOOTDISK}" "${ENV}" 2>/dev/null || true \
     ; sudo chown -R $(id -u):$(id -g) /dev/kvm /dev/snd "${IMAGE_PATH}" "${BOOTDISK}" "${ENV}" || true \
     ; [[ "${NOPICKER}" == true ]] && { \
         sed -i '/^.*InstallMedia.*/d' Launch.sh \
@@ -328,7 +328,7 @@ CMD sudo touch /dev/kvm /dev/snd "${IMAGE_PATH}" "${BOOTDISK}" "${ENV}" || true 
             --height "${HEIGHT:-1080}" \
             --output-bootdisk "${BOOTDISK:=/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore.qcow2}" \
             --output-env "${ENV:=/env}" \
-    ; } \
+    || exit 1 ; } \
     ; [[ "${GENERATE_SPECIFIC}" == true ]] && { \
             source "${ENV:=/env}" 2>/dev/null \
             ; ./Docker-OSX/osx-serial-generator/generate-specific-bootdisk.sh \
@@ -341,7 +341,7 @@ CMD sudo touch /dev/kvm /dev/snd "${IMAGE_PATH}" "${BOOTDISK}" "${ENV}" || true 
             --width "${WIDTH:-1920}" \
             --height "${HEIGHT:-1080}" \
             --output-bootdisk "${BOOTDISK:=/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore.qcow2}" \
-    ; } \
+    || exit 1 ; } \
     ; ./enable-ssh.sh && /bin/bash -c ./Launch.sh
 
 # virt-manager mode: eta son

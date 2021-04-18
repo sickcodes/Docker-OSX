@@ -1,5 +1,6 @@
 |Version|Date|Notes|
 |---|---|---|
+|   |2021-04-18|Add LIBGUESTFS debug & trace commands, exit on fail when creating bootdisks. Silence touch errors.| 
 |4.3|2021-03-24|Enable interactive QEMU again. Remove envsubst since we are already using bash... Add set -x flag| 
 |4.2|2021-03-24|Add all ENV variables to each dockerfile for readability. Add RAM allocation buffer and cache drop bug fix. Add kvm and libvirt groups. Add `IMAGE_FORMAT=qcow2` to allow `IMAGE_FORMAT=raw` too.|
 |   |2021-03-19|Use RAM=3 as the default RAM allocation. Add instructions to clear buff/cache.|
