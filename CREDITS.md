@@ -74,6 +74,6 @@ This project now uses the fantastic OpenCore bootloader from the community OpenC
 
 [@panos](https://github.com/panos) - Made further improvements to the README #219
 
-[@a10kiloham] - Dockerfile for :naked image with VNC support #245 
+[@a10kiloham](https://github.com/a10kiloham) - Dockerfile for :naked image with VNC support #245 
 
-[@a10kiloham] - Adding Bluebubbles as an example use case #250 
+[@a10kiloham](https://github.com/a10kiloham) - Adding Bluebubbles as an example use case #250 
