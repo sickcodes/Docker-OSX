@@ -61,7 +61,6 @@ The images (excluding `:naked`) launch a container with an existing installation
 - username: `user`, password: `alpine`
 - SSH enabled (`localhost:50922`)
 - VNC enabled (`localhost:8888`) if using ./vnc version
-- VNC enabled (`localhost:8888`) if using ./vnc version
 - auto-updates disabled
 - [serial number generator!](https://github.com/sickcodes/osx-serial-generator)
 - X11 forwarding is enabled
