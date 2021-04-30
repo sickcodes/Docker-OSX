@@ -883,6 +883,23 @@ Here's a few other resolutions! If you resolution is invalid, it will default to
     -e HEIGHT=1600 \
 ```
 
+#### This example shows how to change resolution after the container is created.
+
+First step is to stop the docker daemon
+```
+sudo systemctl stop docker
+```
+The second step is to change container config in 
+```
+/var/lib/docker/containers/[container-id]/config.v2.json
+```
+(Suppose your original WIDTH is 1024 and HEIGHT is 768, you can search 1024 and replace it with the new value. Same for 768.)
+
+The last step is to restart the docker daemon
+```
+sudo systemctl restart docker
+```
+
 ### Mounting physical disks in Mac OSX
 
 Pass the disk into the container as a volume and then pass the disk again into QEMU command line extras with.
