@@ -18,6 +18,8 @@ Big thanks to the OpenCore team over at: https://github.com/acidanthera/OpenCore
 
 If you like this project, consider contributing here or upstream!
 
+[![dockeri.co](https://dockeri.co/image/sickcodes/docker-osx)](https://hub.docker.com/r/sickcodes/docker-osx)
+
 ## Quick Start Docker-OSX
 
 First time here? try [initial setup](#initial-setup), otherwise try the instructions below to use either Catalina or Big Sur.
