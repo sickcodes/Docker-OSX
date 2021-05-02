@@ -1,8 +1,16 @@
 # Credits
 
-The upstream credits are available at [@Kholia](https://github.com/Kholia)'s repo https://github.com/kholia/OSX-KVM/blob/master/CREDITS.md
+## Upstream Acknowledgements:
 
-These credits refer to the contributors to this repository:
+This project uses OSX-KVM from https://github.com/kholia/OSX-KVM and fully appreciates the work done by [@Kholia](https://github.com/Kholia) and all the contributors who are listed: [https://github.com/kholia/OSX-KVM/blob/master/CREDITS.md](https://github.com/kholia/OSX-KVM/blob/master/CREDITS.md)
+
+This project also uses KVM-OpenCore from https://github.com/Leoyzen/KVM-Opencore and fully appreciates the work done by [@Leoyzen](https://github.com/Leoyzen).
+
+We use a special fork by [Nicholas Sherlock](https://www.nicksherlock.com/) of KVM-Opencore https://github.com/thenickdude/KVM-Opencore and thank Nick for his awesome upstream work!
+
+This project now uses the fantastic OpenCore bootloader from the community OpenCore project: https://github.com/acidanthera/OpenCorePkg. You can join their [Subreddit here](https://www.reddit.com/r/hackintosh/)!
+
+## These credits refer to the contributors to this repository:
 
 [@GreeFine](https://github.com/GreeFine) - Readme Typo #9 
 
@@ -56,3 +64,18 @@ These credits refer to the contributors to this repository:
 
 [@MrBenFTW](https://github.com/MrBenFTW) - Tempfix for arch #150
 
+[@edsonboldrini](https://github.com/edsonboldrini) - Update README.md #161
+
+[@TheHackerCoding](https://github.com/TheHackerCoding) - Typo in README.md #194
+
+[@panos](https://github.com/panos) -  Improved README #212 
+
+[@ggjulio](https://github.com/ggjulio) - Restarting an "auto" container #216
+
+[@panos](https://github.com/panos) - Made further improvements to the README #219
+
+[@a10kiloham](https://github.com/a10kiloham) - Dockerfile for :naked image with VNC support #245 
+
+[@a10kiloham](https://github.com/a10kiloham) - Adding Bluebubbles as an example use case #250 
+
+[@aronzvi](https://github.com/aronzvi) - Fixed Failed to boot OSX with GENERATE_UNIQUE #244

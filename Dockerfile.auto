@@ -3,13 +3,14 @@
 #    / __ \____  _____/ /_____  _____/ __ \/ ___/ |/ /
 #   / / / / __ \/ ___/ //_/ _ \/ ___/ / / /\__ \|   / 
 #  / /_/ / /_/ / /__/ ,< /  __/ /  / /_/ /___/ /   |  
-# /_____/\____/\___/_/|_|\___/_/   \____//____/_/|_|  AUTOINSTALL
+# /_____/\____/\___/_/|_|\___/_/   \____//____/_/|_|  :AUTO
 # 
-# Title:            Mac on Docker (Docker-OSX) [AUTOINSTALL]
-# Author:           Sick.Codes https://twitter.com/sickcodes       
-# Version:          4.0
+# Title:            Docker-OSX (Mac on Docker)
+# Author:           Sick.Codes https://twitter.com/sickcodes
+# Version:          4.3
 # License:          GPLv3+
 # Repository:       https://github.com/sickcodes/Docker-OSX
+# Website:          https://sick.codes
 # 
 # This Dockerfile is a pre-installed naked installation of Docker-OSX!
 # 
@@ -72,7 +73,7 @@ RUN if [[ "${RANKMIRRORS}" ]]; then \
 RUN pacman -Syu xorg-server-xvfb wget xterm xorg-xhost xorg-xrandr sshpass --noconfirm \
     && if [[ "${SCROT}" ]]; then \
         pacman -Syu scrot base-devel --noconfirm \
-        && git clone https://github.com/stolk/imcat.git \
+        && git clone --recurse-submodules --depth 1 https://github.com/stolk/imcat.git \
         && cd imcat \
         && make \
         && sudo cp imcat /usr/bin/imcat \
@@ -85,6 +86,19 @@ RUN pacman -Syu xorg-server-xvfb wget xterm xorg-xhost xorg-xrandr sshpass --noc
         && chmod +x /usr/bin/scrotcat \
     ; fi \
     ; yes | pacman -Scc
+
+# TEMP-FIX for pacman issue
+RUN patched_glibc=glibc-linux4-2.33-4-x86_64.pkg.tar.zst \
+    && curl -LO "https://raw.githubusercontent.com/sickcodes/Docker-OSX/master/${patched_glibc}" \
+    && bsdtar -C / -xvf "${patched_glibc}" || echo "Everything is fine."
+# TEMP-FIX for pacman issue
+
+# TEMP-FIX for file 5.40 libguestfs issue
+RUN yes | sudo pacman -U https://archive.archlinux.org/packages/f/file/file-5.39-1-x86_64.pkg.tar.zst \
+    && patched_glibc=glibc-linux4-2.33-4-x86_64.pkg.tar.zst \
+    && curl -LO "https://raw.githubusercontent.com/sickcodes/Docker-OSX/master/${patched_glibc}" \
+    && bsdtar -C / -xvf "${patched_glibc}" || echo "Everything is fine."
+# TEMP-FIX for file 5.40 libguestfs issue
 
 USER arch
 
@@ -102,29 +116,64 @@ RUN mkdir -p ~/.ssh \
 
 ARG COMPLETE=true
 
-# Feel free to take a copy of this image and then host it internally
-ARG IMAGE_URL='https://images2.sick.codes/mac_hdd_ng_auto.img'
-
 # use the COMPLETE arg, for a complete image, ready to boot.
 # otherwise use your own image: -v "$PWD/disk.img":/image
 ARG WGET_OPTIONS=
 # ARG WGET_OPTIONS='--no-verbose'
 
+# Feel free to take a copy of this image and then host it internally
+ARG IMAGE_URL='https://images.sick.codes/mac_hdd_ng_auto.img'
+# ARG IMAGE_URL='https://images.sick.codes/mac_hdd_ng_auto_big_sur.img'
+
 RUN if [[ "${COMPLETE}" ]]; then \
-        echo "Downloading 20GB+ image... This step might take a while... Press Ctrl+C if you want to abort." \
+        echo "Downloading 20GB image... This step might take a while... Press Ctrl+C if you want to abort." \
         ; rm -f /home/arch/OSX-KVM/mac_hdd_ng.img \
         && wget ${WGET_OPTIONS} -O /home/arch/OSX-KVM/mac_hdd_ng.img "${IMAGE_URL}" \
     ; fi
 
-ENV BOOTDISK=/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore-nopicker.qcow2
+#### SPECIAL RUNTIME ARGUMENTS BELOW
+
+ENV ADDITIONAL_PORTS=
+
+ENV BOOTDISK=
 
 ENV DISPLAY=:99
 
+ENV HEADLESS=false
+
 ENV ENV=/env
 
+# Boolean for generating a bootdisk with new random serials.
+ENV GENERATE_UNIQUE=false
+
+# Boolean for generating a bootdisk with specific serials.
+ENV GENERATE_SPECIFIC=false
+
 ENV IMAGE_PATH=/home/arch/OSX-KVM/mac_hdd_ng.img
+ENV IMAGE_FORMAT=qcow2
+
+ENV KVM='accel=kvm:tcg'
+
+# ENV MASTER_PLIST_URL="https://raw.githubusercontent.com/sickcodes/osx-serial-generator/master/config-custom.plist"
+
+# ENV NETWORKING=e1000-82545em
+ENV NETWORKING=vmxnet3
 
 ENV NOPICKER=true
+
+# dynamic RAM options for runtime
+ENV RAM=3
+# ENV RAM=max
+# ENV RAM=half
+
+# The x and y coordinates for resolution.
+# Must be used with either -e GENERATE_UNIQUE=true or -e GENERATE_SPECIFIC=true.
+ENV WIDTH=1920
+ENV HEIGHT=1080
+
+# libguestfs verbose
+ENV LIBGUESTFS_DEBUG=1
+ENV LIBGUESTFS_TRACE=1
 
 ENV TERMS_OF_USE=i_agree
 
@@ -133,44 +182,41 @@ ENV BOILERPLATE="By using this Dockerfile, you hereby agree that you are a secur
 CMD echo "${BOILERPLATE}" \
     ; [[ "${TERMS_OF_USE}" = i_agree ]] || exit 1 \
     ; echo "Disk is being copied between layers... Please wait a minute..." \
-    ; sudo chown -R $(id -u):$(id -g) /dev/kvm /dev/snd "${IMAGE_PATH}" "${BOOTDISK}" "${ENV}" 2>/dev/null || true \
+    ; sudo touch /dev/kvm /dev/snd "${IMAGE_PATH}" "${BOOTDISK}" "${ENV}" 2>/dev/null || true \
+    ; sudo chown -R $(id -u):$(id -g) /dev/kvm /dev/snd "${IMAGE_PATH}" "${BOOTDISK}" "${ENV}" || true \
     ; [[ "${NOPICKER}" == true ]] && { \
         sed -i '/^.*InstallMedia.*/d' Launch.sh \
-        && export BOOTDISK=/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore-nopicker.qcow2 \
+        && export BOOTDISK="${BOOTDISK:=/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore-nopicker.qcow2}" \
     ; } \
+    || export BOOTDISK="${BOOTDISK:=/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore.qcow2}" \
     ; [[ "${GENERATE_UNIQUE}" == true ]] && { \
-        ./Docker-OSX/custom/generate-unique-machine-values.sh \
-        --count 1 \
-        --tsv ./serial.tsv \
-        --bootdisks \
-        --output-bootdisk "${BOOTDISK:-/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore.qcow2}" \
-        --output-env "${ENV:=/env}" || exit 1 \
-    ; } \
+        ./Docker-OSX/osx-serial-generator/generate-unique-machine-values.sh \
+            --master-plist-url="${MASTER_PLIST_URL}" \
+            --count 1 \
+            --tsv ./serial.tsv \
+            --bootdisks \
+            --width "${WIDTH:-1920}" \
+            --height "${HEIGHT:-1080}" \
+            --output-bootdisk "${BOOTDISK:-/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore.qcow2}" \
+            --output-env "${ENV:=/env}" \
+    || exit 1 ; } \
     ; [[ "${GENERATE_SPECIFIC}" == true ]] && { \
-            source "${ENV:=/env}" \
-            || ./Docker-OSX/custom/generate-specific-bootdisk.sh \
+            source "${ENV:=/env}" 2>/dev/null \
+            ; ./Docker-OSX/osx-serial-generator/generate-specific-bootdisk.sh \
+            --master-plist-url="${MASTER_PLIST_URL}" \
             --model "${DEVICE_MODEL}" \
             --serial "${SERIAL}" \
             --board-serial "${BOARD_SERIAL}" \
             --uuid "${UUID}" \
             --mac-address "${MAC_ADDRESS}" \
-            --output-bootdisk "${BOOTDISK:-/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore.qcow2}" || exit 1 \
-    ; } \
-    ; case "$(file --brief /bootdisk)" in \
-        QEMU\ QCOW2\ Image* ) export BOOTDISK=/bootdisk \
-            ;; \
-        directory* ) export BOOTDISK=/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore.qcow2 \
-            ;; \
-    esac \
-    ; [[ "${DISPLAY}" = ':99' ]] && { \
+            --width "${WIDTH:-1920}" \
+            --height "${HEIGHT:-1080}" \
+            --output-bootdisk "${BOOTDISK:-/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore.qcow2}"  \
+    || exit 1 ; } \
+    ; { [[ "${DISPLAY}" = ':99' ]] || [[ "${HEADLESS}" == true ]] ; } && { \
         nohup Xvfb :99 -screen 0 1920x1080x16 \
-        & until [[ "$(xrandr --query 2>/dev/null)" ]]; do sleep 0.1 ; done \
+        & until [[ "$(xrandr --query 2>/dev/null)" ]]; do sleep 1 ; done \
     ; } \
-    ; echo "Checking whether /image is a directory or a QEMU disk." \
-    ; case "$(file --brief /image)" in \
-        QEMU*) export IMAGE_PATH=/image;; \
-        directory*) export IMAGE_PATH=/home/arch/OSX-KVM/mac_hdd_ng.img;; \
-    esac \
     ; stat "${IMAGE_PATH}" \
     ; echo "Large image is being copied between layers, please wait a minute..." \
     ; ./enable-ssh.sh \
@@ -178,7 +224,7 @@ CMD echo "${BOILERPLATE}" \
         /usr/bin/ssh-keygen -t rsa -f ~/.ssh/id_docker_osx -q -N "" \
         && chmod 600 ~/.ssh/id_docker_osx \
     ; } \
-    ; envsubst < ./Launch.sh | bash \
+    ; /bin/bash -c ./Launch.sh \
     & echo "Booting Docker-OSX in the background. Please wait..." \
     ; until [[ "$(sshpass -palpine ssh-copy-id -f -i ~/.ssh/id_docker_osx.pub -p 10022 user@127.0.0.1)" ]]; do \
         echo "Disk is being copied between layers. Repeating until able to copy SSH key into OSX..." \

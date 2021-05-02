@@ -7,7 +7,7 @@
 # 
 # Title:            Mac on Docker (Docker-OSX) [VNC EDITION]
 # Author:           Sick.Codes https://sick.codes/        
-# Version:          3.0
+# Version:          3.1
 # License:          GPLv3+
 # 
 # All credits for OSX-KVM and the rest at Kholia's repo: https://github.com/kholia/osx-kvm
@@ -113,7 +113,7 @@ RUN cat vnc.sh Launch.sh > Launch_custom.sh
 
 RUN chmod +x Launch_custom.sh
 
-RUN tee vncpasswd_file <<< "${VNC_PASSWORD:=$(openssl rand -hex 4)}"
+RUN tee vncpasswd_file <<< "${VNC_PASSWORD:="$(tr -dc '[:graph:]' </dev/urandom | head -c8)"}"
 RUN vncpasswd -f < vncpasswd_file > ${HOME}/.vnc/passwd
 
 RUN chmod 600 ~/.vnc/passwd

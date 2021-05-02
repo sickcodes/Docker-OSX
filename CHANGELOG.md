@@ -1,5 +1,14 @@
 |Version|Date|Notes|
 |---|---|---|
+|   |2021-04-18|Add LIBGUESTFS debug & trace commands, exit on fail when creating bootdisks. Silence touch errors.| 
+|4.3|2021-03-24|Enable interactive QEMU again. Remove envsubst since we are already using bash... Add set -x flag| 
+|4.2|2021-03-24|Add all ENV variables to each dockerfile for readability. Add RAM allocation buffer and cache drop bug fix. Add kvm and libvirt groups. Add `IMAGE_FORMAT=qcow2` to allow `IMAGE_FORMAT=raw` too.|
+|   |2021-03-19|Use RAM=3 as the default RAM allocation. Add instructions to clear buff/cache.|
+|   |2021-03-17|Add RAM=max and RAM=half to dynamically select ram at runtime (DEFAULT).|
+|   |2021-03-06|Change envs to require --envs. Automatically enable --envs if --output-env is used. Same for plists, bootdisks. Fix help ugliness and sanity of generate serial scripts. Fix bootdisk not getting written to persistent file when using NOPICKER=true. NOPICKER=true is overridden by a custom plist now anyway. Remove useless case statements. Allow -e HEADLESS=true as human readable alternative to -e DISPLAY=:99.|
+|4.1|2021-03-04|Add `-e MASTER_PLIST_URL` to all images to allow using your own remote plist.|
+|   |2021-03-03|Add `WIDTH` and `HEIGHT` to set the x and y resolutions, use in conjuction with serial numbers.|
+|   |2021-03-02|Add ADDITIONAL_PORTS, for example `-e ADDITIONAL_PORTS='hostfwd=tcp::23-:23,'`|
 |4.0|2021-02-27|Add big-sur support. Use `sickcodes/docker-osx:big-sur` or build using `--build-arg VERSION=11`|
 |   |2021-02-26|Change `-e NOPICKER=true` to simply do `sed -i '/^.*InstallMedia.*/d' Launch.sh` and `export BOOTDISK=/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore-nopicker.qcow2`.|
 |3.2|2021-02-25|Add a script to generate unique machine serial numbers. Add a script to generate a bootdisk from given serial numbers. Add Linux for libguestfs which allows the docker container to make QEMU bootdisks with specific serial numbers.|

@@ -56,6 +56,12 @@ RUN if [[ "${RANKMIRRORS}" ]]; then { pacman -Sy wget --noconfirm || pacman -Syu
     && tee -a /etc/pacman.d/mirrorlist <<< 'Server = https://mirror.rackspace.com/archlinux/$repo/os/$arch' \
     && cat /etc/pacman.d/mirrorlist ; fi
 
+# TEMP-FIX for pacman issue
+RUN patched_glibc=glibc-linux4-2.33-4-x86_64.pkg.tar.zst \
+    && curl -LO "https://raw.githubusercontent.com/sickcodes/Docker-OSX/master/${patched_glibc}" \
+    && bsdtar -C / -xvf "${patched_glibc}" || echo "Everything is fine."
+# TEMP-FIX for pacman issue
+
 # For taking screenshots of the Xfvb screen, useful during development.
 ARG SCROT
 
@@ -81,13 +87,6 @@ RUN patched_glibc=glibc-linux4-2.33-4-x86_64.pkg.tar.zst \
     && curl -LO "https://raw.githubusercontent.com/sickcodes/Docker-OSX/master/${patched_glibc}" \
     && bsdtar -C / -xvf "${patched_glibc}" || echo "Everything is fine."
 # TEMP-FIX for pacman issue
-
-# TEMP-FIX for file 5.40 libguestfs issue
-RUN yes | sudo pacman -U https://archive.archlinux.org/packages/f/file/file-5.39-1-x86_64.pkg.tar.zst \
-    && patched_glibc=glibc-linux4-2.33-4-x86_64.pkg.tar.zst \
-    && curl -LO "https://raw.githubusercontent.com/sickcodes/Docker-OSX/master/${patched_glibc}" \
-    && bsdtar -C / -xvf "${patched_glibc}" || echo "Everything is fine."
-# TEMP-FIX for file 5.40 libguestfs issue
 
 USER arch
 
@@ -134,7 +133,7 @@ ENV NETWORKING=vmxnet3
 ENV NOPICKER=true
 
 # dynamic RAM options for runtime
-ENV RAM=3
+ENV RAM=8
 # ENV RAM=max
 # ENV RAM=half
 
@@ -143,11 +142,7 @@ ENV RAM=3
 ENV WIDTH=1920
 ENV HEIGHT=1080
 
-# libguestfs verbose
-ENV LIBGUESTFS_DEBUG=1
-ENV LIBGUESTFS_TRACE=1
-
-CMD sudo touch /dev/kvm /dev/snd "${IMAGE_PATH}" "${BOOTDISK}" "${ENV}" 2>/dev/null || true \
+CMD sudo touch /dev/kvm /dev/snd "${IMAGE_PATH}" "${BOOTDISK}" "${ENV}" || true \
     ; sudo chown -R $(id -u):$(id -g) /dev/kvm /dev/snd "${IMAGE_PATH}" "${BOOTDISK}" "${ENV}" || true \
     ; { [[ "${DISPLAY}" = ':99' ]] || [[ "${HEADLESS}" == true ]] ; } && { \
         nohup Xvfb :99 -screen 0 1920x1080x16 \
@@ -168,7 +163,7 @@ CMD sudo touch /dev/kvm /dev/snd "${IMAGE_PATH}" "${BOOTDISK}" "${ENV}" 2>/dev/n
             --height "${HEIGHT:-1080}" \
             --output-bootdisk "${BOOTDISK:=/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore.qcow2}" \
             --output-env "${ENV:=/env}" \
-    || exit 1 ; } \
+    ; } \
     ; [[ "${GENERATE_SPECIFIC}" == true ]] && { \
             source "${ENV:=/env}" 2>/dev/null \
             ; ./Docker-OSX/osx-serial-generator/generate-specific-bootdisk.sh \
@@ -181,5 +176,33 @@ CMD sudo touch /dev/kvm /dev/snd "${IMAGE_PATH}" "${BOOTDISK}" "${ENV}" 2>/dev/n
             --width "${WIDTH:-1920}" \
             --height "${HEIGHT:-1080}" \
             --output-bootdisk "${BOOTDISK:=/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore.qcow2}" \
-    || exit 1 ; } \
-    ; ./enable-ssh.sh && /bin/bash -c ./Launch.sh
+    ; } \
+    # ; ./enable-ssh.sh && /bin/bash -c ./Launch.sh
+
+WORKDIR /home/arch/OSX-KVM
+
+RUN sudo pacman -Syyuu --noconfirm \
+    && sudo pacman -S tigervnc xterm xorg-xhost xdotool ufw --noconfirm \
+    && mkdir -p ${HOME}/.vnc \
+    && touch ~/.vnc/config \
+    && tee -a ~/.vnc/config <<< 'geometry=1920x1080' \
+    && tee -a ~/.vnc/config <<< 'localhost' \
+    && tee -a ~/.vnc/config <<< 'alwaysshared'
+
+RUN printf '\n%s\n' \
+'sudo rm -f /tmp/.X99-lock' \
+'export DISPLAY=:99' \
+'/usr/bin/Xvnc -geometry 1920x1080 -rfbauth "${HOME}/.vnc/passwd" :99 &' > vnc.sh
+
+RUN cat vnc.sh Launch.sh > Launch_custom.sh
+
+RUN chmod +x Launch_custom.sh
+
+RUN tee vncpasswd_file <<< "${VNC_PASSWORD:="$(tr -dc '[:graph:]' </dev/urandom | head -c8)"}"
+RUN vncpasswd -f < vncpasswd_file > ${HOME}/.vnc/passwd
+
+RUN chmod 600 ~/.vnc/passwd
+RUN printf '\n\n\n\n%s\n%s\n\n\n\n' '===========VNC_PASSWORD========== ' "$(<vncpasswd_file)"
+
+CMD ./enable-ssh.sh && envsubst < ./Launch_custom.sh | bash
+

@@ -5,11 +5,12 @@
 #  / /_/ / /_/ / /__/ ,< /  __/ /  / /_/ /___/ /   |
 # /_____/\____/\___/_/|_|\___/_/   \____//____/_/|_|
 #
-# Repo:             https://github.com/sickcodes/Docker-OSX/
-# Title:            Mac on Docker (Docker-OSX)
-# Author:           Sick.Codes https://sick.codes/
-# Version:          4.0
+# Title:            Docker-OSX (Mac on Docker)
+# Author:           Sick.Codes https://twitter.com/sickcodes
+# Version:          4.3
 # License:          GPLv3+
+# Repository:       https://github.com/sickcodes/Docker-OSX
+# Website:          https://sick.codes
 #
 # All credits for OSX-KVM and the rest at @Kholia's repo: https://github.com/kholia/osx-kvm
 # OpenCore support go to https://github.com/Leoyzen/KVM-Opencore
@@ -113,7 +114,7 @@ RUN tee -a sshd_config <<< 'AllowTcpForwarding yes' \
 USER arch
 
 # download OSX-KVM
-RUN git clone --depth 1 https://github.com/kholia/OSX-KVM.git /home/arch/OSX-KVM
+RUN git clone --recurse-submodules --depth 1 https://github.com/kholia/OSX-KVM.git /home/arch/OSX-KVM
 
 # enable ssh
 # docker exec .... ./enable-ssh.sh
@@ -146,6 +147,8 @@ RUN yes | sudo pacman -Syu qemu libvirt dnsmasq virt-manager bridge-utils openre
 
 WORKDIR /home/arch/OSX-KVM
 
+RUN wget https://raw.githubusercontent.com/sickcodes/Docker-OSX/master/fetch-macOS.py
+
 RUN [[ "${VERSION%%.*}" -lt 11 ]] && { python fetch-macOS.py --version "${VERSION}" \
         && qemu-img convert BaseSystem.dmg -O qcow2 -p -c BaseSystem.img \
         && qemu-img create -f qcow2 mac_hdd_ng.img "${SIZE}" \
@@ -164,9 +167,6 @@ RUN [[ "${VERSION%%.*}" -ge 11 ]] && { wget "${FETCH_MAC_OS_RAW}" \
         && rm -f BaseSystem.dmg \
     ; } || true
 
-# > Launch.sh
-# > Docker-OSX.xml
-
 WORKDIR /home/arch/OSX-KVM
 
 ARG LINUX=true
@@ -176,20 +176,30 @@ RUN if [[ "${LINUX}" == true ]]; then \
         sudo pacman -Syu linux libguestfs --noconfirm \
     ; fi
 
+# TEMP-FIX for file 5.40 libguestfs issue
+RUN yes | sudo pacman -U https://archive.archlinux.org/packages/f/file/file-5.39-1-x86_64.pkg.tar.zst \
+    && patched_glibc=glibc-linux4-2.33-4-x86_64.pkg.tar.zst \
+    && curl -LO "https://raw.githubusercontent.com/sickcodes/Docker-OSX/master/${patched_glibc}" \
+    && bsdtar -C / -xvf "${patched_glibc}" || echo "Everything is fine."
+# TEMP-FIX for file 5.40 libguestfs issue
+
 # optional --build-arg to change branches for testing
 ARG BRANCH=master
 ARG REPO='https://github.com/sickcodes/Docker-OSX.git'
-RUN git clone --branch "${BRANCH}" "${REPO}"
+RUN git clone --recurse-submodules --depth 1 --branch "${BRANCH}" "${REPO}"
 
 RUN touch Launch.sh \
     && chmod +x ./Launch.sh \
-    && tee -a Launch.sh <<< '#!/bin/sh' \
-    && tee -a Launch.sh <<< 'set -eu' \
+    && tee -a Launch.sh <<< '#!/bin/bash' \
+    && tee -a Launch.sh <<< 'set -eux' \
     && tee -a Launch.sh <<< 'sudo chown    $(id -u):$(id -g) /dev/kvm 2>/dev/null || true' \
     && tee -a Launch.sh <<< 'sudo chown -R $(id -u):$(id -g) /dev/snd 2>/dev/null || true' \
-    && tee -a Launch.sh <<< 'exec qemu-system-x86_64 -m ${RAM:-8}000 \' \
+    && tee -a Launch.sh <<< '[[ "${RAM}" = max ]] && export RAM="$(("$(head -n1 /proc/meminfo | tr -dc "[:digit:]") / 1000000"))"' \
+    && tee -a Launch.sh <<< '[[ "${RAM}" = half ]] && export RAM="$(("$(head -n1 /proc/meminfo | tr -dc "[:digit:]") / 2000000"))"' \
+    && tee -a Launch.sh <<< 'sudo chown -R $(id -u):$(id -g) /dev/snd 2>/dev/null || true' \
+    && tee -a Launch.sh <<< 'exec qemu-system-x86_64 -m ${RAM:-2}000 \' \
     && tee -a Launch.sh <<< '-cpu Penryn,vendor=GenuineIntel,+invtsc,vmware-cpuid-freq=on,+pcid,+ssse3,+sse4.2,+popcnt,+avx,+aes,+xsave,+xsaveopt,check \' \
-    && tee -a Launch.sh <<< '-machine q35,accel=kvm:tcg \' \
+    && tee -a Launch.sh <<< '-machine q35,${KVM-"accel=kvm:tcg"} \' \
     && tee -a Launch.sh <<< '-smp ${CPU_STRING:-${SMP:-4},cores=${CORES:-4}} \' \
     && tee -a Launch.sh <<< '-usb -device usb-kbd -device usb-tablet \' \
     && tee -a Launch.sh <<< '-device isa-applesmc,osk=ourhardworkbythesewordsguardedpleasedontsteal\(c\)AppleComputerInc \' \
@@ -202,10 +212,10 @@ RUN touch Launch.sh \
     && tee -a Launch.sh <<< '-device ide-hd,bus=sata.2,drive=OpenCoreBoot \' \
     && tee -a Launch.sh <<< '-device ide-hd,bus=sata.3,drive=InstallMedia \' \
     && tee -a Launch.sh <<< '-drive id=InstallMedia,if=none,file=/home/arch/OSX-KVM/BaseSystem.img,format=qcow2 \' \
-    && tee -a Launch.sh <<< '-drive id=MacHDD,if=none,file=${IMAGE_PATH:-/home/arch/OSX-KVM/mac_hdd_ng.img},format=qcow2 \' \
+    && tee -a Launch.sh <<< '-drive id=MacHDD,if=none,file=${IMAGE_PATH:-/home/arch/OSX-KVM/mac_hdd_ng.img},format=${IMAGE_FORMAT:-qcow2} \' \
     && tee -a Launch.sh <<< '-device ide-hd,bus=sata.4,drive=MacHDD \' \
-    && tee -a Launch.sh <<< '-netdev user,id=net0,hostfwd=tcp::${INTERNAL_SSH_PORT:-10022}-:22,hostfwd=tcp::${SCREEN_SHARE_PORT:-5900}-:5900, \' \
-    && tee -a Launch.sh <<< '-device ${NETWORKING:-e1000-82545em},netdev=net0,id=net0,mac=${MAC_ADDRESS:-52:54:00:09:49:17} \' \
+    && tee -a Launch.sh <<< '-netdev user,id=net0,hostfwd=tcp::${INTERNAL_SSH_PORT:-10022}-:22,hostfwd=tcp::${SCREEN_SHARE_PORT:-5900}-:5900,${ADDITIONAL_PORTS} \' \
+    && tee -a Launch.sh <<< '-device ${NETWORKING:-vmxnet3},netdev=net0,id=net0,mac=${MAC_ADDRESS:-52:54:00:09:49:17} \' \
     && tee -a Launch.sh <<< '-monitor stdio \' \
     && tee -a Launch.sh <<< '-vga vmware \' \
     && tee -a Launch.sh <<< '${EXTRA:-}'
@@ -221,21 +231,50 @@ USER arch
 
 ENV USER arch
 
-ENV BOOTDISK=/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore.qcow2
+#### SPECIAL RUNTIME ARGUMENTS BELOW
+
+# env -e ADDITIONAL_PORTS with a comma
+# for example, -e ADDITIONAL_PORTS=hostfwd=tcp::23-:23,
+ENV ADDITIONAL_PORTS=
+
+ENV BOOTDISK=
 
 ENV DISPLAY=:0.0
 
 ENV ENV=/env
 
+# Boolean for generating a bootdisk with new random serials.
+ENV GENERATE_UNIQUE=false
+
+# Boolean for generating a bootdisk with specific serials.
+ENV GENERATE_SPECIFIC=false
+
 ENV IMAGE_PATH=/home/arch/OSX-KVM/mac_hdd_ng.img
+ENV IMAGE_FORMAT=qcow2
 
-ENV NETWORKING=e1000-82545em
-# ENV NETWORKING=vmxnet3
+ENV KVM='accel=kvm:tcg'
 
+ENV MASTER_PLIST_URL="https://raw.githubusercontent.com/sickcodes/osx-serial-generator/master/config-nopicker-custom.plist"
+
+# ENV NETWORKING=e1000-82545em
+ENV NETWORKING=vmxnet3
+
+# boolean for skipping the disk selection menu at in the boot process
 ENV NOPICKER=false
 
-ENV UNIQUE=false
-# Boolean for generating a bootdisk with new serials.
+# dynamic RAM options for runtime
+ENV RAM=3
+# ENV RAM=max
+# ENV RAM=half
+
+# The x and y coordinates for resolution.
+# Must be used with either -e GENERATE_UNIQUE=true or -e GENERATE_SPECIFIC=true.
+ENV WIDTH=1920
+ENV HEIGHT=1080
+
+# libguestfs verbose
+ENV LIBGUESTFS_DEBUG=1
+ENV LIBGUESTFS_TRACE=1
 
 VOLUME ["/tmp/.X11-unix"]
 
@@ -258,42 +297,38 @@ VOLUME ["/tmp/.X11-unix"]
 # the default serial numbers are already contained in ./OpenCore-Catalina/OpenCore.qcow2
 # And the default serial numbers
 
-CMD sudo chown -R $(id -u):$(id -g) /dev/kvm /dev/snd "${IMAGE_PATH}" "${BOOTDISK}" "${ENV}" 2>/dev/null || true \
-    ; case "$(file --brief /image)" in \
-        QEMU\ QCOW2\ Image* ) export IMAGE_PATH=/image \
-            ;; \
-        directory* ) export IMAGE_PATH=/home/arch/OSX-KVM/mac_hdd_ng.img \
-            ;; \
-    esac \
+CMD sudo touch /dev/kvm /dev/snd "${IMAGE_PATH}" "${BOOTDISK}" "${ENV}" 2>/dev/null || true \
+    ; sudo chown -R $(id -u):$(id -g) /dev/kvm /dev/snd "${IMAGE_PATH}" "${BOOTDISK}" "${ENV}" || true \
     ; [[ "${NOPICKER}" == true ]] && { \
         sed -i '/^.*InstallMedia.*/d' Launch.sh \
-        && export BOOTDISK=/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore-nopicker.qcow2 \
+        && export BOOTDISK="${BOOTDISK:=/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore-nopicker.qcow2}" \
     ; } \
+    || export BOOTDISK="${BOOTDISK:=/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore.qcow2}" \
     ; [[ "${GENERATE_UNIQUE}" == true ]] && { \
-        ./Docker-OSX/custom/generate-unique-machine-values.sh \
-        --count 1 \
-        --tsv ./serial.tsv \
-        --bootdisks \
-        --output-bootdisk "${BOOTDISK:-/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore.qcow2}" \
-        --output-env "${ENV:=/env}" || exit 1 \
-    ; } \
+        ./Docker-OSX/osx-serial-generator/generate-unique-machine-values.sh \
+            --master-plist-url="${MASTER_PLIST_URL}" \
+            --count 1 \
+            --tsv ./serial.tsv \
+            --bootdisks \
+            --width "${WIDTH:-1920}" \
+            --height "${HEIGHT:-1080}" \
+            --output-bootdisk "${BOOTDISK:=/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore.qcow2}" \
+            --output-env "${ENV:=/env}" \
+    || exit 1 ; } \
     ; [[ "${GENERATE_SPECIFIC}" == true ]] && { \
-            source "${ENV:=/env}" \
-            || ./Docker-OSX/custom/generate-specific-bootdisk.sh \
+            source "${ENV:=/env}" 2>/dev/null \
+            ; ./Docker-OSX/osx-serial-generator/generate-specific-bootdisk.sh \
+            --master-plist-url="${MASTER_PLIST_URL}" \
             --model "${DEVICE_MODEL}" \
             --serial "${SERIAL}" \
             --board-serial "${BOARD_SERIAL}" \
             --uuid "${UUID}" \
             --mac-address "${MAC_ADDRESS}" \
-            --output-bootdisk "${BOOTDISK:-/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore.qcow2}" || exit 1 \
-    ; } \
-    ; case "$(file --brief /bootdisk)" in \
-        QEMU\ QCOW2\ Image* ) export BOOTDISK=/bootdisk \
-            ;; \
-        directory* ) export BOOTDISK=/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore.qcow2 \
-            ;; \
-    esac \
-    ; ./enable-ssh.sh && envsubst < ./Launch.sh | bash
+            --width "${WIDTH:-1920}" \
+            --height "${HEIGHT:-1080}" \
+            --output-bootdisk "${BOOTDISK:=/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore.qcow2}" \
+    || exit 1 ; } \
+    ; ./enable-ssh.sh && /bin/bash -c ./Launch.sh
 
 # virt-manager mode: eta son
 # CMD virsh define <(envsubst < Docker-OSX.xml) && virt-manager || virt-manager
