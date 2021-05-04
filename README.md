@@ -12,9 +12,11 @@ Additional credits can be found here: https://github.com/sickcodes/Docker-OSX/bl
 
 Additionally, comprehensive list of all contributors can be found here: https://github.com/sickcodes/Docker-OSX/graphs/contributors
 
-Special thanks to [@kholia](https://twitter.com/kholia) for maintaining the upstream project, which Docker-OSX is built on top of: [OSX-KVM](https://github.com/kholia/OSX-KVM).
+Big thanks to [@kholia](https://twitter.com/kholia) for maintaining the upstream project, which Docker-OSX is built on top of: [OSX-KVM](https://github.com/kholia/OSX-KVM).
 
-Big thanks to the OpenCore team over at: https://github.com/acidanthera/OpenCorePkg. Their well-maintained bootloader provides much of the great functionality that Docker-OSX users enjoy :)
+Also special thanks to [@thenickdude](https://github.com/thenickdude) who maintains the valuable fork [KVM-OpenCore](https://github.com/thenickdude/KVM-Opencore), which was started by [@Leoyzen](https://github.com/Leoyzen/)!
+
+Extra special thanks to the OpenCore team over at: https://github.com/acidanthera/OpenCorePkg. Their well-maintained bootloader provides much of the great functionality that Docker-OSX users enjoy :)
 
 If you like this project, consider contributing here or upstream!
 

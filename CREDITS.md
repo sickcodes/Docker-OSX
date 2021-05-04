@@ -79,3 +79,7 @@ This project now uses the fantastic OpenCore bootloader from the community OpenC
 [@a10kiloham](https://github.com/a10kiloham) - Adding Bluebubbles as an example use case #250 
 
 [@aronzvi](https://github.com/aronzvi) - Fixed Failed to boot OSX with GENERATE_UNIQUE #244
+
+[@tinjaw](https://github.com/tinjaw) -  Fixed Type #258
+
+[@m-zheng](https://github.com/m-zheng) -  Update README.md #260 
