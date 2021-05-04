@@ -154,7 +154,7 @@ ENV LIBGUESTFS_DEBUG=1
 ENV LIBGUESTFS_TRACE=1
 
 CMD sudo touch /dev/kvm /dev/snd "${IMAGE_PATH}" "${BOOTDISK}" "${ENV}" 2>/dev/null || true \
-    ; sudo chown -R $(id -u):$(id -g) /dev/kvm /dev/snd "${IMAGE_PATH}" "${BOOTDISK}" "${ENV}" || true \
+    ; sudo chown -R $(id -u):$(id -g) /dev/kvm /dev/snd "${IMAGE_PATH}" "${BOOTDISK}" "${ENV}" 2>/dev/null || true \
     ; { [[ "${DISPLAY}" = ':99' ]] || [[ "${HEADLESS}" == true ]] ; } && { \
         nohup Xvfb :99 -screen 0 1920x1080x16 \
         & until [[ "$(xrandr --query 2>/dev/null)" ]]; do sleep 1 ; done \

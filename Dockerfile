@@ -319,7 +319,7 @@ VOLUME ["/tmp/.X11-unix"]
 # And the default serial numbers
 
 CMD sudo touch /dev/kvm /dev/snd "${IMAGE_PATH}" "${BOOTDISK}" "${ENV}" 2>/dev/null || true \
-    ; sudo chown -R $(id -u):$(id -g) /dev/kvm /dev/snd "${IMAGE_PATH}" "${BOOTDISK}" "${ENV}" || true \
+    ; sudo chown -R $(id -u):$(id -g) /dev/kvm /dev/snd "${IMAGE_PATH}" "${BOOTDISK}" "${ENV}" 2>/dev/null || true \
     ; [[ "${NOPICKER}" == true ]] && { \
         sed -i '/^.*InstallMedia.*/d' Launch.sh \
         && export BOOTDISK="${BOOTDISK:=/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore-nopicker.qcow2}" \
