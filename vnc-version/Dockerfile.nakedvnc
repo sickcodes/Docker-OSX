@@ -3,11 +3,11 @@
 #    / __ \____  _____/ /_____  _____/ __ \/ ___/ |/ /
 #   / / / / __ \/ ___/ //_/ _ \/ ___/ / / /\__ \|   / 
 #  / /_/ / /_/ / /__/ ,< /  __/ /  / /_/ /___/ /   |  
-# /_____/\____/\___/_/|_|\___/_/   \____//____/_/|_|  :NAKED
+# /_____/\____/\___/_/|_|\___/_/   \____//____/_/|_|  :NAKEDVNC
 # 
 # Title:            Docker-OSX (Mac on Docker)
 # Author:           Sick.Codes https://twitter.com/sickcodes
-# Version:          4.3
+# Version:          4.4
 # License:          GPLv3+
 # Repository:       https://github.com/sickcodes/Docker-OSX
 # Website:          https://sick.codes
@@ -19,15 +19,15 @@
 #
 # Build:
 # 
-#       docker build -t docker-osx:naked -f Dockerfile.naked .
+#       docker build -t docker-osx:nakedvnc -f Dockerfile.nakedvnc .
 # 
 # Run headless:
 # 
-#       docker run -it --device /dev/kvm -p 50922:10022 -v ${PWD}/mac_hdd_ng.img:/image docker-osx:naked
+#       docker run -it --device /dev/kvm -p 50922:10022 -v ${PWD}/mac_hdd_ng.img:/image docker-osx:nakedvnc
 # 
 # Run with display:
 # 
-#       docker run -it --device /dev/kvm -p 50922:10022 -v ${PWD}/mac_hdd_ng.img:/image -e "DISPLAY=${DISPLAY:-:0.0}" -v /tmp/.X11-unix:/tmp/.X11-unix docker-osx:naked
+#       docker run -it --device /dev/kvm -p 50922:10022 -v ${PWD}/mac_hdd_ng.img:/image -e "DISPLAY=${DISPLAY:-:0.0}" -v /tmp/.X11-unix:/tmp/.X11-unix docker-osx:nakedvnc
 # 
 
 FROM sickcodes/docker-osx:latest
@@ -106,7 +106,13 @@ RUN mkdir -p ~/.ssh \
 
 ENV ADDITIONAL_PORTS=
 
+# add additional QEMU boot arguments
+ENV BOOT_ARGS=
+
 ENV BOOTDISK=
+
+# edit the CPU that is beign emulated
+ENV CPU=Penryn
 
 ENV DISPLAY=:99
 
@@ -142,8 +148,12 @@ ENV RAM=8
 ENV WIDTH=1920
 ENV HEIGHT=1080
 
-CMD sudo touch /dev/kvm /dev/snd "${IMAGE_PATH}" "${BOOTDISK}" "${ENV}" || true \
-    ; sudo chown -R $(id -u):$(id -g) /dev/kvm /dev/snd "${IMAGE_PATH}" "${BOOTDISK}" "${ENV}" || true \
+# libguestfs verbose
+ENV LIBGUESTFS_DEBUG=1
+ENV LIBGUESTFS_TRACE=1
+
+CMD sudo touch /dev/kvm /dev/snd "${IMAGE_PATH}" "${BOOTDISK}" "${ENV}"  2>/dev/null || true \
+    ; sudo chown -R $(id -u):$(id -g) /dev/kvm /dev/snd "${IMAGE_PATH}" "${BOOTDISK}" "${ENV}" 2>/dev/null || true \
     ; { [[ "${DISPLAY}" = ':99' ]] || [[ "${HEADLESS}" == true ]] ; } && { \
         nohup Xvfb :99 -screen 0 1920x1080x16 \
         & until [[ "$(xrandr --query 2>/dev/null)" ]]; do sleep 1 ; done \
@@ -163,7 +173,7 @@ CMD sudo touch /dev/kvm /dev/snd "${IMAGE_PATH}" "${BOOTDISK}" "${ENV}" || true 
             --height "${HEIGHT:-1080}" \
             --output-bootdisk "${BOOTDISK:=/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore.qcow2}" \
             --output-env "${ENV:=/env}" \
-    ; } \
+    || exit 1 ; } \
     ; [[ "${GENERATE_SPECIFIC}" == true ]] && { \
             source "${ENV:=/env}" 2>/dev/null \
             ; ./Docker-OSX/osx-serial-generator/generate-specific-bootdisk.sh \
@@ -176,7 +186,7 @@ CMD sudo touch /dev/kvm /dev/snd "${IMAGE_PATH}" "${BOOTDISK}" "${ENV}" || true 
             --width "${WIDTH:-1920}" \
             --height "${HEIGHT:-1080}" \
             --output-bootdisk "${BOOTDISK:=/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore.qcow2}" \
-    ; } \
+    || exit 1 ; } \
     # ; ./enable-ssh.sh && /bin/bash -c ./Launch.sh
 
 WORKDIR /home/arch/OSX-KVM
@@ -188,6 +198,13 @@ RUN sudo pacman -Syyuu --noconfirm \
     && tee -a ~/.vnc/config <<< 'geometry=1920x1080' \
     && tee -a ~/.vnc/config <<< 'localhost' \
     && tee -a ~/.vnc/config <<< 'alwaysshared'
+
+# TEMP-FIX for file 5.40 libguestfs issue
+RUN yes | sudo pacman -U https://archive.archlinux.org/packages/f/file/file-5.39-1-x86_64.pkg.tar.zst \
+    && patched_glibc=glibc-linux4-2.33-4-x86_64.pkg.tar.zst \
+    && curl -LO "https://raw.githubusercontent.com/sickcodes/Docker-OSX/master/${patched_glibc}" \
+    && bsdtar -C / -xvf "${patched_glibc}" || echo "Everything is fine."
+# TEMP-FIX for file 5.40 libguestfs issue
 
 RUN printf '\n%s\n' \
 'sudo rm -f /tmp/.X99-lock' \
