@@ -120,7 +120,7 @@ RUN mkdir -p ~/.ssh \
     && tee -a ~/.ssh/config <<< '    StrictHostKeyChecking no' \
     && tee -a ~/.ssh/config <<< '    UserKnownHostsFile=/dev/null'
 
-ARG COMPLETE=true
+ARG COMPLETE=false
 
 # use the COMPLETE arg, for a complete image, ready to boot.
 # otherwise use your own image: -v "$PWD/disk.img":/image
