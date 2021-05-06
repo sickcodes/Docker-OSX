@@ -1,5 +1,8 @@
 |Version|Date|Notes|
 |---|---|---|
+|4.4|2021-05-06|Prepare nakedvnc for hub.docker.com. Add `ENV BOOT_ARGS=` to supply additon boot arguments, for example, `vmx,rdtscp`. Add `ENV CPU=Penryn` to allow changes to the CPU emulation, for example, `Skylake-Client`, or see [more examples here](https://manpages.ubuntu.com/manpages/disco/man7/qemu-cpu-models.7.html).| 
+|   |2021-05-04|Disable arbitrary chown warning| 
+|   |2021-04-27|Fixed missing sudo| 
 |   |2021-04-18|Add LIBGUESTFS debug & trace commands, exit on fail when creating bootdisks. Silence touch errors.| 
 |4.3|2021-03-24|Enable interactive QEMU again. Remove envsubst since we are already using bash... Add set -x flag| 
 |4.2|2021-03-24|Add all ENV variables to each dockerfile for readability. Add RAM allocation buffer and cache drop bug fix. Add kvm and libvirt groups. Add `IMAGE_FORMAT=qcow2` to allow `IMAGE_FORMAT=raw` too.|

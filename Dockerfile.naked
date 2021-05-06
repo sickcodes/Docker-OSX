@@ -7,7 +7,7 @@
 # 
 # Title:            Docker-OSX (Mac on Docker)
 # Author:           Sick.Codes https://twitter.com/sickcodes
-# Version:          4.3
+# Version:          4.4
 # License:          GPLv3+
 # Repository:       https://github.com/sickcodes/Docker-OSX
 # Website:          https://sick.codes
@@ -113,7 +113,13 @@ RUN mkdir -p ~/.ssh \
 
 ENV ADDITIONAL_PORTS=
 
+# add additional QEMU boot arguments
+ENV BOOT_ARGS=
+
 ENV BOOTDISK=
+
+# edit the CPU that is beign emulated
+ENV CPU=Penryn
 
 ENV DISPLAY=:99
 
