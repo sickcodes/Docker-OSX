@@ -54,9 +54,17 @@ docker run -it \
 **2021-05-04:** Big Sur requires an updated OpenCore.qcow2 image, simply add:
 
 ```
+# this will not be required after OSX-KVM integrates the changes. No effect if you were already using this method.
     -e GENERATE_UNIQUE=true \
     -e MASTER_PLIST_URL=https://raw.githubusercontent.com/sickcodes/osx-serial-generator/master/config-custom.plist \
 ```
+
+**2021-05-08:** QEMU 6 VNC changes:
+
+For Docker-OSX users who are using [VNC over QEMU using](#building-a-headless-container-which-allows-insecure-vnc-on-localhost-for-local-use-only) `-e EXTRA=...`
+
+- `password` is now `password=on`
+- `change vnc password` now need a username at the end, `change vnc password someuser`
 
 ## Technical details
 
@@ -1137,11 +1145,12 @@ docker run -i \
     -p 5999:5999 \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
     -e "DISPLAY=${DISPLAY:-:0.0}" \
-    -e EXTRA="-display none -vnc 0.0.0.0:99,password" \
+    -e EXTRA="-display none -vnc 0.0.0.0:99,password=on" \
     sickcodes/docker-osx:big-sur
 
-# type `change vnc password` into the docker terminal and set a password
+# type `change vnc password myvncusername` into the docker terminal and set a password
 # connect to localhost:5999 using VNC
+# qemu 6 seems to require a username for vnc now
 ```
 
 **NOT TLS/HTTPS Encrypted at all!**
@@ -1154,11 +1163,13 @@ Or `ssh -N root@1.1.1.1 -L  5999:127.0.0.1:5999`, where `1.1.1.1` is your remote
 
 Add the following line:
 
-`-e EXTRA="-display none -vnc 0.0.0.0:99,password"`
+`-e EXTRA="-display none -vnc 0.0.0.0:99,password=on"`
 
 In the Docker terminal, press `enter` until you see `(qemu)`.
 
-Type `change vnc password`
+Type `change vnc password someusername`
+
+Enter a password for your new vnc username^.
 
 You also need the container IP: `docker inspect <containerid> | jq -r '.[0].NetworkSettings.IPAddress'`
 
