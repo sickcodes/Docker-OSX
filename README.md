@@ -20,7 +20,7 @@ Extra special thanks to the OpenCore team over at: https://github.com/acidanther
 
 If you like this project, consider contributing here or upstream!
 
-[![dockeri.co](https://dockeri.co/image/sickcodes/docker-osx)](https://hub.docker.com/r/sickcodes/docker-osx)
+<a href="https://hub.docker.com/r/sickcodes/docker-osx"><img src="https://dockeri.co/image/sickcodes/docker-osx"/></a>
 
 ## Quick Start Docker-OSX
 
