@@ -961,6 +961,45 @@ docker run -it \
 
 See also: [here](https://github.com/sickcodes/Docker-OSX/issues/222).
 
+
+#### Extracting the APFS disk on Linux
+
+In Docker-OSX, we are using `qcow2` images.
+
+This means the image grows as you use it, but the guest OS thinks you have 200GB available.
+
+
+**READ ONLY**
+
+```bash
+# mount the qemu image like a real disk
+sudo modprobe nbd max_part=8
+sudo qemu-nbd --connect=/dev/nbd0 ./image.img
+sudo fdisk /dev/nbd0 -l
+
+mkdir -p ./mnt
+sudo mount /dev/nbd0p1 ./mnt
+
+# inspect partitions (2 partitions)
+sudo fdisk /dev/nbd0 -l
+
+# mount using apfs-linux-rw OR apfs-fuse
+mkdir -p ./part
+
+sudo mount /dev/nbd0p2 ./part
+sudo apfs-fuse -o allow_other /dev/nbd0p2 ./part
+
+```
+
+When you are finishing looking at your disk, you can unmount the partition, the disk, and remove the loopback device:
+
+```bash
+sudo umount ./part
+sudo umount ./mnt
+sudo qemu-nbd --disconnect /dev/nbd0
+sudo rmmod nbd
+```
+
 ### USB Passthrough
 
 Firstly, QEMU must be started as root. 
