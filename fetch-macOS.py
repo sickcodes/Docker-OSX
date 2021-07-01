@@ -87,7 +87,7 @@ class ReplicationError(Exception):
 
 
 def cmd_exists(cmd):
-    proc subprocess.Popen("type " + cmd, shell=True,
+    return subprocess.Popen("type " + cmd, shell=True,
                            stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
 
