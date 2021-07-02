@@ -87,8 +87,8 @@ class ReplicationError(Exception):
 
 
 def cmd_exists(cmd):
-    return subprocess.call("type " + cmd, shell=True,
-                           stdout=subprocess.PIPE, stderr=subprocess.PIPE) == 0
+    return subprocess.Popen("type " + cmd, shell=True,
+                           stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
 
 def replicate_url(full_url,
