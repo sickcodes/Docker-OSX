@@ -49,6 +49,15 @@ docker run -it \
     sickcodes/docker-osx:big-sur
 ```
 
+## Make container FASTER
+
+SEE commands in [https://github.com/sickcodes/osx-optimizer](https://github.com/sickcodes/osx-optimizer)!
+
+- Skip the GUI login screen (at your own risk!)
+- Disable spotlight indexing on macOS to heavily speed up Virual Instances.
+- Disable heavy login screen wallpaper
+- Disable updates (at your own risk!)
+
 ## Important notices:
 
 **2021-05-04:** Big Sur requires an updated OpenCore.qcow2 image, simply add:
@@ -153,7 +162,7 @@ In case you're interested, contact [@sickcodes on Twitter](https://twitter.com/s
 Docker-OSX is licensed under the [GPL v3+](LICENSE). Contributions are welcomed and immensely appreciated. You are in-fact permitted to use Docker-OSX as a tool to create proprietary software.
 
 ### Other cool Docker/QEMU based projects
-
+- [Run Android in a Docker Container with Dock Droid](https://github.com/sickcodes/dock-droid)
 - [Run iOS in a Docker container with Docker-eyeOS](https://github.com/sickcodes/Docker-eyeOS) - [https://github.com/sickcodes/Docker-eyeOS](https://github.com/sickcodes/Docker-eyeOS)
 - [Run iMessage relayer in Docker with Bluebubbles.app](https://bluebubbles.app/) - [Getting started wiki](https://github.com/BlueBubblesApp/BlueBubbles-Server/wiki/Running-via-Docker)
 
