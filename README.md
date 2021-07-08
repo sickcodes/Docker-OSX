@@ -191,7 +191,7 @@ Then, you'll need QEMU and some other dependencies on your host:
 sudo pacman -S qemu libvirt dnsmasq virt-manager bridge-utils flex bison iptables-nft edk2-ovmf
 
 # UBUNTU DEBIAN
-sudo apt install qemu qemu-kvm libvirt-clients libvirt-daemon-system bridge-utils virt-manager
+sudo apt install qemu qemu-kvm libvirt-clients libvirt-daemon-system bridge-utils virt-manager libguestfs-tools
 
 # CENTOS RHEL FEDORA
 sudo yum install libvirt qemu-kvm
