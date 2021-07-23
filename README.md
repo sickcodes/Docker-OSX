@@ -822,7 +822,10 @@ Or tell the container to use specific ones using `-e GENERATE_SPECIFIC=true`
 
 ### I'd like to run Docker-OSX with WSL2 (Windows, Ubuntu)
 
-Ensure KVM is enabled and `x11-apps` is installed. 
+Ensure KVM is enabled and `x11-apps` is installed.
+
+to void troubles related to docker daemons on WLS 2, use Docker on Windows, and extern it to your distro.
+See Docker Docs for the complete detail setup [here](https://docs.docker.com/docker-for-windows/wsl/)
 
 See more in-depth discussion [here](https://github.com/sickcodes/Docker-OSX/issues/17) and [here](https://github.com/sickcodes/Docker-OSX/issues/60).
 
