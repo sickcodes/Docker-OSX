@@ -7,7 +7,7 @@
 #
 # Title:            Docker-OSX (Mac on Docker)
 # Author:           Sick.Codes https://twitter.com/sickcodes
-# Version:          4.4
+# Version:          5.0
 # License:          GPLv3+
 # Repository:       https://github.com/sickcodes/Docker-OSX
 # Website:          https://sick.codes
@@ -67,12 +67,6 @@ ARG RANKMIRRORS
 ARG MIRROR_COUNTRY=US
 ARG MIRROR_COUNT=10
 
-# TEMP-FIX for pacman issue
-RUN patched_glibc=glibc-linux4-2.33-4-x86_64.pkg.tar.zst \
-    && curl -LO "https://raw.githubusercontent.com/sickcodes/Docker-OSX/master/${patched_glibc}" \
-    && bsdtar -C / -xvf "${patched_glibc}" || echo "Everything is fine."
-# TEMP-FIX for pacman issue
-
 RUN if [[ "${RANKMIRRORS}" ]]; then \
         { pacman -Sy wget --noconfirm || pacman -Syu wget --noconfirm ; } \
         ; wget -O ./rankmirrors "https://raw.githubusercontent.com/sickcodes/Docker-OSX/master/rankmirrors" \
@@ -98,12 +92,6 @@ RUN pacman -Syu git zip vim nano alsa-utils openssh --noconfirm \
     && tee -a /etc/sudoers <<< 'arch ALL=(ALL) NOPASSWD: ALL' \
     && mkdir /home/arch \
     && chown arch:arch /home/arch
-
-# TEMP-FIX for pacman issue
-RUN patched_glibc=glibc-linux4-2.33-4-x86_64.pkg.tar.zst \
-    && curl -LO "https://raw.githubusercontent.com/sickcodes/Docker-OSX/master/${patched_glibc}" \
-    && bsdtar -C / -xvf "${patched_glibc}" || echo "Everything is fine."
-# TEMP-FIX for pacman issue
 
 # allow ssh to container
 RUN mkdir -m 700 /root/.ssh
@@ -154,15 +142,6 @@ RUN touch enable-ssh.sh \
 RUN yes | sudo pacman -Syu qemu libvirt dnsmasq virt-manager bridge-utils openresolv jack ebtables edk2-ovmf netctl libvirt-dbus wget --overwrite --noconfirm \
     && yes | sudo pacman -Scc
 
-# TEMP-FIX for pacman issue
-RUN patched_glibc=glibc-linux4-2.33-4-x86_64.pkg.tar.zst \
-    && curl -LO "https://raw.githubusercontent.com/sickcodes/Docker-OSX/master/${patched_glibc}" \
-    && bsdtar -C / -xvf "${patched_glibc}" || echo "Everything is fine."
-# TEMP-FIX for pacman issue
-
-# RUN sudo systemctl enable libvirtd.service
-# RUN sudo systemctl enable virtlogd.service
-
 WORKDIR /home/arch/OSX-KVM
 
 RUN wget https://raw.githubusercontent.com/sickcodes/Docker-OSX/master/fetch-macOS.py
@@ -192,17 +171,7 @@ ARG LINUX=true
 # required to use libguestfs inside a docker container, to create bootdisks for docker-osx on-the-fly
 RUN if [[ "${LINUX}" == true ]]; then \
         sudo pacman -Syu linux libguestfs --noconfirm \
-        && patched_glibc=glibc-linux4-2.33-4-x86_64.pkg.tar.zst \
-        && curl -LO "https://raw.githubusercontent.com/sickcodes/Docker-OSX/master/${patched_glibc}" \
-        && bsdtar -C / -xvf "${patched_glibc}" || echo "Everything is fine." \
     ; fi
-
-# TEMP-FIX for file 5.40 libguestfs issue
-RUN yes | sudo pacman -U https://archive.archlinux.org/packages/f/file/file-5.39-1-x86_64.pkg.tar.zst \
-    && patched_glibc=glibc-linux4-2.33-4-x86_64.pkg.tar.zst \
-    && curl -LO "https://raw.githubusercontent.com/sickcodes/Docker-OSX/master/${patched_glibc}" \
-    && bsdtar -C / -xvf "${patched_glibc}" || echo "Everything is fine."
-# TEMP-FIX for file 5.40 libguestfs issue
 
 # optional --build-arg to change branches for testing
 ARG BRANCH=master
@@ -224,7 +193,7 @@ RUN touch Launch.sh \
     && tee -a Launch.sh <<< '-smp ${CPU_STRING:-${SMP:-4},cores=${CORES:-4}} \' \
     && tee -a Launch.sh <<< '-usb -device usb-kbd -device usb-tablet \' \
     && tee -a Launch.sh <<< '-device isa-applesmc,osk=ourhardworkbythesewordsguardedpleasedontsteal\(c\)AppleComputerInc \' \
-    && tee -a Launch.sh <<< '-drive if=pflash,format=raw,readonly,file=/home/arch/OSX-KVM/OVMF_CODE.fd \' \
+    && tee -a Launch.sh <<< '-drive if=pflash,format=raw,readonly=on,file=/home/arch/OSX-KVM/OVMF_CODE.fd \' \
     && tee -a Launch.sh <<< '-drive if=pflash,format=raw,file=/home/arch/OSX-KVM/OVMF_VARS-1024x768.fd \' \
     && tee -a Launch.sh <<< '-smbios type=2 \' \
     && tee -a Launch.sh <<< '-audiodev ${AUDIO_DRIVER:-alsa},id=hda -device ich9-intel-hda -device hda-duplex,audiodev=hda \' \
@@ -238,6 +207,7 @@ RUN touch Launch.sh \
     && tee -a Launch.sh <<< '-netdev user,id=net0,hostfwd=tcp::${INTERNAL_SSH_PORT:-10022}-:22,hostfwd=tcp::${SCREEN_SHARE_PORT:-5900}-:5900,${ADDITIONAL_PORTS} \' \
     && tee -a Launch.sh <<< '-device ${NETWORKING:-vmxnet3},netdev=net0,id=net0,mac=${MAC_ADDRESS:-52:54:00:09:49:17} \' \
     && tee -a Launch.sh <<< '-monitor stdio \' \
+    && tee -a Launch.sh <<< '-boot menu=on \' \
     && tee -a Launch.sh <<< '-vga vmware \' \
     && tee -a Launch.sh <<< '${EXTRA:-}'
 

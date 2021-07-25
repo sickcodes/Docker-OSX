@@ -22,7 +22,7 @@ This project now uses the fantastic OpenCore bootloader from the community OpenC
 
 [@qcasey](https://github.com/qcasey) - Removed unnecessary yay in Remove yay dependancy #40 
 
-[@tlierdotfr](https://github.com/tlierdotfr) - Reduce number of layers in Dockerfile  
+[@tlierdotfr](https://github.com/tlierdotfr) - Reduce number of layers in Dockerfile 
 
 [@Julioevm](https://github.com/Julioevm) - Update docker-compose.yml #57
 
@@ -46,7 +46,7 @@ This project now uses the fantastic OpenCore bootloader from the community OpenC
 
 [@PeterDaveHello](https://github.com/PeterDaveHello) - Reduce image size by setting git clone depth #110
 
-[@PeterDaveHello](https://github.com/PeterDaveHello) -  Reduce Dockerfile instructions and Docker image layers #112
+[@PeterDaveHello](https://github.com/PeterDaveHello) - Reduce Dockerfile instructions and Docker image layers #112
 
 [@weskerfoot](https://github.com/weskerfoot) Docs updates: usb passthrough, headless mode, disk space reduction guide #113
 
@@ -68,7 +68,7 @@ This project now uses the fantastic OpenCore bootloader from the community OpenC
 
 [@TheHackerCoding](https://github.com/TheHackerCoding) - Typo in README.md #194
 
-[@panos](https://github.com/panos) -  Improved README #212 
+[@panos](https://github.com/panos) - Improved README #212 
 
 [@ggjulio](https://github.com/ggjulio) - Restarting an "auto" container #216
 
@@ -80,6 +80,12 @@ This project now uses the fantastic OpenCore bootloader from the community OpenC
 
 [@aronzvi](https://github.com/aronzvi) - Fixed Failed to boot OSX with GENERATE_UNIQUE #244
 
-[@tinjaw](https://github.com/tinjaw) -  Fixed Type #258
+[@tinjaw](https://github.com/tinjaw) - Fixed Type #258
 
 [@m-zheng](https://github.com/m-zheng) -  Update README.md #260 
+
+[@johnjhacking](https://github.com/johnjhacking) - Change call function to Popen #288 
+
+[@allansrc](https://github.com/allansrc) - Update Doc detail for run on WLS #318 
+
+
