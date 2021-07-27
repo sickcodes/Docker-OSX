@@ -275,6 +275,23 @@ ENV HEIGHT=1080
 ENV LIBGUESTFS_DEBUG=1
 ENV LIBGUESTFS_TRACE=1
 
+# ### FIX LIBGUESTFS
+# # downgrade file command for supermin sub environment
+# RUN sudo pacman -Syyu \
+#     && sudo pacman -R libguestfs \
+#     && sudo pacman -U https://archive.archlinux.org/packages/f/file/file-5.39-1-x86_64.pkg.tar.zst \
+#     && git clone https://aur.archlinux.org/libguestfs-dev.git \
+#     && cd libguestfs-dev \
+#     && makepkg -si --syncdeps --noconfirm || exit 1
+# ### FIX LIBGUESTFS
+
+### FIX glibc & file
+RUN yes | sudo pacman -U https://archive.archlinux.org/packages/f/file/file-5.39-1-x86_64.pkg.tar.zst \
+    && patched_glibc=glibc-linux4-2.33-4-x86_64.pkg.tar.zst \
+    && curl -LO "https://raw.githubusercontent.com/sickcodes/Docker-OSX/master/${patched_glibc}" \
+    && sudo bsdtar -C / -xvf "${patched_glibc}" || echo "Everything is fine."
+### FIX glibc & file
+
 VOLUME ["/tmp/.X11-unix"]
 
 # check if /image is a disk image or a directory. This allows you to optionally use -v disk.img:/image

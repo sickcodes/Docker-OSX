@@ -44,8 +44,6 @@ docker run -it \
     -p 50922:10022 \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
     -e "DISPLAY=${DISPLAY:-:0.0}" \
-    -e GENERATE_UNIQUE=true \
-    -e MASTER_PLIST_URL=https://raw.githubusercontent.com/sickcodes/osx-serial-generator/master/config-custom.plist \
     sickcodes/docker-osx:big-sur
 ```
 
@@ -60,20 +58,7 @@ SEE commands in [https://github.com/sickcodes/osx-optimizer](https://github.com/
 
 ## Important notices:
 
-**2021-05-04:** Big Sur requires an updated OpenCore.qcow2 image, simply add:
-
-```
-# this will not be required after OSX-KVM integrates the changes. No effect if you were already using this method.
-    -e GENERATE_UNIQUE=true \
-    -e MASTER_PLIST_URL=https://raw.githubusercontent.com/sickcodes/osx-serial-generator/master/config-custom.plist \
-```
-
-**2021-05-08:** QEMU 6 VNC changes:
-
-For Docker-OSX users who are using [VNC over QEMU using](#building-a-headless-container-which-allows-insecure-vnc-on-localhost-for-local-use-only) `-e EXTRA=...`
-
-- `password` is now `password=on`
-- `change vnc password` now need a username at the end, `change vnc password someuser`
+**2021-07-27:**  Bug in libguestfs currently preventing `GENERATE_UNIQUE` and `GENERATE_TRUE`
 
 ## Technical details
 
