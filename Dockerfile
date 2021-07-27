@@ -126,6 +126,7 @@ RUN tee -a sshd_config <<< 'AllowTcpForwarding yes' \
 USER arch
 
 # download OSX-KVM
+# RUN git clone --recurse-submodules --depth 1 https://github.com/kholia/OSX-KVM.git /home/arch/OSX-KVM
 RUN git clone --recurse-submodules --depth 1 https://github.com/kholia/OSX-KVM.git /home/arch/OSX-KVM
 
 # enable ssh
@@ -213,6 +214,7 @@ RUN yes | sudo pacman -U https://archive.archlinux.org/packages/f/file/file-5.39
 # optional --build-arg to change branches for testing
 ARG BRANCH=master
 ARG REPO='https://github.com/sickcodes/Docker-OSX.git'
+# RUN git clone --recurse-submodules --depth 1 --branch "${BRANCH}" "${REPO}"
 RUN git clone --recurse-submodules --depth 1 --branch "${BRANCH}" "${REPO}"
 
 RUN touch Launch.sh \
