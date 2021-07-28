@@ -67,12 +67,6 @@ ARG RANKMIRRORS
 ARG MIRROR_COUNTRY=US
 ARG MIRROR_COUNT=10
 
-# TEMP-FIX for pacman issue
-RUN patched_glibc=glibc-linux4-2.33-4-x86_64.pkg.tar.zst \
-    && curl -LO "https://raw.githubusercontent.com/sickcodes/Docker-OSX/master/${patched_glibc}" \
-    && bsdtar -C / -xvf "${patched_glibc}" || echo "Everything is fine."
-# TEMP-FIX for pacman issue
-
 RUN if [[ "${RANKMIRRORS}" ]]; then \
         { pacman -Sy wget --noconfirm || pacman -Syu wget --noconfirm ; } \
         ; wget -O ./rankmirrors "https://raw.githubusercontent.com/sickcodes/Docker-OSX/master/rankmirrors" \
@@ -98,12 +92,6 @@ RUN pacman -Syu git zip vim nano alsa-utils openssh --noconfirm \
     && tee -a /etc/sudoers <<< 'arch ALL=(ALL) NOPASSWD: ALL' \
     && mkdir /home/arch \
     && chown arch:arch /home/arch
-
-# TEMP-FIX for pacman issue
-RUN patched_glibc=glibc-linux4-2.33-4-x86_64.pkg.tar.zst \
-    && curl -LO "https://raw.githubusercontent.com/sickcodes/Docker-OSX/master/${patched_glibc}" \
-    && bsdtar -C / -xvf "${patched_glibc}" || echo "Everything is fine."
-# TEMP-FIX for pacman issue
 
 # allow ssh to container
 RUN mkdir -m 700 /root/.ssh
@@ -143,15 +131,6 @@ RUN touch enable-ssh.sh \
     && tee -a enable-ssh.sh <<< 'sudo /usr/bin/ssh-keygen -A' \
     && tee -a enable-ssh.sh <<< 'nohup sudo /usr/bin/sshd -D &'
 
-# TEMP-FIX for pacman issue
-RUN patched_glibc=glibc-linux4-2.33-4-x86_64.pkg.tar.zst \
-    && curl -LO "https://raw.githubusercontent.com/sickcodes/Docker-OSX/master/${patched_glibc}" \
-    && bsdtar -C / -xvf "${patched_glibc}" || echo "Everything is fine."
-# TEMP-FIX for pacman issue
-
-# RUN sudo systemctl enable libvirtd.service
-# RUN sudo systemctl enable virtlogd.service
-
 # QEMU CONFIGURATOR
 # set optional ram at runtime -e RAM=16
 # set optional cores at runtime -e SMP=4 -e CORES=2
@@ -163,12 +142,6 @@ RUN patched_glibc=glibc-linux4-2.33-4-x86_64.pkg.tar.zst \
 
 RUN yes | sudo pacman -Syu qemu libvirt dnsmasq virt-manager bridge-utils openresolv jack ebtables edk2-ovmf netctl libvirt-dbus wget --overwrite --noconfirm \
     && yes | sudo pacman -Scc
-
-# TEMP-FIX for pacman issue
-RUN patched_glibc=glibc-linux4-2.33-4-x86_64.pkg.tar.zst \
-    && curl -LO "https://raw.githubusercontent.com/sickcodes/Docker-OSX/master/${patched_glibc}" \
-    && bsdtar -C / -xvf "${patched_glibc}" || echo "Everything is fine."
-# TEMP-FIX for pacman issue
 
 WORKDIR /home/arch/OSX-KVM
 
@@ -199,17 +172,7 @@ ARG LINUX=true
 # required to use libguestfs inside a docker container, to create bootdisks for docker-osx on-the-fly
 RUN if [[ "${LINUX}" == true ]]; then \
         sudo pacman -Syu linux libguestfs --noconfirm \
-        && patched_glibc=glibc-linux4-2.33-4-x86_64.pkg.tar.zst \
-        && curl -LO "https://raw.githubusercontent.com/sickcodes/Docker-OSX/master/${patched_glibc}" \
-        && bsdtar -C / -xvf "${patched_glibc}" || echo "Everything is fine." \
     ; fi
-
-# TEMP-FIX for file 5.40 libguestfs issue
-RUN yes | sudo pacman -U https://archive.archlinux.org/packages/f/file/file-5.39-1-x86_64.pkg.tar.zst \
-    && patched_glibc=glibc-linux4-2.33-4-x86_64.pkg.tar.zst \
-    && curl -LO "https://raw.githubusercontent.com/sickcodes/Docker-OSX/master/${patched_glibc}" \
-    && bsdtar -C / -xvf "${patched_glibc}" || echo "Everything is fine."
-# TEMP-FIX for file 5.40 libguestfs issue
 
 # optional --build-arg to change branches for testing
 ARG BRANCH=master
@@ -257,9 +220,11 @@ RUN grep -v InstallMedia ./Launch.sh > ./Launch-nopicker.sh \
     && chmod +x ./Launch-nopicker.sh \
     && sed -i -e s/OpenCore\.qcow2/OpenCore\-nopicker\.qcow2/ ./Launch-nopicker.sh
 
+USER arch
+
+ENV USER arch
 
 # 5.13 problem
-
 ENV SUPERMIN_KERNEL=/boot/vmlinuz-linux
 
 ENV SUPERMIN_MODULES=/lib/modules/5.12.14-arch1-1
@@ -270,12 +235,8 @@ RUN sudo pacman -Rns linux --noconfirm \
     ; sudo pacman -Syy \
     ; sudo pacman -S mkinitcpio --noconfirm \
     ; sudo pacman -U https://archive.archlinux.org/packages/l/linux/linux-5.12.14.arch1-1-x86_64.pkg.tar.zst --noconfirm \
-    ; rm -rf /var/tmp/.guestfs-* \
+    ; sudo rm -rf /var/tmp/.guestfs-* \
     ; libguestfs-test-tool
-
-USER arch
-
-ENV USER arch
 
 #### SPECIAL RUNTIME ARGUMENTS BELOW
 
