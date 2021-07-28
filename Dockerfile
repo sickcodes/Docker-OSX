@@ -235,12 +235,8 @@ RUN sudo pacman -Rns linux --noconfirm \
     ; sudo pacman -Syy \
     ; sudo pacman -S mkinitcpio --noconfirm \
     ; sudo pacman -U https://archive.archlinux.org/packages/l/linux/linux-5.12.14.arch1-1-x86_64.pkg.tar.zst --noconfirm \
-    ; rm -rf /var/tmp/.guestfs-* \
+    ; sudo rm -rf /var/tmp/.guestfs-* \
     ; libguestfs-test-tool
-
-USER arch
-
-ENV USER arch
 
 #### SPECIAL RUNTIME ARGUMENTS BELOW
 
