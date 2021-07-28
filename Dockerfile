@@ -220,6 +220,9 @@ RUN grep -v InstallMedia ./Launch.sh > ./Launch-nopicker.sh \
     && chmod +x ./Launch-nopicker.sh \
     && sed -i -e s/OpenCore\.qcow2/OpenCore\-nopicker\.qcow2/ ./Launch-nopicker.sh
 
+USER arch
+
+ENV USER arch
 
 # 5.13 problem
 ENV SUPERMIN_KERNEL=/boot/vmlinuz-linux
