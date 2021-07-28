@@ -257,6 +257,22 @@ RUN grep -v InstallMedia ./Launch.sh > ./Launch-nopicker.sh \
     && chmod +x ./Launch-nopicker.sh \
     && sed -i -e s/OpenCore\.qcow2/OpenCore\-nopicker\.qcow2/ ./Launch-nopicker.sh
 
+
+# 5.13 problem
+
+ENV SUPERMIN_KERNEL=/boot/vmlinuz-linux
+
+ENV SUPERMIN_MODULES=/lib/modules/5.12.14-arch1-1
+
+ENV SUPERMIN_KERNEL_VERSION=5.12.14-arch1-1
+
+RUN sudo pacman -Rns linux --noconfirm \
+    ; sudo pacman -Syy \
+    ; sudo pacman -S mkinitcpio --noconfirm \
+    ; sudo pacman -U https://archive.archlinux.org/packages/l/linux/linux-5.12.14.arch1-1-x86_64.pkg.tar.zst --noconfirm \
+    ; rm -rf /var/tmp/.guestfs-* \
+    ; libguestfs-test-tool
+
 USER arch
 
 ENV USER arch
