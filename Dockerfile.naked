@@ -56,12 +56,6 @@ RUN if [[ "${RANKMIRRORS}" ]]; then { pacman -Sy wget --noconfirm || pacman -Syu
     && tee -a /etc/pacman.d/mirrorlist <<< 'Server = https://mirror.rackspace.com/archlinux/$repo/os/$arch' \
     && cat /etc/pacman.d/mirrorlist ; fi
 
-# TEMP-FIX for pacman issue
-RUN patched_glibc=glibc-linux4-2.33-4-x86_64.pkg.tar.zst \
-    && curl -LO "https://raw.githubusercontent.com/sickcodes/Docker-OSX/master/${patched_glibc}" \
-    && bsdtar -C / -xvf "${patched_glibc}" || echo "Everything is fine."
-# TEMP-FIX for pacman issue
-
 # For taking screenshots of the Xfvb screen, useful during development.
 ARG SCROT
 
@@ -82,19 +76,19 @@ RUN pacman -Syu xorg-server-xvfb wget xterm xorg-xhost xorg-xrandr sshpass --noc
     ; fi \
     ; yes | pacman -Scc
 
-# TEMP-FIX for pacman issue
-RUN patched_glibc=glibc-linux4-2.33-4-x86_64.pkg.tar.zst \
-    && curl -LO "https://raw.githubusercontent.com/sickcodes/Docker-OSX/master/${patched_glibc}" \
-    && bsdtar -C / -xvf "${patched_glibc}" || echo "Everything is fine."
-# TEMP-FIX for pacman issue
+# 5.13 problem
+ENV SUPERMIN_KERNEL=/boot/vmlinuz-linux
 
-# TEMP-FIX for file 5.40 libguestfs issue
-RUN yes | sudo pacman -U https://archive.archlinux.org/packages/f/file/file-5.39-1-x86_64.pkg.tar.zst \
-    && patched_glibc=glibc-linux4-2.33-4-x86_64.pkg.tar.zst \
-    && curl -LO "https://raw.githubusercontent.com/sickcodes/Docker-OSX/master/${patched_glibc}" \
-    && bsdtar -C / -xvf "${patched_glibc}" || echo "Everything is fine."
-# TEMP-FIX for file 5.40 libguestfs issue
+ENV SUPERMIN_MODULES=/lib/modules/5.12.14-arch1-1
 
+ENV SUPERMIN_KERNEL_VERSION=5.12.14-arch1-1
+
+RUN sudo pacman -Rns linux --noconfirm \
+    ; sudo pacman -Syy \
+    ; sudo pacman -S mkinitcpio --noconfirm \
+    ; sudo pacman -U https://archive.archlinux.org/packages/l/linux/linux-5.12.14.arch1-1-x86_64.pkg.tar.zst --noconfirm \
+    ; rm -rf /var/tmp/.guestfs-* \
+    ; libguestfs-test-tool
 
 USER arch
 
