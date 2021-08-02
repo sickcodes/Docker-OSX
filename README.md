@@ -4,6 +4,9 @@
 
 Run Mac OS X in Docker with near-native performance! X11 Forwarding! iMessage security research!
 
+# Docker-OSX now has a Discord server:
+# [https://discord.gg/mx8pPw39Yg](https://discord.gg/mx8pPw39Yg)
+
 ## Author
 
 This project is maintained by [Sick.Codes](https://sick.codes/). [(Twitter)](https://twitter.com/sickcodes)
@@ -25,6 +28,9 @@ If you like this project, consider contributing here or upstream!
 ## Quick Start Docker-OSX
 
 First time here? try [initial setup](#initial-setup), otherwise try the instructions below to use either Catalina or Big Sur.
+
+## Any questions, ideas, or just want to hang out?
+# [https://discord.gg/mx8pPw39Yg](https://discord.gg/mx8pPw39Yg)
 
 ### Catalina [![https://img.shields.io/docker/image-size/sickcodes/docker-osx/latest?label=sickcodes%2Fdocker-osx%3Alatest](https://img.shields.io/docker/image-size/sickcodes/docker-osx/latest?label=sickcodes%2Fdocker-osx%3Alatest)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
 
