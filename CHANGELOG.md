@@ -1,5 +1,6 @@
 |Version|Date|Notes|
 |---|---|---|
+|6.0|2021-08-25|Added naked-auto. Keep kernel at 5.13, even tho it's just for supermin.|
 |5.0|2021-07-25|Retire glibc patch. Retire file command patch. Add bootmenu=on.|
 |   |2021-07-08|Add CPUID_FLAGS to edit the CPUID flags on the fly.|
 |4.4|2021-05-06|Prepare nakedvnc for hub.docker.com. Add `ENV BOOT_ARGS=` to supply additon boot arguments, for example, `vmx,rdtscp`. Add `ENV CPU=Penryn` to allow changes to the CPU emulation, for example, `Skylake-Client`, or see [more examples here](https://manpages.ubuntu.com/manpages/disco/man7/qemu-cpu-models.7.html).| 
