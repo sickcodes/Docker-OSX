@@ -53,6 +53,65 @@ docker run -it \
     sickcodes/docker-osx:big-sur
 ```
 
+#### Run Catalina Pre-Installed [![https://img.shields.io/docker/image-size/sickcodes/docker-osx/auto?label=sickcodes%2Fdocker-osx%3Aauto](https://img.shields.io/docker/image-size/sickcodes/docker-osx/auto?label=sickcodes%2Fdocker-osx%3Aauto)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
+
+```bash
+# 40GB disk space required: 20GB original image 20GB your container.
+docker pull sickcodes/docker-osx:auto
+
+# boot directly into a real OS X shell with a visual display [NOT HEADLESS]
+docker run -it \
+    --device /dev/kvm \
+    -p 50922:10022 \
+    -v /tmp/.X11-unix:/tmp/.X11-unix \
+    -e "DISPLAY=${DISPLAY:-:0.0}" \
+    sickcodes/docker-osx:auto
+
+# username is user
+# passsword is alpine
+```
+
+#### Download the image manually and use it in Docker 
+
+[![https://img.shields.io/docker/image-size/sickcodes/docker-osx/naked?label=sickcodes%2Fdocker-osx%3Anaked](https://img.shields.io/docker/image-size/sickcodes/docker-osx/naked?label=sickcodes%2Fdocker-osx%3Anaked)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
+
+
+This is a particularly good way for downloading the container, in case Docker's CDN (or your connection) happens to be slow.
+
+```bash
+wget https://images2.sick.codes/mac_hdd_ng_auto.img
+
+docker run -it \
+    --device /dev/kvm \
+    -p 50922:10022 \
+    -v "${PWD}/mac_hdd_ng_auto.img:/image" \
+    -v /tmp/.X11-unix:/tmp/.X11-unix \
+    -e "DISPLAY=${DISPLAY:-:0.0}" \
+    sickcodes/docker-osx:naked
+```
+
+
+#### Use your own image and manually and automatically log into a shell
+
+[![https://img.shields.io/docker/image-size/sickcodes/docker-osx/naked-auto?label=sickcodes%2Fdocker-osx%3Anaked-auto](https://img.shields.io/docker/image-size/sickcodes/docker-osx/naked-auto?label=sickcodes%2Fdocker-osx%3Anaked-auto)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
+
+
+Enable SSH in network sharing inside the guest first. Change `-e "USERNAME=user"` and `-e "USERNAME=password"` to your credentials. The container will add itself to `~/.ssh/authorized_keys`
+
+```bash
+wget https://images2.sick.codes/mac_hdd_ng_auto.img
+
+docker run -it \
+    --device /dev/kvm \
+    -p 50922:10022 \
+    -v "${PWD}/mac_hdd_ng_auto.img:/image" \
+    -v /tmp/.X11-unix:/tmp/.X11-unix \
+    -e "DISPLAY=${DISPLAY:-:0.0}" \
+    -e "USERNAME=user" \
+    -e "DISPLAY=alpine" \
+    sickcodes/docker-osx:naked-auto
+```
+
 ## Make container FASTER
 
 SEE commands in [https://github.com/sickcodes/osx-optimizer](https://github.com/sickcodes/osx-optimizer)!
@@ -68,7 +127,13 @@ SEE commands in [https://github.com/sickcodes/osx-optimizer](https://github.com/
 
 ## Technical details
 
-There currently four images, each with different use cases (explained [below](#container-images)):
+There currently five images, each with different use cases (explained [below](#container-images)):
+
+- Catalina
+- Big Sur
+- Auto (pre-made Catalina)
+- Naked (use your own .img)
+- Naked-Auto (user your own .img and SSH in)
 
 Catalina make your own image:
 
@@ -85,6 +150,10 @@ Pre-made system by [Sick.Codes](https://sick.codes): username: `user`, password:
 Bring-your-own-image setup (use any of the above first):
 
 [![https://img.shields.io/docker/image-size/sickcodes/docker-osx/naked?label=sickcodes%2Fdocker-osx%3Anaked](https://img.shields.io/docker/image-size/sickcodes/docker-osx/naked?label=sickcodes%2Fdocker-osx%3Anaked)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
+
+Same as above but with `-e USERNAME` & `-e PASSWORD` and `-e OSX_COMMANDS="put your commands here"`
+
+[![https://img.shields.io/docker/image-size/sickcodes/docker-osx/naked-auto?label=sickcodes%2Fdocker-osx%3Anaked-auto](https://img.shields.io/docker/image-size/sickcodes/docker-osx/naked-auto?label=sickcodes%2Fdocker-osx%3Anaked-auto)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
 
 ## Capabilities
 - SSH enabled (`localhost:50922`)
@@ -1106,28 +1175,11 @@ The Quick Start command should work out of the box, provided that you keep the f
     -e "DISPLAY=${DISPLAY:-:0.0}" \
 ```
 
-#### Download the image manually and use it in Docker 
-
-[![https://img.shields.io/docker/image-size/sickcodes/docker-osx/naked?label=sickcodes%2Fdocker-osx%3Anaked](https://img.shields.io/docker/image-size/sickcodes/docker-osx/naked?label=sickcodes%2Fdocker-osx%3Anaked)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
-
-
-This is a particularly good way for downloading the container, in case Docker's CDN (or your connection) happens to be slow.
-
-```bash
-wget https://images2.sick.codes/mac_hdd_ng_auto.img
-
-docker run -it \
-    --device /dev/kvm \
-    -p 50922:10022 \
-    -v "${PWD}/mac_hdd_ng_auto.img:/image" \
-    -v /tmp/.X11-unix:/tmp/.X11-unix \
-    -e "DISPLAY=${DISPLAY:-:0.0}" \
-    sickcodes/docker-osx:naked
-```
-
 #### Prebuilt image with arbitrary command line arguments 
 
 [![https://img.shields.io/docker/image-size/sickcodes/docker-osx/auto?label=sickcodes%2Fdocker-osx%3Aauto](https://img.shields.io/docker/image-size/sickcodes/docker-osx/auto?label=sickcodes%2Fdocker-osx%3Aauto)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
+
+`-e OSX_COMMANDS` lets you run any commands inside the container
 
 ```bash
 docker pull sickcodes/docker-osx:auto
@@ -1138,10 +1190,33 @@ docker run -it \
     -p 50922:10022 \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
     -e "DISPLAY=${DISPLAY:-:0.0}" \
-    -e "OSX_COMMANDS=/bin/bash -c \"pwd && uname -a\"" \
+    -e "OSX_COMMANDS=/bin/bash -c \"put your commands here\"" \
     sickcodes/docker-osx:auto
 
 # Boots in a minute or two!
+```
+
+
+```bash
+
+OR if you have an image already and just want to log in and execute arbitrary commands:
+
+```bash
+docker pull sickcodes/docker-osx:naked-auto
+
+# boot to OS X shell + display + specify commands to run inside OS X!
+docker run -it \
+    --device /dev/kvm \
+    -p 50922:10022 \
+    -v /tmp/.X11-unix:/tmp/.X11-unix \
+    -e "DISPLAY=${DISPLAY:-:0.0}" \
+    -e USERNAME=yourusername \
+    -e USERNAME=yourpassword \
+    -e "OSX_COMMANDS=/bin/bash -c \"put your commands here\"" \
+    sickcodes/docker-osx:naked-auto
+
+# Boots in a minute or two!
+
 ```
 
 ### Further examples
@@ -1256,23 +1331,6 @@ docker run \
     --device /dev/snd \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
     newImageName
-```
-
-#### Run Catalina Pre-Installed [![https://img.shields.io/docker/image-size/sickcodes/docker-osx/auto?label=sickcodes%2Fdocker-osx%3Aauto](https://img.shields.io/docker/image-size/sickcodes/docker-osx/auto?label=sickcodes%2Fdocker-osx%3Aauto)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
-
-```bash
-docker pull sickcodes/docker-osx:auto
-
-# boot directly into a real OS X shell with a visual display [NOT HEADLESS]
-docker run -it \
-    --device /dev/kvm \
-    -p 50922:10022 \
-    -v /tmp/.X11-unix:/tmp/.X11-unix \
-    -e "DISPLAY=${DISPLAY:-:0.0}" \
-    sickcodes/docker-osx:auto
-
-# username is user
-# passsword is alpine
 ```
 
 ```bash

@@ -7,7 +7,7 @@
 # 
 # Title:            Docker-OSX (Mac on Docker)
 # Author:           Sick.Codes https://twitter.com/sickcodes
-# Version:          4.4
+# Version:          6.0
 # License:          GPLv3+
 # Repository:       https://github.com/sickcodes/Docker-OSX
 # Website:          https://sick.codes
@@ -171,6 +171,10 @@ ENV NETWORKING=vmxnet3
 
 ENV NOPICKER=true
 
+# set the username and password for automatically logging in
+ENV USERNAME=user
+ENV PASSWORD=alpine
+
 # dynamic RAM options for runtime
 ENV RAM=3
 # ENV RAM=max
@@ -207,7 +211,7 @@ CMD echo "${BOILERPLATE}" \
             --bootdisks \
             --width "${WIDTH:-1920}" \
             --height "${HEIGHT:-1080}" \
-            --output-bootdisk "${BOOTDISK:-/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore.qcow2}" \
+            --output-bootdisk "${BOOTDISK:=/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore.qcow2}" \
             --output-env "${ENV:=/env}" \
     || exit 1 ; } \
     ; [[ "${GENERATE_SPECIFIC}" == true ]] && { \
@@ -221,7 +225,7 @@ CMD echo "${BOILERPLATE}" \
             --mac-address "${MAC_ADDRESS}" \
             --width "${WIDTH:-1920}" \
             --height "${HEIGHT:-1080}" \
-            --output-bootdisk "${BOOTDISK:-/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore.qcow2}"  \
+            --output-bootdisk "${BOOTDISK:=/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore.qcow2}"  \
     || exit 1 ; } \
     ; { [[ "${DISPLAY}" = ':99' ]] || [[ "${HEADLESS}" == true ]] ; } && { \
         nohup Xvfb :99 -screen 0 1920x1080x16 \
@@ -236,13 +240,13 @@ CMD echo "${BOILERPLATE}" \
     ; } \
     ; /bin/bash -c ./Launch.sh \
     & echo "Booting Docker-OSX in the background. Please wait..." \
-    ; until [[ "$(sshpass -palpine ssh-copy-id -f -i ~/.ssh/id_docker_osx.pub -p 10022 user@127.0.0.1)" ]]; do \
+    ; until [[ "$(sshpass -p${MAC_PASSWORD} ssh-copy-id -f -i ~/.ssh/id_docker_osx.pub -p 10022 ${USERNAME}@127.0.0.1)" ]]; do \
         echo "Disk is being copied between layers. Repeating until able to copy SSH key into OSX..." \
         ; sleep 1 \
     ; done \
     ; grep id_docker_osx ~/.ssh/config || { \
         tee -a ~/.ssh/config <<< 'Host 127.0.0.1' \
-        ; tee -a ~/.ssh/config <<< '    User user' \
+        ; tee -a ~/.ssh/config <<< "    User ${USERNAME:=user}" \
         ; tee -a ~/.ssh/config <<< '    Port 10022' \
         ; tee -a ~/.ssh/config <<< '    IdentityFile ~/.ssh/id_docker_osx' \
         ; tee -a ~/.ssh/config <<< '    StrictHostKeyChecking no' \
@@ -251,7 +255,7 @@ CMD echo "${BOILERPLATE}" \
     && echo 'Default username: user' \
     && echo 'Default password: alpine' \
     && echo 'Change it immediately using the command: passwd' \
-    && ssh -i ~/.ssh/id_docker_osx user@127.0.0.1 -p 10022 "${OSX_COMMANDS}"
+    && ssh -i ~/.ssh/id_docker_osx ${USERNAME:=user}@127.0.0.1 -p 10022 "${OSX_COMMANDS}"
 
 # username: user
 # password: alpine

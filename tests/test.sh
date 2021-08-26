@@ -122,6 +122,7 @@ NO_CACHE="${NO_CACHE:=--no-cache}"
 TEST_BUILDS=(
 'docker-osx:latest'
 'docker-osx:naked'
+'docker-osx:naked-auto'
 'docker-osx:big-sur'
 'docker-osx:auto'
 #'docker-osx:auto-big-sur'
@@ -221,6 +222,16 @@ docker-osx:naked () {
 }
 
 
+docker-osx:naked-auto () {
+    docker build ${NO_CACHE} \
+        --build-arg RANKMIRRORS=true \
+        --build-arg MIRROR_COUNTRY="${MIRROR_COUNTRY}" \
+        -f ./Dockerfile.naked-auto \
+        -t docker-osx:naked-auto .
+    docker tag docker-osx:naked-auto sickcodes/docker-osx:naked-auto
+}
+
+
 docker-osx:big-sur () {
     docker build ${NO_CACHE} \
         --build-arg VERSION=11 \
@@ -291,6 +302,7 @@ if [[ "${DOCKER_USERNAME}" ]] && [[ "${DOCKER_PASSWORD}" ]]; then
         && docker push sickcodes/docker-osx:latest \
         && docker push sickcodes/docker-osx:big-sur \
         && docker push sickcodes/docker-osx:naked \
+        && docker push sickcodes/docker-osx:naked-auto \
         && docker push sickcodes/docker-osx:auto \
         && docker push sickcodes/docker-osx:auto-big-sur \
         && touch PUSHED

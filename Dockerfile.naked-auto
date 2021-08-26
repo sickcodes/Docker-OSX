@@ -3,7 +3,7 @@
 #    / __ \____  _____/ /_____  _____/ __ \/ ___/ |/ /
 #   / / / / __ \/ ___/ //_/ _ \/ ___/ / / /\__ \|   / 
 #  / /_/ / /_/ / /__/ ,< /  __/ /  / /_/ /___/ /   |  
-# /_____/\____/\___/_/|_|\___/_/   \____//____/_/|_|  :NAKED
+# /_____/\____/\___/_/|_|\___/_/   \____//____/_/|_|  :NAKED-AUTO
 # 
 # Title:            Docker-OSX (Mac on Docker)
 # Author:           Sick.Codes https://twitter.com/sickcodes
@@ -12,23 +12,9 @@
 # Repository:       https://github.com/sickcodes/Docker-OSX
 # Website:          https://sick.codes
 # 
-# This image won't run unless you supply a disk image using:
-#       -v ${PWD}/mac_hdd_ng.img:/image
+# This Dockerfile needs you to supply a pre-installed installation of Docker-OSX!
 # 
-# Take screenshots in the Arch container and display in terminal: scrotcat
-#
-# Build:
-# 
-#       docker build -t docker-osx:naked -f Dockerfile.naked .
-# 
-# Run headless:
-# 
-#       docker run -it --device /dev/kvm -p 50922:10022 -v ${PWD}/mac_hdd_ng.img:/image docker-osx:naked
-# 
-# Run with display:
-# 
-#       docker run -it --device /dev/kvm -p 50922:10022 -v ${PWD}/mac_hdd_ng.img:/image -e "DISPLAY=${DISPLAY:-:0.0}" -v /tmp/.X11-unix:/tmp/.X11-unix docker-osx:naked
-# 
+# Visit https://github.com/sickcodes/Docker-OSX for info
 
 FROM sickcodes/docker-osx:latest
 
@@ -40,21 +26,28 @@ WORKDIR /root
 
 RUN rm -f /home/arch/OSX-KVM/mac_hdd_ng.img
 
+# For taking screenshots of the Xfvb screen, useful during development.
+ARG SCROT
+
 # OPTIONAL: Arch Linux server mirrors for super fast builds
 # set RANKMIRRORS to any value other that nothing, e.g. -e RANKMIRRORS=true
 ARG RANKMIRRORS
 ARG MIRROR_COUNTRY=US
 ARG MIRROR_COUNT=10
-RUN if [[ "${RANKMIRRORS}" ]]; then { pacman -Sy wget --noconfirm || pacman -Syu wget --noconfirm ; } \
-    ; wget -O ./rankmirrors "https://raw.githubusercontent.com/sickcodes/Docker-OSX/master/rankmirrors" \
-    ; wget -O- "https://www.archlinux.org/mirrorlist/?country=${MIRROR_COUNTRY:-US}&protocol=https&use_mirror_status=on" \
-    | sed -e 's/^#Server/Server/' -e '/^#/d' \
-    | head -n "$((${MIRROR_COUNT:-10}+1))" \
-    | bash ./rankmirrors --verbose --max-time 5 - > /etc/pacman.d/mirrorlist \
-    && tee -a /etc/pacman.d/mirrorlist <<< 'Server = http://mirrors.evowise.com/archlinux/$repo/os/$arch' \
-    && tee -a /etc/pacman.d/mirrorlist <<< 'Server = http://mirror.rackspace.com/archlinux/$repo/os/$arch' \
-    && tee -a /etc/pacman.d/mirrorlist <<< 'Server = https://mirror.rackspace.com/archlinux/$repo/os/$arch' \
-    && cat /etc/pacman.d/mirrorlist ; fi
+
+RUN if [[ "${RANKMIRRORS}" ]]; then \
+        { pacman -Sy wget --noconfirm || pacman -Syu wget --noconfirm ; } \
+        ; wget -O ./rankmirrors "https://raw.githubusercontent.com/sickcodes/Docker-OSX/master/rankmirrors" \
+        ; wget -O- "https://www.archlinux.org/mirrorlist/?country=${MIRROR_COUNTRY:-US}&protocol=https&use_mirror_status=on" \
+        | sed -e 's/^#Server/Server/' -e '/^#/d' \
+        | head -n "$((${MIRROR_COUNT:-10}+1))" \
+        | bash ./rankmirrors --verbose --max-time 5 - > /etc/pacman.d/mirrorlist \
+        && tee -a /etc/pacman.d/mirrorlist <<< 'Server = http://mirrors.evowise.com/archlinux/$repo/os/$arch' \
+        && tee -a /etc/pacman.d/mirrorlist <<< 'Server = http://mirror.rackspace.com/archlinux/$repo/os/$arch' \
+        && tee -a /etc/pacman.d/mirrorlist <<< 'Server = https://mirror.rackspace.com/archlinux/$repo/os/$arch' \
+        && cat /etc/pacman.d/mirrorlist \
+    ; fi \
+    ; yes | pacman -Scc
 
 # For taking screenshots of the Xfvb screen, useful during development.
 ARG SCROT
@@ -106,6 +99,23 @@ RUN mkdir -p ~/.ssh \
     && tee -a ~/.ssh/config <<< '    StrictHostKeyChecking no' \
     && tee -a ~/.ssh/config <<< '    UserKnownHostsFile=/dev/null'
 
+ARG COMPLETE=
+
+# use the COMPLETE arg, for a complete image, ready to boot.
+# otherwise use your own image: -v "$PWD/disk.img":/image
+ARG WGET_OPTIONS=
+# ARG WGET_OPTIONS='--no-verbose'
+
+# Feel free to take a copy of this image and then host it internally
+ARG IMAGE_URL=
+# ARG IMAGE_URL='https://images.sick.codes/mac_hdd_ng_auto_big_sur.img'
+
+RUN if [[ "${COMPLETE}" ]]; then \
+        echo "Downloading your image... This step might take a while... Press Ctrl+C if you want to abort." \
+        ; rm -f /home/arch/OSX-KVM/mac_hdd_ng.img \
+        && wget ${WGET_OPTIONS} -O /home/arch/OSX-KVM/mac_hdd_ng.img "${IMAGE_URL}" \
+    ; fi
+
 #### SPECIAL RUNTIME ARGUMENTS BELOW
 
 ENV ADDITIONAL_PORTS=
@@ -156,7 +166,14 @@ ENV HEIGHT=1080
 ENV LIBGUESTFS_DEBUG=1
 ENV LIBGUESTFS_TRACE=1
 
-CMD sudo touch /dev/kvm /dev/snd "${IMAGE_PATH}" "${BOOTDISK}" "${ENV}" 2>/dev/null || true \
+ENV TERMS_OF_USE=i_agree
+
+ENV BOILERPLATE="By using this Dockerfile, you hereby agree that you are a security reseacher or developer and agree to use this Dockerfile to make the world a safer place. Examples include: making your apps safer, finding your mobile phone, compiling security products, etc. You understand that Docker-OSX is an Open Source project, which is released to the public under the GNU Pulic License version 3 and above. You acknowledge that the Open Source project is absolutely unaffiliated with any third party, in any form whatsoever. Any trademarks or intelectual property which happen to be mentioned anywhere in or around the project are owned by their respective owners. By using this Dockerfile, you agree to agree to the EULA of each piece of upstream or downstream software. The following code is released for the sole purpose of security research, under the GNU Public License version 3. If you are concerned about the licensing, please note that this project is not AGPL. A copy of the license is available online: https://github.com/sickcodes/Docker-OSX/blob/master/LICENSE. In order to use the following Dockerfile you must read and understand the terms. Once you have read the terms, use the -e TERMS_OF_USE=i_agree or -e TERMS_OF_USE=i_disagree"
+
+CMD echo "${BOILERPLATE}" \
+    ; [[ "${TERMS_OF_USE}" = i_agree ]] || exit 1 \
+    ; echo "Disk is being copied between layers... Please wait a minute..." \
+    ; sudo touch /dev/kvm /dev/snd "${IMAGE_PATH}" "${BOOTDISK}" "${ENV}" 2>/dev/null || true \
     ; sudo chown -R $(id -u):$(id -g) /dev/kvm /dev/snd "${IMAGE_PATH}" "${BOOTDISK}" "${ENV}" 2>/dev/null || true \
     ; { [[ "${DISPLAY}" = ':99' ]] || [[ "${HEADLESS}" == true ]] ; } && { \
         nohup Xvfb :99 -screen 0 1920x1080x16 \
@@ -191,4 +208,25 @@ CMD sudo touch /dev/kvm /dev/snd "${IMAGE_PATH}" "${BOOTDISK}" "${ENV}" 2>/dev/n
             --height "${HEIGHT:-1080}" \
             --output-bootdisk "${BOOTDISK:=/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore.qcow2}" \
     || exit 1 ; } \
-    ; ./enable-ssh.sh && /bin/bash -c ./Launch.sh
+    ; stat "${IMAGE_PATH}" \
+    ; echo "Large image is being copied between layers, please wait a minute..." \
+    ; ./enable-ssh.sh \
+    ; [[ -e ~/.ssh/id_docker_osx ]] || { \
+        /usr/bin/ssh-keygen -t rsa -f ~/.ssh/id_docker_osx -q -N "" \
+        && chmod 600 ~/.ssh/id_docker_osx \
+    ; } \
+    ; /bin/bash -c ./Launch.sh \
+    & echo "Booting Docker-OSX in the background. Please wait..." \
+    ; until [[ "$(sshpass -p${MAC_PASSWORD:=alpine} ssh-copy-id -f -i ~/.ssh/id_docker_osx.pub -p 10022 ${USERNAME:=user}@127.0.0.1)" ]]; do \
+        echo "Disk is being copied between layers. Repeating until able to copy SSH key into OSX..." \
+        ; sleep 1 \
+    ; done \
+    ; grep id_docker_osx ~/.ssh/config || { \
+        tee -a ~/.ssh/config <<< 'Host 127.0.0.1' \
+        ; tee -a ~/.ssh/config <<< "    User ${USERNAME:=user}" \
+        ; tee -a ~/.ssh/config <<< '    Port 10022' \
+        ; tee -a ~/.ssh/config <<< '    IdentityFile ~/.ssh/id_docker_osx' \
+        ; tee -a ~/.ssh/config <<< '    StrictHostKeyChecking no' \
+        ; tee -a ~/.ssh/config <<< '    UserKnownHostsFile=/dev/null' \
+    ; } \
+    && ssh -i ~/.ssh/id_docker_osx ${USERNAME:=user}@127.0.0.1 -p 10022 "${OSX_COMMANDS}"
