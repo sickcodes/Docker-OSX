@@ -117,7 +117,7 @@ docker run -it \
 SEE commands in [https://github.com/sickcodes/osx-optimizer](https://github.com/sickcodes/osx-optimizer)!
 
 - Skip the GUI login screen (at your own risk!)
-- Disable spotlight indexing on macOS to heavily speed up Virual Instances.
+- Disable spotlight indexing on macOS to heavily speed up Virtual Instances.
 - Disable heavy login screen wallpaper
 - Disable updates (at your own risk!)
 
