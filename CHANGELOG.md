@@ -1,5 +1,6 @@
 |Version|Date|Notes|
 |---|---|---|
+|   |2021-08-27|Add iPhone passthrough OTA!|
 |6.0|2021-08-25|Added naked-auto. Keep kernel at 5.13, even tho it's just for supermin.|
 |5.0|2021-07-25|Retire glibc patch. Retire file command patch. Add bootmenu=on.|
 |   |2021-07-08|Add CPUID_FLAGS to edit the CPUID flags on the fly.|

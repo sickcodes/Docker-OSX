@@ -116,6 +116,72 @@ docker run -it \
     sickcodes/docker-osx:naked-auto
 ```
 
+# iPhone passthrough OSX-KVM Docker-OSX
+
+Thank you [@nikias](https://github.com/nikias) for [usbfluxd](https://github.com/corellium/usbfluxd) via [https://github.com/corellium](https://github.com/corellium)!
+
+**This is done inside Linux.**
+
+Connecting your device over USB on Linux allows you to expose `usbmuxd` on port `5000` using [https://github.com/corellium/usbfluxd](https://github.com/corellium/usbfluxd) to another system on the same network.
+
+Ensure `usbmuxd`, `socat` and `usbfluxd` are installed.
+
+`sudo pacman -S libusbmuxd usbmuxd avahi socat`
+
+Available on the AUR: [https://aur.archlinux.org/packages/usbfluxd/](https://aur.archlinux.org/packages/usbfluxd/)
+
+`yay usbfluxd`
+
+Plug in the phone.
+
+```bash
+sudo systemctl start usbmuxd
+sudo avahi-daemon
+```
+
+Another terminal:
+```bash
+# on host
+sudo systemctl restart usbmuxd
+sudo socat tcp-listen:5000,fork unix-connect:/var/run/usbmuxd &
+sudo usbfluxd -f -n
+```
+
+If you need to start again:
+```bash
+sudo killall usbfluxd
+sudo systemctl restart usbfluxd
+sudo killall socat
+```
+
+### Connect to a host running usbfluxd
+
+**This is done inside macOS.**
+
+Install homebrew.
+
+172.17.0.1 is the Docker bridge IP, which is your PC, but you can use any IP from `ip addr`...
+
+```zsh
+# on the guest
+brew install make autoheader automake autoconf libtool pkg-config gcc libimobiledevice
+
+git clone https://github.com/corellium/usbfluxd.git
+cd usbfluxd
+
+./autogen.sh
+make
+sudo make install
+```
+
+Accept the USB over TCP connection, and appear as local:
+
+```bash
+# on the guest
+export PATH=/usr/local/sbin:${PATH}
+sudo usbfluxd -f -r 172.17.0.1:5000
+```
+
 ## Make container FASTER
 
 SEE commands in [https://github.com/sickcodes/osx-optimizer](https://github.com/sickcodes/osx-optimizer)!
