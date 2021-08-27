@@ -240,7 +240,7 @@ CMD echo "${BOILERPLATE}" \
     ; } \
     ; /bin/bash -c ./Launch.sh \
     & echo "Booting Docker-OSX in the background. Please wait..." \
-    ; until [[ "$(sshpass -p${MAC_PASSWORD} ssh-copy-id -f -i ~/.ssh/id_docker_osx.pub -p 10022 ${USERNAME}@127.0.0.1)" ]]; do \
+    ; until [[ "$(sshpass -p${PASSWORD:=alpine} ssh-copy-id -f -i ~/.ssh/id_docker_osx.pub -p 10022 ${USERNAME:=user}@127.0.0.1)" ]]; do \
         echo "Disk is being copied between layers. Repeating until able to copy SSH key into OSX..." \
         ; sleep 1 \
     ; done \

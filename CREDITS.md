@@ -88,4 +88,5 @@ This project now uses the fantastic OpenCore bootloader from the community OpenC
 
 [@allansrc](https://github.com/allansrc) - Update Doc detail for run on WLS #318 
 
+[@mcandre](https://github.com/mcandre) - fix typo #334 
 

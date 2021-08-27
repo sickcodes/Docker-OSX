@@ -152,6 +152,10 @@ ENV NETWORKING=vmxnet3
 
 ENV NOPICKER=true
 
+# set the username and password for automatically logging in
+ENV USERNAME=user
+ENV PASSWORD=alpine
+
 # dynamic RAM options for runtime
 ENV RAM=3
 # ENV RAM=max
@@ -175,10 +179,6 @@ CMD echo "${BOILERPLATE}" \
     ; echo "Disk is being copied between layers... Please wait a minute..." \
     ; sudo touch /dev/kvm /dev/snd "${IMAGE_PATH}" "${BOOTDISK}" "${ENV}" 2>/dev/null || true \
     ; sudo chown -R $(id -u):$(id -g) /dev/kvm /dev/snd "${IMAGE_PATH}" "${BOOTDISK}" "${ENV}" 2>/dev/null || true \
-    ; { [[ "${DISPLAY}" = ':99' ]] || [[ "${HEADLESS}" == true ]] ; } && { \
-        nohup Xvfb :99 -screen 0 1920x1080x16 \
-        & until [[ "$(xrandr --query 2>/dev/null)" ]]; do sleep 1 ; done \
-    ; } \
     ; [[ "${NOPICKER}" == true ]] && { \
         sed -i '/^.*InstallMedia.*/d' Launch.sh \
         && export BOOTDISK="${BOOTDISK:=/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore-nopicker.qcow2}" \
@@ -208,6 +208,10 @@ CMD echo "${BOILERPLATE}" \
             --height "${HEIGHT:-1080}" \
             --output-bootdisk "${BOOTDISK:=/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore.qcow2}" \
     || exit 1 ; } \
+    ; { [[ "${DISPLAY}" = ':99' ]] || [[ "${HEADLESS}" == true ]] ; } && { \
+        nohup Xvfb :99 -screen 0 1920x1080x16 \
+        & until [[ "$(xrandr --query 2>/dev/null)" ]]; do sleep 1 ; done \
+    ; } \
     ; stat "${IMAGE_PATH}" \
     ; echo "Large image is being copied between layers, please wait a minute..." \
     ; ./enable-ssh.sh \
@@ -217,7 +221,7 @@ CMD echo "${BOILERPLATE}" \
     ; } \
     ; /bin/bash -c ./Launch.sh \
     & echo "Booting Docker-OSX in the background. Please wait..." \
-    ; until [[ "$(sshpass -p${MAC_PASSWORD:=alpine} ssh-copy-id -f -i ~/.ssh/id_docker_osx.pub -p 10022 ${USERNAME:=user}@127.0.0.1)" ]]; do \
+    ; until [[ "$(sshpass -p${PASSWORD:=alpine} ssh-copy-id -f -i ~/.ssh/id_docker_osx.pub -p 10022 ${USERNAME:=user}@127.0.0.1)" ]]; do \
         echo "Disk is being copied between layers. Repeating until able to copy SSH key into OSX..." \
         ; sleep 1 \
     ; done \

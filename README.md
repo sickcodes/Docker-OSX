@@ -98,6 +98,8 @@ docker run -it \
 
 Enable SSH in network sharing inside the guest first. Change `-e "USERNAME=user"` and `-e "USERNAME=password"` to your credentials. The container will add itself to `~/.ssh/authorized_keys`
 
+Since you can't see the screen, use the PLIST with nopicker, for example:
+
 ```bash
 wget https://images2.sick.codes/mac_hdd_ng_auto.img
 
@@ -109,6 +111,8 @@ docker run -it \
     -e "DISPLAY=${DISPLAY:-:0.0}" \
     -e "USERNAME=user" \
     -e "DISPLAY=alpine" \
+    -e GENERATE_UNIQUE=true \
+    -e MASTER_PLIST_URL=https://raw.githubusercontent.com/sickcodes/Docker-OSX/master/custom/config-nopicker-custom.plist \
     sickcodes/docker-osx:naked-auto
 ```
 
@@ -156,6 +160,8 @@ Same as above but with `-e USERNAME` & `-e PASSWORD` and `-e OSX_COMMANDS="put y
 [![https://img.shields.io/docker/image-size/sickcodes/docker-osx/naked-auto?label=sickcodes%2Fdocker-osx%3Anaked-auto](https://img.shields.io/docker/image-size/sickcodes/docker-osx/naked-auto?label=sickcodes%2Fdocker-osx%3Anaked-auto)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
 
 ## Capabilities
+- iPhone over USB
+- Folder sharing
 - SSH enabled (`localhost:50922`)
 - VNC enabled (`localhost:8888`) if using ./vnc version
 - [serial number generator!](https://github.com/sickcodes/osx-serial-generator)
@@ -343,51 +349,6 @@ Big thank you to our contributors who have worked out almost every conceivable i
 
 [https://github.com/sickcodes/Docker-OSX/blob/master/CREDITS.md](https://github.com/sickcodes/Docker-OSX/blob/master/CREDITS.md)
 
-### The big-sur image starts slowly after installation. Is this expected?
-
-Automatic updates are still on in the container's settings. You may wish to turn them off. [We have future plans for development around this.](https://github.com/sickcodes/Docker-OSX/issues/227)
-
-### What is `${DISPLAY:-:0.0}`?
-
-`$DISPLAY` is the shell variable that refers to your X11 display server.
-
-`${DISPLAY}` is the same, but allows you to join variables like this:
-
-- e.g. `${DISPLAY}_${DISPLAY}` would print `:0.0_:0.0`
-- e.g. `$DISPLAY_$DISPLAY`     would print `:0.0`
-
-...because `$DISPLAY_` is not `$DISPLAY`
-
-`${variable:-fallback}` allows you to set a "fallback" variable to be substituted if `$variable` is not set.
-
-You can also use `${variable:=fallback}` to set that variable (in your current terminal).
-
-In Docker-OSX, we assume, `:0.0` is your default `$DISPLAY` variable.
-
-You can see what yours is
-
-```bash
-echo $DISPLAY
-```
-
-That way, `${DISPLAY:-:0.0}` will use whatever variable your X11 server has set for you, else `:0.0`
-
-### What is `-v /tmp/.X11-unix:/tmp/.X11-unix`?
-
-`-v` is a Docker command-line option that lets you pass a volume to the container.
-
-The directory that we are letting the Docker container use is a X server display socket.
-
-`/tmp/.X11-unix`
-
-If we let the Docker container use the same display socket as our own environment, then any applications you run inside the Docker container will show up on your screen too! [https://www.x.org/archive/X11R6.8.0/doc/RELNOTES5.html](https://www.x.org/archive/X11R6.8.0/doc/RELNOTES5.html)
-
-### ALSA errors on startup or container creation
-
-You may when initialising or booting into a container see errors from the `(qemu)` console of the following form: 
-`ALSA lib blahblahblah: (function name) returned error: no such file or directory`. These are more or less expected. As long as you are able to boot into the container and everything is working, no reason to worry about these.
-
-See also: [here](https://github.com/sickcodes/Docker-OSX/issues/174).
 
 ### Start the same container later (persistent disk)
 
@@ -429,7 +390,7 @@ docker ps -a
 docker start -ai -i <Replace this with your ID>
 ```
 
-### LibGTK errors
+### LibGTK errors "connection refused"
 
 You may see one or more libgtk-related errors if you do not have everything set up for hardware virtualisation yet. If you have not yet done so, check out the [initial setup](#initial-setup) section and the [routine checks](#routine-checks) section as you may have missed a setup step or may not have all the needed Docker dependencies ready to go.
 
@@ -584,6 +545,48 @@ nano /etc/sysctl.conf || vi /etc/sysctl.conf || vim /etc/sysctl.conf
 
 # now reboot
 ```
+
+## Share folder with Docker-OSX QEMU macOS
+
+Sharing a folder with guest is quite simple.
+
+Your folder, will go to /mnt/hostshare inside the Arch container which is then passed over QEMU.
+
+Then mount using `sudo -S mount_9p hostshare` from inside the mac.
+
+For example,
+
+```bash
+FOLDER=~/somefolder
+```
+
+```bash
+    -v "${FOLDER}:/mnt/hostshare" \
+    -e EXTRA="-virtfs local,path=/mnt/hostshare,mount_tag=hostshare,security_model=passthrough,id=hostshare" \
+```
+
+Full example:
+
+```bash
+# stat mac_hdd_ng.img
+SHARE=~/somefolder
+
+docker run -it \
+    --device /dev/kvm \
+    -p 50922:10022 \
+    -v /tmp/.X11-unix:/tmp/.X11-unix \
+    -e "DISPLAY=${DISPLAY:-:0.0}" \
+    -v "${PWD}/mac_hdd_ng.img:/home/arch/OSX-KVM/mac_hdd_ng.img" \
+    -v "${SHARE}:/mnt/hostshare" \
+    -e EXTRA="-virtfs local,path=/mnt/hostshare,mount_tag=hostshare,security_model=passthrough,id=hostshare" \
+    sickcodes/docker-osx:latest
+
+# !!! Open Terminal inside macOS and run the following command to mount the virtual file system
+# sudo -S mount_9p hostshare
+
+```
+
+
 
 ### Fedora: enable internet connectivity with a bridged network
 
@@ -1403,3 +1406,52 @@ chmod +x ./Launch-nopicker.sh
 sed -i -e s/OpenCore\.qcow2/OpenCore\-nopicker\.qcow2/ ./Launch-nopicker.sh
 "
 ```
+
+
+
+### The big-sur image starts slowly after installation. Is this expected?
+
+Automatic updates are still on in the container's settings. You may wish to turn them off. [We have future plans for development around this.](https://github.com/sickcodes/Docker-OSX/issues/227)
+
+### What is `${DISPLAY:-:0.0}`?
+
+`$DISPLAY` is the shell variable that refers to your X11 display server.
+
+`${DISPLAY}` is the same, but allows you to join variables like this:
+
+- e.g. `${DISPLAY}_${DISPLAY}` would print `:0.0_:0.0`
+- e.g. `$DISPLAY_$DISPLAY`     would print `:0.0`
+
+...because `$DISPLAY_` is not `$DISPLAY`
+
+`${variable:-fallback}` allows you to set a "fallback" variable to be substituted if `$variable` is not set.
+
+You can also use `${variable:=fallback}` to set that variable (in your current terminal).
+
+In Docker-OSX, we assume, `:0.0` is your default `$DISPLAY` variable.
+
+You can see what yours is
+
+```bash
+echo $DISPLAY
+```
+
+That way, `${DISPLAY:-:0.0}` will use whatever variable your X11 server has set for you, else `:0.0`
+
+### What is `-v /tmp/.X11-unix:/tmp/.X11-unix`?
+
+`-v` is a Docker command-line option that lets you pass a volume to the container.
+
+The directory that we are letting the Docker container use is a X server display socket.
+
+`/tmp/.X11-unix`
+
+If we let the Docker container use the same display socket as our own environment, then any applications you run inside the Docker container will show up on your screen too! [https://www.x.org/archive/X11R6.8.0/doc/RELNOTES5.html](https://www.x.org/archive/X11R6.8.0/doc/RELNOTES5.html)
+
+### ALSA errors on startup or container creation
+
+You may when initialising or booting into a container see errors from the `(qemu)` console of the following form: 
+`ALSA lib blahblahblah: (function name) returned error: no such file or directory`. These are more or less expected. As long as you are able to boot into the container and everything is working, no reason to worry about these.
+
+See also: [here](https://github.com/sickcodes/Docker-OSX/issues/174).
+
