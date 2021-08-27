@@ -96,7 +96,7 @@ docker run -it \
 [![https://img.shields.io/docker/image-size/sickcodes/docker-osx/naked-auto?label=sickcodes%2Fdocker-osx%3Anaked-auto](https://img.shields.io/docker/image-size/sickcodes/docker-osx/naked-auto?label=sickcodes%2Fdocker-osx%3Anaked-auto)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
 
 
-Enable SSH in network sharing inside the guest first. Change `-e "USERNAME=user"` and `-e "USERNAME=password"` to your credentials. The container will add itself to `~/.ssh/authorized_keys`
+Enable SSH in network sharing inside the guest first. Change `-e "USERNAME=user"` and `-e "PASSWORD=password"` to your credentials. The container will add itself to `~/.ssh/authorized_keys`
 
 Since you can't see the screen, use the PLIST with nopicker, for example:
 
@@ -110,7 +110,7 @@ docker run -it \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
     -e "DISPLAY=${DISPLAY:-:0.0}" \
     -e "USERNAME=user" \
-    -e "DISPLAY=alpine" \
+    -e "PASSWORD=alpine" \
     -e GENERATE_UNIQUE=true \
     -e MASTER_PLIST_URL=https://raw.githubusercontent.com/sickcodes/Docker-OSX/master/custom/config-nopicker-custom.plist \
     sickcodes/docker-osx:naked-auto
@@ -1214,7 +1214,7 @@ docker run -it \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
     -e "DISPLAY=${DISPLAY:-:0.0}" \
     -e USERNAME=yourusername \
-    -e USERNAME=yourpassword \
+    -e PASSWORD=yourpassword \
     -e "OSX_COMMANDS=/bin/bash -c \"put your commands here\"" \
     sickcodes/docker-osx:naked-auto
 
