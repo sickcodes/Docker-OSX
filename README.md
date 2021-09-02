@@ -1376,6 +1376,7 @@ Note: `-disable-ticketing` will allow unauthenticated access to the VM. See the 
 ```bash
   docker run \
     --device /dev/kvm \
+    -p 3001:3001 \
     -p 50922:10022 \
     -e "DISPLAY=${DISPLAY:-:0.0}" \
     -e EXTRA="-monitor telnet::45454,server,nowait -nographic -serial null -spice disable-ticketing,port=3001" \
