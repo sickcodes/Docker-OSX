@@ -90,3 +90,6 @@ This project now uses the fantastic OpenCore bootloader from the community OpenC
 
 [@mcandre](https://github.com/mcandre) - fix typo #334 
 
+[@cybik](https://github.com/cybik) Spice fix #337
+
+[@Silfalion](https://github.com/Silfalion) - [https://github.com/Silfalion/Iphone_docker_osx_passthrough](https://github.com/Silfalion/Iphone_docker_osx_passthrough)

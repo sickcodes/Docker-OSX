@@ -2,10 +2,21 @@
 
 ![Running Mac OS X in a Docker container](/running-mac-inside-docker-qemu.png?raw=true "OSX KVM DOCKER")
 
-Run Mac OS X in Docker with near-native performance! X11 Forwarding! iMessage security research!
+Run Mac OS X in Docker with near-native performance! X11 Forwarding! iMessage security research! iPhone USB working!
 
-# Docker-OSX now has a Discord server:
-# [https://discord.gg/mx8pPw39Yg](https://discord.gg/mx8pPw39Yg)
+# Docker-OSX now has a Discord server & Telegram!
+
+The Discord is active on #docker-osx and anyone is welcome to come and ask questions, ideas, etc.
+
+![https://discord.gg/mx8pPw39Yg](/discord-logo.svg?raw=true "Join Sick Codes Discord Server")
+
+### Click to join the Discord server [https://discord.gg/mx8pPw39Yg](https://discord.gg/mx8pPw39Yg)
+
+### Click to join the Telegram server [https://t.me/sickcodeschat](https://t.me/sickcodeschat)
+
+Or reach out via Linkedin if it's private: [https://www.linkedin.com/in/sickcodes](https://www.linkedin.com/in/sickcodes)
+
+Or via [https://sick.codes/contact/](https://sick.codes/contact/)
 
 ## Author
 
@@ -87,6 +98,8 @@ docker run -it \
     -v "${PWD}/mac_hdd_ng_auto.img:/image" \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
     -e "DISPLAY=${DISPLAY:-:0.0}" \
+    -e GENERATE_UNIQUE=true \
+    -e MASTER_PLIST_URL=https://raw.githubusercontent.com/sickcodes/Docker-OSX/master/custom/config-nopicker-custom.plist \
     sickcodes/docker-osx:naked
 ```
 
@@ -116,11 +129,21 @@ docker run -it \
     sickcodes/docker-osx:naked-auto
 ```
 
-# iPhone passthrough OSX-KVM Docker-OSX
+# (VFIO) iPhone USB passthrough (VFIO)
+
+If you have a laptop see the next usbfluxd section.
+
+If you have a desktop PC, you can use [@Silfalion](https://github.com/Silfalion)'s instructions : [https://github.com/Silfalion/Iphone_docker_osx_passthrough](https://github.com/Silfalion/Iphone_docker_osx_passthrough)
+
+# (USBFLUXD) iPhone USB -> Network style passthrough OSX-KVM Docker-OSX
+
+This method WORKS on laptop, PC, anything!
 
 Thank you [@nikias](https://github.com/nikias) for [usbfluxd](https://github.com/corellium/usbfluxd) via [https://github.com/corellium](https://github.com/corellium)!
 
 **This is done inside Linux.**
+
+Open 3 terminals on Linux
 
 Connecting your device over USB on Linux allows you to expose `usbmuxd` on port `5000` using [https://github.com/corellium/usbfluxd](https://github.com/corellium/usbfluxd) to another system on the same network.
 
@@ -132,26 +155,24 @@ Available on the AUR: [https://aur.archlinux.org/packages/usbfluxd/](https://aur
 
 `yay usbfluxd`
 
-Plug in the phone.
+Plug in your iPhone or iPad.
 
+Terminal 1
 ```bash
 sudo systemctl start usbmuxd
 sudo avahi-daemon
 ```
 
-Another terminal:
+Terminal 2:
 ```bash
 # on host
 sudo systemctl restart usbmuxd
-sudo socat tcp-listen:5000,fork unix-connect:/var/run/usbmuxd &
-sudo usbfluxd -f -n
+sudo socat tcp-listen:5000,fork unix-connect:/var/run/usbmuxd
 ```
 
-If you need to start again:
+Terminal 3:
 ```bash
-sudo killall usbfluxd
-sudo systemctl restart usbfluxd
-sudo killall socat
+sudo usbfluxd -f -n
 ```
 
 ### Connect to a host running usbfluxd
@@ -160,11 +181,12 @@ sudo killall socat
 
 Install homebrew.
 
-172.17.0.1 is the Docker bridge IP, which is your PC, but you can use any IP from `ip addr`...
+`172.17.0.1` is usually the Docker bridge IP, which is your PC, but you can use any IP from `ip addr`...
 
+macOS Terminal:
 ```zsh
 # on the guest
-brew install make autoheader automake autoconf libtool pkg-config gcc libimobiledevice
+brew install make automake autoconf libtool pkg-config gcc libimobiledevice usbmuxd
 
 git clone https://github.com/corellium/usbfluxd.git
 cd usbfluxd
@@ -178,11 +200,21 @@ Accept the USB over TCP connection, and appear as local:
 
 ```bash
 # on the guest
+sudo launchctl start usbmuxd
 export PATH=/usr/local/sbin:${PATH}
 sudo usbfluxd -f -r 172.17.0.1:5000
 ```
 
-## Make container FASTER
+Close apps such as Xcode and reopen them and your device should appear!
+
+*If you need to start again on Linux, wipe the current usbfluxd, usbmuxd, and socat:*
+```bash
+sudo killall usbfluxd
+sudo systemctl restart usbmuxd
+sudo killall socat
+```
+
+## Make container FASTER using [https://github.com/sickcodes/osx-optimizer](https://github.com/sickcodes/osx-optimizer)
 
 SEE commands in [https://github.com/sickcodes/osx-optimizer](https://github.com/sickcodes/osx-optimizer)!
 
@@ -295,7 +327,8 @@ Docker-OSX is licensed under the [GPL v3+](LICENSE). Contributions are welcomed 
 
 ### Other cool Docker/QEMU based projects
 - [Run Android in a Docker Container with Dock Droid](https://github.com/sickcodes/dock-droid)
-- [Run iOS in a Docker container with Docker-eyeOS](https://github.com/sickcodes/Docker-eyeOS) - [https://github.com/sickcodes/Docker-eyeOS](https://github.com/sickcodes/Docker-eyeOS)
+- [Run Android fully native on the host!](https://github.com/sickcodes/droid-native)
+- [Run iOS 12 in a Docker container with Docker-eyeOS](https://github.com/sickcodes/Docker-eyeOS) - [https://github.com/sickcodes/Docker-eyeOS](https://github.com/sickcodes/Docker-eyeOS)
 - [Run iMessage relayer in Docker with Bluebubbles.app](https://bluebubbles.app/) - [Getting started wiki](https://github.com/BlueBubblesApp/BlueBubbles-Server/wiki/Running-via-Docker)
 
 ## Disclaimer
