@@ -8,7 +8,7 @@ Run Mac OS X in Docker with near-native performance! X11 Forwarding! iMessage se
 
 The Discord is active on #docker-osx and anyone is welcome to come and ask questions, ideas, etc.
 
-![https://discord.gg/mx8pPw39Yg](/discord-logo.svg?raw=true "Join Sick Codes Discord Server")
+[![https://discord.gg/mx8pPw39Yg](/discord-logo.svg?raw=true "Join Sick Codes Discord Server")](https://discord.gg/mx8pPw39Yg)
 
 ### Click to join the Discord server [https://discord.gg/mx8pPw39Yg](https://discord.gg/mx8pPw39Yg)
 
