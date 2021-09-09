@@ -124,6 +124,7 @@ TEST_BUILDS=(
 'docker-osx:naked'
 'docker-osx:naked-auto'
 'docker-osx:big-sur'
+'docker-osx:monterey'
 'docker-osx:auto'
 #'docker-osx:auto-big-sur'
 )
@@ -242,6 +243,15 @@ docker-osx:big-sur () {
     docker tag docker-osx:big-sur sickcodes/docker-osx:big-sur
 }
 
+docker-osx:monterey () {
+    docker build ${NO_CACHE} \
+        --build-arg RANKMIRRORS=true \
+        --build-arg MIRROR_COUNTRY="${MIRROR_COUNTRY}" \
+        -f ./Dockerfile.monterey \
+        -t docker-osx:monterey .
+    docker tag docker-osx:monterey sickcodes/docker-osx:monterey
+}
+
 docker-osx:auto () {
     docker build ${NO_CACHE} \
         --build-arg RANKMIRRORS=true \
@@ -301,6 +311,7 @@ if [[ "${DOCKER_USERNAME}" ]] && [[ "${DOCKER_PASSWORD}" ]]; then
     docker login --username "${DOCKER_USERNAME}" --password "${DOCKER_PASSWORD}" \
         && docker push sickcodes/docker-osx:latest \
         && docker push sickcodes/docker-osx:big-sur \
+        && docker push sickcodes/docker-osx:monterey \
         && docker push sickcodes/docker-osx:naked \
         && docker push sickcodes/docker-osx:naked-auto \
         && docker push sickcodes/docker-osx:auto \
