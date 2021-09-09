@@ -2,7 +2,7 @@
 
 ![Running Mac OS X in a Docker container](/running-mac-inside-docker-qemu.png?raw=true "OSX KVM DOCKER")
 
-Run Mac OS X in Docker with near-native performance! X11 Forwarding! iMessage security research! iPhone USB working!
+Run Mac OS X in Docker with near-native performance! X11 Forwarding! iMessage security research! iPhone USB working! macOS in a Docker container!
 
 # Docker-OSX now has a Discord server & Telegram!
 
@@ -52,6 +52,8 @@ docker run -it \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
     -e "DISPLAY=${DISPLAY:-:0.0}" \
     sickcodes/docker-osx:latest
+
+# docker build -t docker-osx .
 ```
 ### Big Sur [![https://img.shields.io/docker/image-size/sickcodes/docker-osx/big-sur?label=sickcodes%2Fdocker-osx%3Abig-sur](https://img.shields.io/docker/image-size/sickcodes/docker-osx/big-sur?label=sickcodes%2Fdocker-osx%3Abig-sur)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
 
@@ -62,6 +64,24 @@ docker run -it \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
     -e "DISPLAY=${DISPLAY:-:0.0}" \
     sickcodes/docker-osx:big-sur
+
+# docker build -t docker-osx -e VERSION='Big Sur' .
+```
+
+### Monterey [![https://img.shields.io/docker/image-size/sickcodes/docker-osx/monterey?label=sickcodes%2Fdocker-osx%3Amonterey](https://img.shields.io/docker/image-size/sickcodes/docker-osx/monterey?label=sickcodes%2Fdocker-osx%3Amonterey)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
+
+```bash
+
+docker run -it \
+    --device /dev/kvm \
+    -p 50922:10022 \
+    -v /tmp/.X11-unix:/tmp/.X11-unix \
+    -e "DISPLAY=${DISPLAY:-:0.0}" \
+    -e GENERATE_UNIQUE=true \
+    -e MASTER_PLIST_URL='https://raw.githubusercontent.com/sickcodes/osx-serial-generator/master/config-custom.plist' \
+    sickcodes/docker-osx:monterey
+
+# docker build -t docker-osx -f Dockerfile.monterey .
 ```
 
 #### Run Catalina Pre-Installed [![https://img.shields.io/docker/image-size/sickcodes/docker-osx/auto?label=sickcodes%2Fdocker-osx%3Aauto](https://img.shields.io/docker/image-size/sickcodes/docker-osx/auto?label=sickcodes%2Fdocker-osx%3Aauto)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
@@ -225,7 +245,15 @@ SEE commands in [https://github.com/sickcodes/osx-optimizer](https://github.com/
 
 ## Important notices:
 
-**2021-07-27:**  Bug in libguestfs currently preventing `GENERATE_UNIQUE` and `GENERATE_TRUE`
+**2021-09-09** - Bootdisks at runtime required for Monterey!
+
+Pick one of these:
+```
+    -e MASTER_PLIST_URL='https://raw.githubusercontent.com/sickcodes/osx-serial-generator/master/config-custom.plist' \
+
+    -e MASTER_PLIST_URL='https://raw.githubusercontent.com/sickcodes/osx-serial-generator/master/config-nopicker-custom.plist' \
+```
+
 
 ## Technical details
 
@@ -245,6 +273,10 @@ Big-Sur make your own image:
 
 [![https://img.shields.io/docker/image-size/sickcodes/docker-osx/big-sur?label=sickcodes%2Fdocker-osx%3Abig-sur](https://img.shields.io/docker/image-size/sickcodes/docker-osx/big-sur?label=sickcodes%2Fdocker-osx%3Abig-sur)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
 
+Monterey make your own image:
+
+[![https://img.shields.io/docker/image-size/sickcodes/docker-osx/monterey?label=sickcodes%2Fdocker-osx%3Amonterey](https://img.shields.io/docker/image-size/sickcodes/docker-osx/monterey?label=sickcodes%2Fdocker-osx%3Amonterey)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
+
 Pre-made system by [Sick.Codes](https://sick.codes): username: `user`, password: `alpine`
 
 [![https://img.shields.io/docker/image-size/sickcodes/docker-osx/auto?label=sickcodes%2Fdocker-osx%3Aauto](https://img.shields.io/docker/image-size/sickcodes/docker-osx/auto?label=sickcodes%2Fdocker-osx%3Aauto)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
@@ -258,7 +290,8 @@ Same as above but with `-e USERNAME` & `-e PASSWORD` and `-e OSX_COMMANDS="put y
 [![https://img.shields.io/docker/image-size/sickcodes/docker-osx/naked-auto?label=sickcodes%2Fdocker-osx%3Anaked-auto](https://img.shields.io/docker/image-size/sickcodes/docker-osx/naked-auto?label=sickcodes%2Fdocker-osx%3Anaked-auto)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
 
 ## Capabilities
-- iPhone over USB
+- use iPhone OSX KVM on Linux using usbfluxd!
+- macOS Monterey!
 - Folder sharing
 - SSH enabled (`localhost:50922`)
 - VNC enabled (`localhost:8888`) if using ./vnc version
@@ -354,6 +387,7 @@ Create your personal image using `:latest` or `big-sur`. Then, pull the image ou
 - `sickcodes/docker-osx:auto` - [I'm only interested in using the command line (useful for compiling software or using Homebrew headlessly).](#prebuilt-image-with-arbitrary-command-line-arguments)
 - `sickcodes/docker-osx:naked` - [I need iMessage/iCloud for security research.](#generating-serial-numbers)
 - `sickcodes/docker-osx:big-sur` - [I want to run Big Sur.](#quick-start-docker-osx)
+- `sickcodes/docker-osx:monterey` - [I want to run Monterey.](#quick-start-docker-osx)
 
 ## Initial setup
 Before you do anything else, you will need to turn on hardware virtualization in your BIOS. Precisely how will depend on your particular machine (and BIOS), but it should be straightforward.
@@ -841,7 +875,10 @@ At any time, verify your serial number before logging into iCloud, etc.
 # this is a quick way to check your serial number via cli inside OSX
 ioreg -l | grep IOPlatformSerialNumber
 
-# or from the host
+# test some commands
+sshpass -p 'alpine' ssh user@localhost -p 50922 'ping google.com'
+
+# check your serial number
 sshpass -p 'alpine' ssh user@localhost -p 50922 'ioreg -l | grep IOPlatformSerialNumber'
 ```
 
@@ -905,8 +942,9 @@ docker run --rm -it \
     -e NOPICKER=true \
     -e GENERATE_UNIQUE=true \
     -e DEVICE_MODEL="iMacPro1,1" \
-    -e OSX_COMMANDS='ioreg -l | grep IOPlatformSerialNumber' \
     sickcodes/docker-osx:auto
+
+# -e OSX_COMMANDS='ioreg -l | grep IOPlatformSerialNumber' \
 ```
 
 #### This example generates a specific set of serial numbers at runtime
