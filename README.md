@@ -686,6 +686,35 @@ docker run -it \
 ```
 
 
+### Share USB Drive into macOS over QEMU
+
+## Mount USB Drive (Hotplug/Hot Plug USB)
+
+Start your container.
+
+Pick a port, for example, `7700`.
+
+`lsusb` to get `vid:pid`
+
+On Linux:
+`sudo usbredirserver -p 7700 1e3d:2096`
+
+Now, in the Docker window hit Enter to see the `(qemu)` console.
+
+You can add/remove the disk using commands like this, even once the machine is started:
+
+`chardev-add socket,id=usbredirchardev1,port=7700,host=172.17.0.1`
+
+`device_add usb-redir,chardev=usbredirchardev1,id=usbredirdev1,debug=4`
+
+## Mount USB Drive inside macOS at boot Docker OSX
+
+```bash
+PORT=7700
+IP_ADDRESS=172.17.0.1
+
+-e EXTRA="-chardev socket,id=usbredirchardev1,port=${PORT},host=${IP_ADDRESS} -device usb-redir,chardev=usbredirchardev1,id=usbredirdev1,debug=4" \`
+```
 
 ### Fedora: enable internet connectivity with a bridged network
 
