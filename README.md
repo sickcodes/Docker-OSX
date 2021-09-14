@@ -443,6 +443,42 @@ More specific/advanced troubleshooting questions and answers may be found in [Mo
 
 See [initial setup](#initial-setup).
 
+
+
+#### Docker Unknown Server OS error
+
+```console
+docker: unknown server OS: .
+See 'docker run --help'.
+```
+
+This means your docker daemon is not running.
+
+`pgrep dockerd` should return nothing
+
+Therefore, you have a few choices.
+
+`sudo dockerd` for foreground Docker usage. I use this.
+
+Or
+
+`sudo systemctl --start dockerd` to start dockerd this now.
+
+Or
+
+`sudo systemctl --enable --now dockerd` for start dockerd on every reboot, and now.
+
+
+#### Use more CPU Cores/SMP
+
+This will use all available cores; adjust accordingly to the day of the week:
+
+```
+    -e CPU_STRING=$(nproc) \
+```
+
+This will use `-smp $(nproc)`
+
 #### Confirm your user is part of the the Docker group, KVM group, libvirt group
 
 If you use `sudo dockerd` or dockerd is controlled by systemd/systemctl, then you must be in the Docker group.
