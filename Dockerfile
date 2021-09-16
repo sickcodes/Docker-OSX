@@ -238,6 +238,46 @@ RUN sudo pacman -Rns linux --noconfirm \
     ; sudo rm -rf /var/tmp/.guestfs-* \
     ; libguestfs-test-tool
 
+# These are hardcoded serials for non-iMessage related research
+# Overwritten by using GENERATE_UNIQUE=true
+# Upstream removed nopicker, so we are adding it back in, at build time
+# Once again, this is just for the Docker build so there is a default nopicker image there
+
+ARG STOCK_DEVICE_MODEL=iMacPro1,1
+ARG STOCK_SERIAL=C02TM2ZBHX87
+ARG STOCK_BOARD_SERIAL=C02717306J9JG361M
+ARG STOCK_UUID=007076A6-F2A2-4461-BBE5-BAD019F8025A
+ARG STOCK_MAC_ADDRESS=00:0A:27:00:00:00
+ARG STOCK_WIDTH=1920
+ARG STOCK_HEIGHT=1080
+ARG STOCK_MASTER_PLIST_URL=https://raw.githubusercontent.com/sickcodes/osx-serial-generator/master/config-custom.plist
+ARG STOCK_MASTER_PLIST_URL_NOPICKER=https://raw.githubusercontent.com/sickcodes/osx-serial-generator/master/config-nopicker-custom.plist
+ARG STOCK_BOOTDISK=/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore.qcow2
+ARG STOCK_BOOTDISK_NOPICKER=/home/arch/OSX-KVM/OpenCore-Catalina/OpenCore-nopicker.qcow2
+
+RUN ./Docker-OSX/osx-serial-generator/generate-specific-bootdisk.sh \
+    --master-plist-url="${STOCK_MASTER_PLIST_URL}" \
+    --model "${STOCK_DEVICE_MODEL}" \
+    --serial "${STOCK_SERIAL}" \
+    --board-serial "${STOCK_BOARD_SERIAL}" \
+    --uuid "${STOCK_UUID}" \
+    --mac-address "${STOCK_MAC_ADDRESS}" \
+    --width "${STOCK_WIDTH}" \
+    --height "${STOCK_HEIGHT}" \
+    --output-bootdisk "${STOCK_BOOTDISK}"
+
+
+RUN ./Docker-OSX/osx-serial-generator/generate-specific-bootdisk.sh \
+    --master-plist-url="${STOCK_MASTER_PLIST_URL_NOPICKER}" \
+    --model "${STOCK_DEVICE_MODEL}" \
+    --serial "${STOCK_SERIAL}" \
+    --board-serial "${STOCK_BOARD_SERIAL}" \
+    --uuid "${STOCK_UUID}" \
+    --mac-address "${STOCK_MAC_ADDRESS}" \
+    --width "${STOCK_WIDTH}" \
+    --height "${STOCK_HEIGHT}" \
+    --output-bootdisk "${STOCK_BOOTDISK_NOPICKER}"
+
 #### SPECIAL RUNTIME ARGUMENTS BELOW
 
 # env -e ADDITIONAL_PORTS with a comma
