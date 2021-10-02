@@ -52,8 +52,7 @@
 #       # you will also need to pass the device to the container
 
 FROM archlinux:base-devel
-
-MAINTAINER 'https://twitter.com/sickcodes' <https://sick.codes>
+LABEL maintainer='https://twitter.com/sickcodes <https://sick.codes>'
 
 SHELL ["/bin/bash", "-c"]
 
