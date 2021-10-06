@@ -9,8 +9,11 @@ Run Mac OS X in Docker with near-native performance! X11 Forwarding! iMessage se
 The Discord is active on #docker-osx and anyone is welcome to come and ask questions, ideas, etc.
 
 <p align="center">
-    <a href="https://hub.docker.com/r/sickcodes/docker-osx"><img src="https://dockeri.co/image/sickcodes/docker-osx"/></a> <a href="https://discord.gg/mx8pPw39Yg" rel="nofollow"><img src="/sickcodes/Docker-OSX/raw/master/discord-logo.svg?raw=true" alt="https://discord.gg/mx8pPw39Yg" title="Join Sick Codes Discord Server" style="max-width: 100%;"></a>
+    <a href="https://hub.docker.com/r/sickcodes/docker-osx"><img src="https://dockeri.co/image/sickcodes/docker-osx"/></a><a href="https://discord.gg/mx8pPw39Yg"><a href="https://discord.gg/mx8pPw39Yg" target="_blank"><img src="https://raw.githubusercontent.com/sickcodes/Docker-OSX/master/discord-logo.svg"></a></a>
 </p>
+
+
+
 
 ### Click to join the Discord server [https://discord.gg/mx8pPw39Yg](https://discord.gg/mx8pPw39Yg)
 
