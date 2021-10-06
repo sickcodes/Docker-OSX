@@ -8,7 +8,9 @@ Run Mac OS X in Docker with near-native performance! X11 Forwarding! iMessage se
 
 The Discord is active on #docker-osx and anyone is welcome to come and ask questions, ideas, etc.
 
-[![https://discord.gg/mx8pPw39Yg](/discord-logo.svg?raw=true "Join Sick Codes Discord Server")](https://discord.gg/mx8pPw39Yg)
+<p align="center">
+    <a href="https://hub.docker.com/r/sickcodes/docker-osx"><img src="https://dockeri.co/image/sickcodes/docker-osx"/></a> <a href="https://discord.gg/mx8pPw39Yg" rel="nofollow"><img src="/sickcodes/Docker-OSX/raw/master/discord-logo.svg?raw=true" alt="https://discord.gg/mx8pPw39Yg" title="Join Sick Codes Discord Server" style="max-width: 100%;"></a>
+</p>
 
 ### Click to join the Discord server [https://discord.gg/mx8pPw39Yg](https://discord.gg/mx8pPw39Yg)
 
@@ -34,9 +36,13 @@ Extra special thanks to the OpenCore team over at: https://github.com/acidanther
 
 If you like this project, consider contributing here or upstream!
 
-<a href="https://hub.docker.com/r/sickcodes/docker-osx"><img src="https://dockeri.co/image/sickcodes/docker-osx"/></a>
-
 ## Quick Start Docker-OSX
+
+Video setup tutorial is also available here: https://www.youtube.com/watch?v=wLezYl77Ll8
+
+<p align="center">
+  <a href="https://www.youtube.com/watch?v=wLezYl77Ll8" target="_blank"><img src="https://raw.githubusercontent.com/sickcodes/Docker-OSX/master/Youtube-Screenshot-Docker-OSX-Setup.png"></a>
+</p>
 
 First time here? try [initial setup](#initial-setup), otherwise try the instructions below to use either Catalina or Big Sur.
 
