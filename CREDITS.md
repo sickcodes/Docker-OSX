@@ -93,3 +93,5 @@ This project now uses the fantastic OpenCore bootloader from the community OpenC
 [@cybik](https://github.com/cybik) Spice fix #337
 
 [@Silfalion](https://github.com/Silfalion) - [https://github.com/Silfalion/Iphone_docker_osx_passthrough](https://github.com/Silfalion/Iphone_docker_osx_passthrough)
+
+[@Buthrakaur](https://github.com/Buthrakaur) readme - improve instructions for running on windows #361

@@ -1094,7 +1094,9 @@ Or tell the container to use specific ones using `-e GENERATE_SPECIFIC=true`
     -e MAC_ADDRESS="A8:5C:2C:9A:46:2F" \
 ```
 
-### I'd like to run Docker-OSX with WSL2 (Windows, Ubuntu)
+### I'd like to run Docker-OSX on Windows
+
+Running Docker-OSX on windows is possible just in WSL2 (Windows, Ubuntu).
 
 Ensure KVM is enabled and `x11-apps` is installed.
 
