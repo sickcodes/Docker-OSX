@@ -215,6 +215,7 @@ docker-osx:latest () {
 
 docker-osx:naked () {
     docker build ${NO_CACHE} \
+        --squash \
         --build-arg RANKMIRRORS=true \
         --build-arg MIRROR_COUNTRY="${MIRROR_COUNTRY}" \
         -f ./Dockerfile.naked \
@@ -225,6 +226,7 @@ docker-osx:naked () {
 
 docker-osx:naked-auto () {
     docker build ${NO_CACHE} \
+        --squash \
         --build-arg RANKMIRRORS=true \
         --build-arg MIRROR_COUNTRY="${MIRROR_COUNTRY}" \
         -f ./Dockerfile.naked-auto \
@@ -272,6 +274,12 @@ docker-osx:auto-big-sur () {
 }
 
 reset_docker_hard () {
+
+    tee /etc/docker/daemon.json <<'EOF'
+{
+    "experimental": true
+}
+EOF
     systemctl disable --now docker
     systemctl disable --now docker.socket
     systemctl stop docker
@@ -298,7 +306,7 @@ export DEBIAN_FRONTEND=noninteractive \
 ; echo start_xvfb \
 ; start_vnc \
 ; enable_kvm \
-; echo reset_docker_hard \
+; reset_docker_hard \
 ; echo killall Xvfb \
 ; clone_repo "${BRANCH}" "${REPO}" \
 ; cd Docker-OSX \
