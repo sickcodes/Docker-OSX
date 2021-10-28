@@ -1412,9 +1412,6 @@ docker run -it \
 # Boots in a minute or two!
 ```
 
-
-```bash
-
 OR if you have an image already and just want to log in and execute arbitrary commands:
 
 ```bash
