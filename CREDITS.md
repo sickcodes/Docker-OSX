@@ -95,3 +95,5 @@ This project now uses the fantastic OpenCore bootloader from the community OpenC
 [@Silfalion](https://github.com/Silfalion) - [https://github.com/Silfalion/Iphone_docker_osx_passthrough](https://github.com/Silfalion/Iphone_docker_osx_passthrough)
 
 [@Buthrakaur](https://github.com/Buthrakaur) readme - improve instructions for running on windows #361
+
+[@eggplants](https://github.com/eggplants)  Fix command to launch sickcodes/docker-osx:auto #366 
