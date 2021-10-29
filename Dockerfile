@@ -166,13 +166,6 @@ RUN [[ "${VERSION%%.*}" -ge 11 ]] && { wget "${FETCH_MAC_OS_RAW}" \
 
 WORKDIR /home/arch/OSX-KVM
 
-ARG LINUX=true
-
-# required to use libguestfs inside a docker container, to create bootdisks for docker-osx on-the-fly
-RUN if [[ "${LINUX}" == true ]]; then \
-        sudo pacman -Syu linux libguestfs --noconfirm \
-    ; fi
-
 # optional --build-arg to change branches for testing
 ARG BRANCH=master
 ARG REPO='https://github.com/sickcodes/Docker-OSX.git'
@@ -215,27 +208,38 @@ RUN touch Launch.sh \
 # docker exec containerid mv ./Launch-nopicker.sh ./Launch.sh
 # This is now a legacy command.
 # You can use -e BOOTDISK=/bootdisk with -v ./bootdisk.img:/bootdisk
+
+### LEGACY CODE
 RUN grep -v InstallMedia ./Launch.sh > ./Launch-nopicker.sh \
     && chmod +x ./Launch-nopicker.sh \
     && sed -i -e s/OpenCore\.qcow2/OpenCore\-nopicker\.qcow2/ ./Launch-nopicker.sh
+###
 
 USER arch
 
 ENV USER arch
 
-# 5.13 problem
+#### libguestfs versioning
+
+# 5.13+ problem resolved by building the qcow2 against 5.12 using libguestfs-1.44.1-6
+
 ENV SUPERMIN_KERNEL=/boot/vmlinuz-linux
-
 ENV SUPERMIN_MODULES=/lib/modules/5.12.14-arch1-1
-
 ENV SUPERMIN_KERNEL_VERSION=5.12.14-arch1-1
+ENV KERNEL_PACKAGE_URL=https://archive.archlinux.org/packages/l/linux/linux-5.12.14.arch1-1-x86_64.pkg.tar.zst
+ENV LIBGUESTFS_PACKAGE_URL=https://archive.archlinux.org/packages/l/libguestfs/libguestfs-1.44.1-6-x86_64.pkg.tar.zst
 
-RUN sudo pacman -Rns linux --noconfirm \
-    ; sudo pacman -Syy \
-    ; sudo pacman -S mkinitcpio --noconfirm \
-    ; sudo pacman -U https://archive.archlinux.org/packages/l/linux/linux-5.12.14.arch1-1-x86_64.pkg.tar.zst --noconfirm \
-    ; sudo rm -rf /var/tmp/.guestfs-* \
-    ; libguestfs-test-tool
+ARG LINUX=true
+
+# required to use libguestfs inside a docker container, to create bootdisks for docker-osx on-the-fly
+RUN if [[ "${LINUX}" == true ]]; then \
+        sudo pacman -U "${KERNEL_PACKAGE_URL}" --noconfirm \
+        ; sudo pacman -U "${LIBGUESTFS_PACKAGE_URL}" --noconfirm \
+        ; sudo libguestfs-test-tool \
+        ; sudo rm -rf /var/tmp/.guestfs-* \
+    ; fi
+
+####
 
 # These are hardcoded serials for non-iMessage related research
 # Overwritten by using GENERATE_UNIQUE=true
@@ -265,7 +269,6 @@ RUN ./Docker-OSX/osx-serial-generator/generate-specific-bootdisk.sh \
     --height "${STOCK_HEIGHT}" \
     --output-bootdisk "${STOCK_BOOTDISK}"
 
-
 RUN ./Docker-OSX/osx-serial-generator/generate-specific-bootdisk.sh \
     --master-plist-url="${STOCK_MASTER_PLIST_URL_NOPICKER}" \
     --model "${STOCK_DEVICE_MODEL}" \
@@ -277,15 +280,11 @@ RUN ./Docker-OSX/osx-serial-generator/generate-specific-bootdisk.sh \
     --height "${STOCK_HEIGHT}" \
     --output-bootdisk "${STOCK_BOOTDISK_NOPICKER}"
 
-####
-
-# symlink the old directory, for redundancy
+### symlink the old directory as upstream has renamed a directory. Symlinking purely for backwards compatability!
 RUN ln -s /home/arch/OSX-KVM/Opencore /home/arch/OSX-KVM/Opencore-Catalina || true
-
 ####
 
 #### SPECIAL RUNTIME ARGUMENTS BELOW
-
 # env -e ADDITIONAL_PORTS with a comma
 # for example, -e ADDITIONAL_PORTS=hostfwd=tcp::23-:23,
 ENV ADDITIONAL_PORTS=
