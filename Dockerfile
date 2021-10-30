@@ -267,7 +267,7 @@ RUN ./Docker-OSX/osx-serial-generator/generate-specific-bootdisk.sh \
     --mac-address "${STOCK_MAC_ADDRESS}" \
     --width "${STOCK_WIDTH}" \
     --height "${STOCK_HEIGHT}" \
-    --output-bootdisk "${STOCK_BOOTDISK}"
+    --output-bootdisk "${STOCK_BOOTDISK}" || exit 1
 
 RUN ./Docker-OSX/osx-serial-generator/generate-specific-bootdisk.sh \
     --master-plist-url="${STOCK_MASTER_PLIST_URL_NOPICKER}" \
@@ -278,7 +278,7 @@ RUN ./Docker-OSX/osx-serial-generator/generate-specific-bootdisk.sh \
     --mac-address "${STOCK_MAC_ADDRESS}" \
     --width "${STOCK_WIDTH}" \
     --height "${STOCK_HEIGHT}" \
-    --output-bootdisk "${STOCK_BOOTDISK_NOPICKER}"
+    --output-bootdisk "${STOCK_BOOTDISK_NOPICKER}" || exit 1
 
 ### symlink the old directory as upstream has renamed a directory. Symlinking purely for backwards compatability!
 RUN ln -s /home/arch/OSX-KVM/Opencore /home/arch/OSX-KVM/Opencore-Catalina || true
