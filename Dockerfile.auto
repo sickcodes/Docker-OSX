@@ -151,7 +151,7 @@ RUN if [[ "${COMPLETE}" ]]; then \
 ####
 
 # symlink the old directory, for redundancy
-RUN ln -s /home/arch/OSX-KVM/Opencore /home/arch/OSX-KVM/Opencore-Catalina || true
+RUN ln -s /home/arch/OSX-KVM/OpenCore /home/arch/OSX-KVM/OpenCore-Catalina || true
 
 ####
 

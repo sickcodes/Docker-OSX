@@ -284,7 +284,7 @@ RUN ./Docker-OSX/osx-serial-generator/generate-specific-bootdisk.sh \
     --output-bootdisk "${STOCK_BOOTDISK_NOPICKER}" || exit 1
 
 ### symlink the old directory as upstream has renamed a directory. Symlinking purely for backwards compatability!
-RUN ln -s /home/arch/OSX-KVM/Opencore /home/arch/OSX-KVM/Opencore-Catalina || true
+RUN ln -s /home/arch/OSX-KVM/OpenCore /home/arch/OSX-KVM/OpenCore-Catalina || true
 ####
 
 #### SPECIAL RUNTIME ARGUMENTS BELOW
