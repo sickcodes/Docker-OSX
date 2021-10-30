@@ -227,6 +227,7 @@ ENV SUPERMIN_KERNEL=/boot/vmlinuz-linux
 ENV SUPERMIN_MODULES=/lib/modules/5.12.14-arch1-1
 ENV SUPERMIN_KERNEL_VERSION=5.12.14-arch1-1
 ENV KERNEL_PACKAGE_URL=https://archive.archlinux.org/packages/l/linux/linux-5.12.14.arch1-1-x86_64.pkg.tar.zst
+ENV KERNEL_HEADERS_PACKAGE_URL=https://archive.archlinux.org/packages/l/linux/linux-headers-5.12.14.arch1-1-x86_64.pkg.tar.zst
 ENV LIBGUESTFS_PACKAGE_URL=https://archive.archlinux.org/packages/l/libguestfs/libguestfs-1.44.1-6-x86_64.pkg.tar.zst
 
 ARG LINUX=true
@@ -235,6 +236,8 @@ ARG LINUX=true
 RUN if [[ "${LINUX}" == true ]]; then \
         sudo pacman -U "${KERNEL_PACKAGE_URL}" --noconfirm \
         ; sudo pacman -U "${LIBGUESTFS_PACKAGE_URL}" --noconfirm \
+        ; sudo pacman -U "${KERNEL_HEADERS_PACKAGE_URL}" --noconfirm \
+        ; sudo pacman -S mkinitcpio --noconfirm \
         ; sudo libguestfs-test-tool \
         ; sudo rm -rf /var/tmp/.guestfs-* \
     ; fi
