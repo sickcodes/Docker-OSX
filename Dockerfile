@@ -166,6 +166,13 @@ RUN [[ "${VERSION%%.*}" -ge 11 ]] && { wget "${FETCH_MAC_OS_RAW}" \
 
 WORKDIR /home/arch/OSX-KVM
 
+ARG LINUX=true
+
+# required to use libguestfs inside a docker container, to create bootdisks for docker-osx on-the-fly
+RUN if [[ "${LINUX}" == true ]]; then \
+        sudo pacman -Syu linux libguestfs --noconfirm \
+    ; fi
+
 # optional --build-arg to change branches for testing
 ARG BRANCH=master
 ARG REPO='https://github.com/sickcodes/Docker-OSX.git'
@@ -230,17 +237,13 @@ ENV KERNEL_PACKAGE_URL=https://archive.archlinux.org/packages/l/linux/linux-5.12
 ENV KERNEL_HEADERS_PACKAGE_URL=https://archive.archlinux.org/packages/l/linux/linux-headers-5.12.14.arch1-1-x86_64.pkg.tar.zst
 ENV LIBGUESTFS_PACKAGE_URL=https://archive.archlinux.org/packages/l/libguestfs/libguestfs-1.44.1-6-x86_64.pkg.tar.zst
 
-ARG LINUX=true
-
-# required to use libguestfs inside a docker container, to create bootdisks for docker-osx on-the-fly
-RUN if [[ "${LINUX}" == true ]]; then \
-        sudo pacman -U "${KERNEL_PACKAGE_URL}" --noconfirm \
-        ; sudo pacman -U "${LIBGUESTFS_PACKAGE_URL}" --noconfirm \
-        ; sudo pacman -U "${KERNEL_HEADERS_PACKAGE_URL}" --noconfirm \
-        ; sudo pacman -S mkinitcpio --noconfirm \
-        ; sudo libguestfs-test-tool \
-        ; sudo rm -rf /var/tmp/.guestfs-* \
-    ; fi
+RUN sudo pacman -Syy \
+    && sudo pacman -Rns linux --noconfirm \
+    ; sudo pacman -S mkinitcpio --noconfirm \
+    && sudo pacman -U "${KERNEL_PACKAGE_URL}" --noconfirm \
+    && sudo pacman -U "${LIBGUESTFS_PACKAGE_URL}" --noconfirm \
+    && rm -rf /var/tmp/.guestfs-* \
+    ; libguestfs-test-tool || exit 1
 
 ####
 
@@ -248,6 +251,10 @@ RUN if [[ "${LINUX}" == true ]]; then \
 # Overwritten by using GENERATE_UNIQUE=true
 # Upstream removed nopicker, so we are adding it back in, at build time
 # Once again, this is just for the Docker build so there is a default nopicker image there
+
+# libguestfs verbose
+ENV LIBGUESTFS_DEBUG=1
+ENV LIBGUESTFS_TRACE=1
 
 ARG STOCK_DEVICE_MODEL=iMacPro1,1
 ARG STOCK_SERIAL=C02TM2ZBHX87
@@ -334,10 +341,6 @@ ENV RAM=3
 # Must be used with either -e GENERATE_UNIQUE=true or -e GENERATE_SPECIFIC=true.
 ENV WIDTH=1920
 ENV HEIGHT=1080
-
-# libguestfs verbose
-ENV LIBGUESTFS_DEBUG=1
-ENV LIBGUESTFS_TRACE=1
 
 VOLUME ["/tmp/.X11-unix"]
 
