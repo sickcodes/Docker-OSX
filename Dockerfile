@@ -58,7 +58,7 @@ SHELL ["/bin/bash", "-c"]
 
 # change disk size here or add during build, e.g. --build-arg VERSION=10.14.5 --build-arg SIZE=50G
 ARG SIZE=200G
-ARG VERSION=10.15.6
+ARG VERSION=10.15.7
 
 # OPTIONAL: Arch Linux server mirrors for super fast builds
 # set RANKMIRRORS to any value other that nothing, e.g. -e RANKMIRRORS=true
@@ -144,25 +144,25 @@ RUN yes | sudo pacman -Syu qemu libvirt dnsmasq virt-manager bridge-utils openre
 
 WORKDIR /home/arch/OSX-KVM
 
-RUN wget https://raw.githubusercontent.com/sickcodes/Docker-OSX/master/fetch-macOS.py
+# RUN wget https://raw.githubusercontent.com/kholia/OSX-KVM/master/fetch-macOS-v2.py
 
-RUN [[ "${VERSION%%.*}" -lt 11 ]] && { python fetch-macOS.py --version "${VERSION}" \
-        && qemu-img convert BaseSystem.dmg -O qcow2 -p -c BaseSystem.img \
-        && qemu-img create -f qcow2 mac_hdd_ng.img "${SIZE}" \
-        && rm -f BaseSystem.dmg \
-    ; } || true
+ARG SHORTNAME=
 
-# VERSION=11.2.1
-# this downloads LATEST ONLY
-ARG FETCH_MAC_OS_RAW=https://raw.githubusercontent.com/acidanthera/OpenCorePkg/master/Utilities/macrecovery/macrecovery.py
-# submit a PR to here to get the version option https://github.com/acidanthera/OpenCorePkg/blob/master/Utilities/macrecovery/macrecovery.py
+# VERSION will just set the appropriate shortname
+RUN [[ "${SHORTNAME}" ]] || \
+    if [[ $(bc <<< "${VERSION} >= 10.13") = 0 ]]; then \
+        export SHORTNAME=high-sierra \
+    ; elif [[ $(bc <<< "${VERSION} >= 10.14") = 0 ]]; then \
+        export SHORTNAME=mojave \
+    ; elif [[ $(bc <<< "${VERSION} >= 10.15") = 0 ]]; then \
+        export SHORTNAME=catalina \
+    ; elif [[ $(bc <<< "${VERSION} >= 11.6") = 0 ]]; then \
+        export SHORTNAME=big-sur \
+    ; elif [[ $(bc <<< "${VERSION} > 11.6") = 0 ]]; then \
+        export SHORTNAME=monterey \
+    ; fi
 
-RUN [[ "${VERSION%%.*}" -ge 11 ]] && { wget "${FETCH_MAC_OS_RAW}" \
-        && python macrecovery.py download \
-        && qemu-img convert BaseSystem.dmg -O qcow2 -p -c BaseSystem.img \
-        && qemu-img create -f qcow2 mac_hdd_ng.img "${SIZE}" \
-        && rm -f BaseSystem.dmg \
-    ; } || true
+RUN make
 
 WORKDIR /home/arch/OSX-KVM
 
