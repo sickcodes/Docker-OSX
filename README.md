@@ -74,7 +74,7 @@ docker run -it \
     -e "DISPLAY=${DISPLAY:-:0.0}" \
     sickcodes/docker-osx:big-sur
 
-# docker build -t docker-osx -e VERSION='Big Sur' .
+# docker build -t docker-osx --build-arg VERSION='Big Sur' .
 ```
 
 ### Monterey [![https://img.shields.io/docker/image-size/sickcodes/docker-osx/monterey?label=sickcodes%2Fdocker-osx%3Amonterey](https://img.shields.io/docker/image-size/sickcodes/docker-osx/monterey?label=sickcodes%2Fdocker-osx%3Amonterey)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
