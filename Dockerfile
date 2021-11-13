@@ -149,17 +149,12 @@ WORKDIR /home/arch/OSX-KVM
 ARG SHORTNAME=
 
 # VERSION will just set the appropriate shortname
-RUN [[ "${SHORTNAME}" ]] || \
-    if [[ $(bc <<< "${VERSION} >= 10.13") = 0 ]]; then \
-        export SHORTNAME=high-sierra \
-    ; elif [[ $(bc <<< "${VERSION} >= 10.14") = 0 ]]; then \
-        export SHORTNAME=mojave \
-    ; elif [[ $(bc <<< "${VERSION} >= 10.15") = 0 ]]; then \
-        export SHORTNAME=catalina \
-    ; elif [[ $(bc <<< "${VERSION} >= 11.6") = 0 ]]; then \
-        export SHORTNAME=big-sur \
-    ; elif [[ $(bc <<< "${VERSION} > 11.6") = 0 ]]; then \
-        export SHORTNAME=monterey \
+RUN if [[ ! "${SHORTNAME}" ]]; then \
+        {    [[ $(bc <<< "${VERSION} >= 10.13") = 0 ]]    && export SHORTNAME=high-sierra ; } \
+        || { [[ $(bc <<< "${VERSION} >= 10.14") = 0 ]]    && export SHORTNAME=mojave ; } \
+        || { [[ $(bc <<< "${VERSION} >= 10.15") = 0 ]]    && export SHORTNAME=catalina ; } \
+        || { [[ $(bc <<< "${VERSION} >= 11.6") = 0 ]]     && export SHORTNAME=big-sur ; } \
+        || { [[ $(bc <<< "${VERSION} > 11.6") = 0 ]]      && export SHORTNAME=monterey ; } \
     ; fi
 
 RUN make
