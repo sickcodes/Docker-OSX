@@ -12,7 +12,7 @@
 # Repository:       https://github.com/sickcodes/Docker-OSX
 # Website:          https://sick.codes
 #
-# Status:           Work in progress.
+# Status:           Used internally to auto build, run and test images on DO.
 # 
 
 help_text="Usage: ./test.sh --branch <string> --repo <string>
@@ -302,6 +302,9 @@ docker tag docker-osx:catalina sickcodes/docker-osx:latest
 for TEST_BUILD in "${TEST_BUILDS[@]}"; do
     "${TEST_BUILD}"
 done
+
+# boot each image and test
+bash ./tests/boot-images.sh || exit 1
 
 if [[ "${DOCKER_USERNAME}" ]] && [[ "${DOCKER_PASSWORD}" ]]; then
     docker login --username "${DOCKER_USERNAME}" --password "${DOCKER_PASSWORD}" \
