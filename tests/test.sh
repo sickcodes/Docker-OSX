@@ -178,7 +178,7 @@ install_scrotcat () {
     make -C ./imcat
     sudo cp ./imcat/imcat /usr/bin/imcat
     touch /usr/bin/scrotcat
-    tee -a /usr/bin/scrotcat <<< '/usr/bin/imcat <(scrot -o /dev/stdout)'
+    tee  /usr/bin/scrotcat <<< '/usr/bin/imcat <(scrot -o /dev/stdout)'
     chmod +x /usr/bin/scrotcat
 }
 
@@ -285,8 +285,8 @@ yes | apt install -y --no-install-recommends tzdata -y
 install_scrotcat
 yes | install_vnc
 export_display_99
-echo start_xvfb
-start_vnc
+start_xvfb
+# start_vnc
 enable_kvm
 reset_docker_hard
 echo killall Xvfb
