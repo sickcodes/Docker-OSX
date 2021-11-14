@@ -58,7 +58,6 @@ SHELL ["/bin/bash", "-c"]
 
 # change disk size here or add during build, e.g. --build-arg VERSION=10.14.5 --build-arg SIZE=50G
 ARG SIZE=200G
-ARG VERSION=10.15.6
 
 # OPTIONAL: Arch Linux server mirrors for super fast builds
 # set RANKMIRRORS to any value other that nothing, e.g. -e RANKMIRRORS=true
@@ -139,32 +138,16 @@ RUN touch enable-ssh.sh \
 
 # RUN yes | sudo pacman -Syu qemu libvirt dnsmasq virt-manager bridge-utils edk2-ovmf netctl libvirt-dbus --overwrite --noconfirm
 
-RUN yes | sudo pacman -Syu qemu libvirt dnsmasq virt-manager bridge-utils openresolv jack ebtables edk2-ovmf netctl libvirt-dbus wget --overwrite --noconfirm \
+RUN yes | sudo pacman -Syu bc qemu libvirt dnsmasq virt-manager bridge-utils openresolv jack ebtables edk2-ovmf netctl libvirt-dbus wget --overwrite --noconfirm \
     && yes | sudo pacman -Scc
 
 WORKDIR /home/arch/OSX-KVM
 
-RUN wget https://raw.githubusercontent.com/sickcodes/Docker-OSX/master/fetch-macOS.py
+# RUN wget https://raw.githubusercontent.com/kholia/OSX-KVM/master/fetch-macOS-v2.py
 
-RUN [[ "${VERSION%%.*}" -lt 11 ]] && { python fetch-macOS.py --version "${VERSION}" \
-        && qemu-img convert BaseSystem.dmg -O qcow2 -p -c BaseSystem.img \
-        && qemu-img create -f qcow2 mac_hdd_ng.img "${SIZE}" \
-        && rm -f BaseSystem.dmg \
-    ; } || true
+ARG SHORTNAME
 
-# VERSION=11.2.1
-# this downloads LATEST ONLY
-ARG FETCH_MAC_OS_RAW=https://raw.githubusercontent.com/acidanthera/OpenCorePkg/master/Utilities/macrecovery/macrecovery.py
-# submit a PR to here to get the version option https://github.com/acidanthera/OpenCorePkg/blob/master/Utilities/macrecovery/macrecovery.py
-
-RUN [[ "${VERSION%%.*}" -ge 11 ]] && { wget "${FETCH_MAC_OS_RAW}" \
-        && python macrecovery.py download \
-        && qemu-img convert BaseSystem.dmg -O qcow2 -p -c BaseSystem.img \
-        && qemu-img create -f qcow2 mac_hdd_ng.img "${SIZE}" \
-        && rm -f BaseSystem.dmg \
-    ; } || true
-
-WORKDIR /home/arch/OSX-KVM
+RUN make
 
 ARG LINUX=true
 
@@ -202,7 +185,7 @@ RUN touch Launch.sh \
     && tee -a Launch.sh <<< '-drive id=OpenCoreBoot,if=none,snapshot=on,format=qcow2,file=${BOOTDISK:-/home/arch/OSX-KVM/OpenCore/OpenCore.qcow2} \' \
     && tee -a Launch.sh <<< '-device ide-hd,bus=sata.2,drive=OpenCoreBoot \' \
     && tee -a Launch.sh <<< '-device ide-hd,bus=sata.3,drive=InstallMedia \' \
-    && tee -a Launch.sh <<< '-drive id=InstallMedia,if=none,file=/home/arch/OSX-KVM/BaseSystem.img,format=qcow2 \' \
+    && tee -a Launch.sh <<< '-drive id=InstallMedia,if=none,file=/home/arch/OSX-KVM/BaseSystem.img,format=raw \' \
     && tee -a Launch.sh <<< '-drive id=MacHDD,if=none,file=${IMAGE_PATH:-/home/arch/OSX-KVM/mac_hdd_ng.img},format=${IMAGE_FORMAT:-qcow2} \' \
     && tee -a Launch.sh <<< '-device ide-hd,bus=sata.4,drive=MacHDD \' \
     && tee -a Launch.sh <<< '-netdev user,id=net0,hostfwd=tcp::${INTERNAL_SSH_PORT:-10022}-:22,hostfwd=tcp::${SCREEN_SHARE_PORT:-5900}-:5900,${ADDITIONAL_PORTS} \' \
