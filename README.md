@@ -9,13 +9,13 @@ Run Mac OS X in Docker with near-native performance! X11 Forwarding! iMessage se
 The Discord is active on #docker-osx and anyone is welcome to come and ask questions, ideas, etc.
 
 <p align="center">
-    <a href="https://hub.docker.com/r/sickcodes/docker-osx"><img src="https://dockeri.co/image/sickcodes/docker-osx"/></a><a href="https://discord.gg/mx8pPw39Yg"><a href="https://discord.gg/mx8pPw39Yg" target="_blank"><img src="https://raw.githubusercontent.com/sickcodes/Docker-OSX/master/discord-logo.svg"></a></a>
+    <a href="https://hub.docker.com/r/sickcodes/docker-osx"><img src="https://dockeri.co/image/sickcodes/docker-osx"/></a><a href="https://discord.gg/sickchat"><a href="https://discord.gg/sickchat" target="_blank"><img src="https://raw.githubusercontent.com/sickcodes/Docker-OSX/master/discord-logo.svg"></a></a>
 </p>
 
 
 
 
-### Click to join the Discord server [https://discord.gg/mx8pPw39Yg](https://discord.gg/mx8pPw39Yg)
+### Click to join the Discord server [https://discord.gg/sickchat](https://discord.gg/sickchat)
 
 ### Click to join the Telegram server [https://t.me/sickcodeschat](https://t.me/sickcodeschat)
 
@@ -50,7 +50,7 @@ Video setup tutorial is also available here: https://www.youtube.com/watch?v=wLe
 First time here? try [initial setup](#initial-setup), otherwise try the instructions below to use either Catalina or Big Sur.
 
 ## Any questions, ideas, or just want to hang out?
-# [https://discord.gg/mx8pPw39Yg](https://discord.gg/mx8pPw39Yg)
+# [https://discord.gg/sickchat](https://discord.gg/sickchat)
 
 ### Catalina [![https://img.shields.io/docker/image-size/sickcodes/docker-osx/latest?label=sickcodes%2Fdocker-osx%3Alatest](https://img.shields.io/docker/image-size/sickcodes/docker-osx/latest?label=sickcodes%2Fdocker-osx%3Alatest)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
 
@@ -74,7 +74,7 @@ docker run -it \
     -e "DISPLAY=${DISPLAY:-:0.0}" \
     sickcodes/docker-osx:big-sur
 
-# docker build -t docker-osx -e VERSION='Big Sur' .
+# docker build -t docker-osx --build-arg SHORTNAME=big-sur .
 ```
 
 ### Monterey [![https://img.shields.io/docker/image-size/sickcodes/docker-osx/monterey?label=sickcodes%2Fdocker-osx%3Amonterey](https://img.shields.io/docker/image-size/sickcodes/docker-osx/monterey?label=sickcodes%2Fdocker-osx%3Amonterey)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
@@ -90,7 +90,7 @@ docker run -it \
     -e MASTER_PLIST_URL='https://raw.githubusercontent.com/sickcodes/osx-serial-generator/master/config-custom.plist' \
     sickcodes/docker-osx:monterey
 
-# docker build -t docker-osx -f Dockerfile.monterey .
+# docker build -t docker-osx --build-arg SHORTNAME=monterey .
 ```
 
 #### Run Catalina Pre-Installed [![https://img.shields.io/docker/image-size/sickcodes/docker-osx/auto?label=sickcodes%2Fdocker-osx%3Aauto](https://img.shields.io/docker/image-size/sickcodes/docker-osx/auto?label=sickcodes%2Fdocker-osx%3Aauto)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
@@ -111,6 +111,38 @@ docker run -it \
 # username is user
 # passsword is alpine
 ```
+
+### Older Systems
+
+### High Sierra [![https://img.shields.io/docker/image-size/sickcodes/docker-osx/high-sierra?label=sickcodes%2Fdocker-osx%3Ahigh-sierra](https://img.shields.io/docker/image-size/sickcodes/docker-osx/high-sierra?label=sickcodes%2Fdocker-osx%3Ahigh-sierra)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
+
+```bash
+
+docker run -it \
+    --device /dev/kvm \
+    -p 50922:10022 \
+    -v /tmp/.X11-unix:/tmp/.X11-unix \
+    -e "DISPLAY=${DISPLAY:-:0.0}" \
+    sickcodes/docker-osx:high-sierra
+
+# docker build -t docker-osx --build-arg SHORTNAME=high-sierra .
+```
+
+### Mojave [![https://img.shields.io/docker/image-size/sickcodes/docker-osx/mojave?label=sickcodes%2Fdocker-osx%3Amojave](https://img.shields.io/docker/image-size/sickcodes/docker-osx/mojave?label=sickcodes%2Fdocker-osx%3Amojave)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
+
+```bash
+
+docker run -it \
+    --device /dev/kvm \
+    -p 50922:10022 \
+    -v /tmp/.X11-unix:/tmp/.X11-unix \
+    -e "DISPLAY=${DISPLAY:-:0.0}" \
+    sickcodes/docker-osx:mojave
+
+# docker build -t docker-osx --build-arg SHORTNAME=mojave .
+```
+
+
 
 #### Download the image manually and use it in Docker 
 
@@ -255,31 +287,44 @@ SEE commands in [https://github.com/sickcodes/osx-optimizer](https://github.com/
 
 ## Important notices:
 
-**2021-09-09** - Bootdisks at runtime required for Monterey!
+**2021-11-14** - Added High Sierra, Mojave
 
-Pick one of these:
+Pick one of these while **building**, irrelevant when using docker pull:
 ```
-    -e MASTER_PLIST_URL='https://raw.githubusercontent.com/sickcodes/osx-serial-generator/master/config-custom.plist' \
-
-    -e MASTER_PLIST_URL='https://raw.githubusercontent.com/sickcodes/osx-serial-generator/master/config-nopicker-custom.plist' \
+--build-arg SHORTNAME=high-sierra 
+--build-arg SHORTNAME=mojave
+--build-arg SHORTNAME=catalina
+--build-arg SHORTNAME=big-sur
+--build-arg SHORTNAME=monterey
 ```
 
 
 ## Technical details
 
-There currently five images, each with different use cases (explained [below](#container-images)):
+There currently multiple images, each with different use cases (explained [below](#container-images)):
 
+- High Sierra
+- Mojave
 - Catalina
 - Big Sur
+- Monterey
 - Auto (pre-made Catalina)
 - Naked (use your own .img)
 - Naked-Auto (user your own .img and SSH in)
 
-Catalina make your own image:
+High Sierra:
+
+[![https://img.shields.io/docker/image-size/sickcodes/docker-osx/high-sierra?label=sickcodes%2Fdocker-osx%3Ahigh-sierra](https://img.shields.io/docker/image-size/sickcodes/docker-osx/high-sierra?label=sickcodes%2Fdocker-osx%3Ahigh-sierra)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
+
+Mojave:
+
+[![https://img.shields.io/docker/image-size/sickcodes/docker-osx/mojave?label=sickcodes%2Fdocker-osx%3Amojave](https://img.shields.io/docker/image-size/sickcodes/docker-osx/mojave?label=sickcodes%2Fdocker-osx%3Amojave)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
+
+Catalina:
 
 [![https://img.shields.io/docker/image-size/sickcodes/docker-osx/latest?label=sickcodes%2Fdocker-osx%3Alatest](https://img.shields.io/docker/image-size/sickcodes/docker-osx/latest?label=sickcodes%2Fdocker-osx%3Alatest)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
 
-Big-Sur make your own image:
+Big-Sur:
 
 [![https://img.shields.io/docker/image-size/sickcodes/docker-osx/big-sur?label=sickcodes%2Fdocker-osx%3Abig-sur](https://img.shields.io/docker/image-size/sickcodes/docker-osx/big-sur?label=sickcodes%2Fdocker-osx%3Abig-sur)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
 
@@ -287,25 +332,26 @@ Monterey make your own image:
 
 [![https://img.shields.io/docker/image-size/sickcodes/docker-osx/monterey?label=sickcodes%2Fdocker-osx%3Amonterey](https://img.shields.io/docker/image-size/sickcodes/docker-osx/monterey?label=sickcodes%2Fdocker-osx%3Amonterey)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
 
-Pre-made system by [Sick.Codes](https://sick.codes): username: `user`, password: `alpine`
+Pre-made **Catalina** system by [Sick.Codes](https://sick.codes): username: `user`, password: `alpine`
 
 [![https://img.shields.io/docker/image-size/sickcodes/docker-osx/auto?label=sickcodes%2Fdocker-osx%3Aauto](https://img.shields.io/docker/image-size/sickcodes/docker-osx/auto?label=sickcodes%2Fdocker-osx%3Aauto)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
 
-Bring-your-own-image setup (use any of the above first):
+Naked: Bring-your-own-image setup (use any of the above first):
 
 [![https://img.shields.io/docker/image-size/sickcodes/docker-osx/naked?label=sickcodes%2Fdocker-osx%3Anaked](https://img.shields.io/docker/image-size/sickcodes/docker-osx/naked?label=sickcodes%2Fdocker-osx%3Anaked)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
 
-Same as above but with `-e USERNAME` & `-e PASSWORD` and `-e OSX_COMMANDS="put your commands here"`
+Naked Auto: same as above but with `-e USERNAME` & `-e PASSWORD` and `-e OSX_COMMANDS="put your commands here"`
 
 [![https://img.shields.io/docker/image-size/sickcodes/docker-osx/naked-auto?label=sickcodes%2Fdocker-osx%3Anaked-auto](https://img.shields.io/docker/image-size/sickcodes/docker-osx/naked-auto?label=sickcodes%2Fdocker-osx%3Anaked-auto)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
 
 ## Capabilities
-- use iPhone OSX KVM on Linux using usbfluxd!
-- macOS Monterey!
-- Folder sharing
+- use iPhone OSX KVM on Linux using [usbfluxd](https://github.com/corellium/usbfluxd)!
+- macOS Monterey VM on Linux!
+- Folder sharing-
+- USB passthrough (hotplug too)
 - SSH enabled (`localhost:50922`)
 - VNC enabled (`localhost:8888`) if using ./vnc version
-- [serial number generator!](https://github.com/sickcodes/osx-serial-generator)
+- iMessage security research via [serial number generator!](https://github.com/sickcodes/osx-serial-generator)
 - X11 forwarding is enabled
 - runs on top of QEMU + KVM
 - supports Big Sur, custom images, Xvfb headless mode
@@ -313,9 +359,9 @@ Same as above but with `-e USERNAME` & `-e PASSWORD` and `-e OSX_COMMANDS="put y
 
 ### Requirements
 
-- 20GB disk space for bare minimum installation
+- 20GB+++ disk space for bare minimum installation (50GB if using Xcode)
 - virtualization should be enabled in your BIOS settings
-- a kvm-capable host
+- a x86_64 kvm-capable host
 - at least 50 GBs for `:auto` (half for the base image, half for your runtime image
 
 ### TODO
@@ -399,6 +445,9 @@ Create your personal image using `:latest` or `big-sur`. Then, pull the image ou
 - `sickcodes/docker-osx:big-sur` - [I want to run Big Sur.](#quick-start-docker-osx)
 - `sickcodes/docker-osx:monterey` - [I want to run Monterey.](#quick-start-docker-osx)
 
+- `sickcodes/docker-osx:high-sierra` - I want to run High Sierra.
+- `sickcodes/docker-osx:mojave` - I want to run Mojave.
+
 ## Initial setup
 Before you do anything else, you will need to turn on hardware virtualization in your BIOS. Precisely how will depend on your particular machine (and BIOS), but it should be straightforward.
 
@@ -428,7 +477,7 @@ sudo modprobe kvm
 
 ## Additional boot instructions for when you are [creating your container](#container-creation-examples)
 
-- Boot the macOS Base System
+- Boot the macOS Base System (Press Enter)
 
 - Click `Disk Utility`
 
@@ -438,6 +487,8 @@ sudo modprobe kvm
 - (optional) Create a partition using the unused space to house the OS and your files if you want to limit the capacity. (For Xcode 12 partition at least 60gb.)
 
 - Click `Reinstall macOS`
+
+- The system may require multiple reboots during installation
 
 ## Troubleshooting
 
@@ -489,7 +540,9 @@ This will use all available cores; adjust accordingly to the day of the week:
 
 This will use `-smp $(nproc)`
 
-#### Confirm your user is part of the the Docker group, KVM group, libvirt group
+### Confirm your user is part of the the Docker group, KVM group, libvirt group
+
+#### Add yourself to the Docker group
 
 If you use `sudo dockerd` or dockerd is controlled by systemd/systemctl, then you must be in the Docker group.
 If you are not in the Docker group:
@@ -509,17 +562,17 @@ See also: [initial setup](#initial-setup).
 #### Is the docker daemon enabled?
 
 ```bash
+# run ad hoc
+sudo dockerd
+
+# or daemonize it
+sudo nohup dockerd &
+
 # enable it in systemd (it will persist across reboots this way)
 sudo systemctl enable --now docker
 
 # or just start it as your user with systemd instead of enabling it
 systemctl start docker
-
-# or run ad hoc
-sudo dockerd
-
-# or daemonize it
-sudo nohup dockerd &
 ```
 
 ## More Questions and Answers
@@ -883,7 +936,7 @@ docker build -t docker-osx:latest \
     --build-arg RANKMIRRORS=true \
     --build-arg MIRROR_COUNTRY=US \
     --build-arg MIRROR_COUNT=10 \
-    --build-arg VERSION=10.15.6 \
+    --build-arg SHORTNAME=catalina \
     --build-arg SIZE=200G .
 ```
 
