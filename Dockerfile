@@ -58,7 +58,6 @@ SHELL ["/bin/bash", "-c"]
 
 # change disk size here or add during build, e.g. --build-arg VERSION=10.14.5 --build-arg SIZE=50G
 ARG SIZE=200G
-ARG VERSION=10.15.7
 
 # OPTIONAL: Arch Linux server mirrors for super fast builds
 # set RANKMIRRORS to any value other that nothing, e.g. -e RANKMIRRORS=true
@@ -146,20 +145,9 @@ WORKDIR /home/arch/OSX-KVM
 
 # RUN wget https://raw.githubusercontent.com/kholia/OSX-KVM/master/fetch-macOS-v2.py
 
-ARG SHORTNAME=
-
-# VERSION will just set the appropriate shortname
-RUN if [[ ! "${SHORTNAME}" ]]; then \
-        {    [[ $(bc <<< "${VERSION} >= 10.13") = 0 ]]    && export SHORTNAME=high-sierra ; } \
-        || { [[ $(bc <<< "${VERSION} >= 10.14") = 0 ]]    && export SHORTNAME=mojave ; } \
-        || { [[ $(bc <<< "${VERSION} >= 10.15") = 0 ]]    && export SHORTNAME=catalina ; } \
-        || { [[ $(bc <<< "${VERSION} >= 11.6") = 0 ]]     && export SHORTNAME=big-sur ; } \
-        || { [[ $(bc <<< "${VERSION} > 11.6") = 0 ]]      && export SHORTNAME=monterey ; } \
-    ; fi
+ARG SHORTNAME
 
 RUN make
-
-WORKDIR /home/arch/OSX-KVM
 
 ARG LINUX=true
 
