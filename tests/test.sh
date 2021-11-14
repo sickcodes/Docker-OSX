@@ -1,4 +1,4 @@
-#!/usr/bin/docker
+#!/usr/bin/bash
 #     ____             __             ____  ______  __
 #    / __ \____  _____/ /_____  _____/ __ \/ ___/ |/ /
 #   / / / / __ \/ ___/ //_/ _ \/ ___/ / / /\__ \|   /
@@ -120,13 +120,17 @@ NO_CACHE="${NO_CACHE:=--no-cache}"
 
 
 TEST_BUILDS=(
-'docker-osx:latest'
-'docker-osx:naked'
-'docker-osx:naked-auto'
-'docker-osx:big-sur'
-'docker-osx:monterey'
-'docker-osx:auto'
-#'docker-osx:auto-big-sur'
+    'docker-osx:naked'
+    'docker-osx:naked-auto'
+    'docker-osx:auto'
+)
+
+VERSION_BUILDS=(
+    'high-sierra'
+    'mojave'
+    'catalina'
+    'big-sur'
+    'monterey'
 )
 
 install_docker () {
@@ -196,22 +200,9 @@ enable_kvm () {
     echo 1 | tee /sys/module/kvm/parameters/ignore_msrs
 }
 
-
 clone_repo () {
     git clone --branch="${1}" "${2}" Docker-OSX
 }
-
-
-docker-osx:latest () {
-    docker build ${NO_CACHE} \
-        --build-arg BRANCH="${BRANCH}" \
-        --build-arg RANKMIRRORS=true \
-        --build-arg MIRROR_COUNTRY="${MIRROR_COUNTRY}" \
-        -f ./Dockerfile \
-        -t docker-osx:latest .
-    docker tag docker-osx:latest sickcodes/docker-osx:latest
-}
-
 
 docker-osx:naked () {
     docker build ${NO_CACHE} \
@@ -223,7 +214,6 @@ docker-osx:naked () {
     docker tag docker-osx:naked sickcodes/docker-osx:naked
 }
 
-
 docker-osx:naked-auto () {
     docker build ${NO_CACHE} \
         --squash \
@@ -232,26 +222,6 @@ docker-osx:naked-auto () {
         -f ./Dockerfile.naked-auto \
         -t docker-osx:naked-auto .
     docker tag docker-osx:naked-auto sickcodes/docker-osx:naked-auto
-}
-
-
-docker-osx:big-sur () {
-    docker build ${NO_CACHE} \
-        --build-arg VERSION=11 \
-        --build-arg RANKMIRRORS=true \
-        --build-arg MIRROR_COUNTRY="${MIRROR_COUNTRY}" \
-        -f ./Dockerfile \
-        -t docker-osx:big-sur .
-    docker tag docker-osx:big-sur sickcodes/docker-osx:big-sur
-}
-
-docker-osx:monterey () {
-    docker build ${NO_CACHE} \
-        --build-arg RANKMIRRORS=true \
-        --build-arg MIRROR_COUNTRY="${MIRROR_COUNTRY}" \
-        -f ./Dockerfile.monterey \
-        -t docker-osx:monterey .
-    docker tag docker-osx:monterey sickcodes/docker-osx:monterey
 }
 
 docker-osx:auto () {
@@ -263,14 +233,26 @@ docker-osx:auto () {
     docker tag docker-osx:auto sickcodes/docker-osx:auto
 }
 
-docker-osx:auto-big-sur () {
+# docker-osx:auto-big-sur () {
+#     docker build ${NO_CACHE} \
+#         --build-arg RANKMIRRORS=true \
+#         --build-arg MIRROR_COUNTRY="${MIRROR_COUNTRY}" \
+#         --build-arg IMAGE_URL='https://images.sick.codes/mac_hdd_ng_auto_big_sur.img' \
+#         -f ./Dockerfile.auto \
+#         -t docker-osx:auto-big-sur .
+#     docker tag docker-osx:auto-big-sur sickcodes/docker-osx:auto-big-sur
+# }
+
+docker-osx:version () {
+    SHORTNAME="${1}"
     docker build ${NO_CACHE} \
+        --build-arg BRANCH="${BRANCH}" \
         --build-arg RANKMIRRORS=true \
+        --build-arg SHORTNAME="${SHORTNAME}" \
         --build-arg MIRROR_COUNTRY="${MIRROR_COUNTRY}" \
-        --build-arg IMAGE_URL='https://images.sick.codes/mac_hdd_ng_auto_big_sur.img' \
-        -f ./Dockerfile.auto \
-        -t docker-osx:auto-big-sur .
-    docker tag docker-osx:auto-big-sur sickcodes/docker-osx:auto-big-sur
+        -f ./Dockerfile \
+        -t "docker-osx:${SHORTNAME}" .
+    docker tag "docker-osx:${SHORTNAME}" "sickcodes/docker-osx:${SHORTNAME}"
 }
 
 reset_docker_hard () {
@@ -288,42 +270,44 @@ EOF
     systemctl enable --now docker
 }
 
-tee -a ~/.bashrc <<EOF ; true &&
+tee -a ~/.bashrc <<EOF
 export DEBIAN_FRONTEND=noninteractive
 export TZ=UTC
 EOF
-export DEBIAN_FRONTEND=noninteractive \
-; export TZ=UTC \
-; ln -snf "/usr/share/zoneinfo/${TZ}" /etc/localtime \
-; tee -a /etc/timezone <<< "${TZ}" \
-; apt update -y \
-; apt-get install keyboard-configuration -y \
-; docker -v | grep '\ 20\.\|\ 19\.' || install_docker \
-; yes | apt install -y --no-install-recommends tzdata -y \
-; install_scrotcat \
-; yes | install_vnc \
-; export_display_99 \
-; echo start_xvfb \
-; start_vnc \
-; enable_kvm \
-; reset_docker_hard \
-; echo killall Xvfb \
-; clone_repo "${BRANCH}" "${REPO}" \
-; cd Docker-OSX \
-; for TEST_BUILD in "${TEST_BUILDS[@]}"; do
+export DEBIAN_FRONTEND=noninteractive
+export TZ=UTC
+ln -snf "/usr/share/zoneinfo/${TZ}" /etc/localtime
+tee -a /etc/timezone <<< "${TZ}"
+apt update -y
+apt-get install keyboard-configuration -y
+docker -v | grep '\ 20\.\|\ 19\.' || install_docker
+yes | apt install -y --no-install-recommends tzdata -y
+install_scrotcat
+yes | install_vnc
+export_display_99
+echo start_xvfb
+start_vnc
+enable_kvm
+reset_docker_hard
+echo killall Xvfb
+clone_repo "${BRANCH}" "${REPO}"
+cd ./Docker-OSX
+
+for SHORTNAME in "${VERSION_BUILDS[@]}"; do
+    docker-osx:version "${SHORTNAME}"
+done
+
+docker tag docker-osx:catalina sickcodes/docker-osx:latest
+
+for TEST_BUILD in "${TEST_BUILDS[@]}"; do
     "${TEST_BUILD}"
-done \
-&& touch COMPLETED
+done
 
 if [[ "${DOCKER_USERNAME}" ]] && [[ "${DOCKER_PASSWORD}" ]]; then
     docker login --username "${DOCKER_USERNAME}" --password "${DOCKER_PASSWORD}" \
-        && docker push sickcodes/docker-osx:latest \
-        && docker push sickcodes/docker-osx:big-sur \
-        && docker push sickcodes/docker-osx:monterey \
-        && docker push sickcodes/docker-osx:naked \
-        && docker push sickcodes/docker-osx:naked-auto \
-        && docker push sickcodes/docker-osx:auto \
-        && docker push sickcodes/docker-osx:auto-big-sur \
+        && for SHORTNAME in "${VERSION_BUILDS[@]}"; do
+            docker push "sickcodes/docker-osx:${SHORTNAME}"
+        done \
         && touch PUSHED
 fi
 
