@@ -817,7 +817,37 @@ docker run -it \
 # sudo -S mount_9p hostshare
 
 ```
+### Share Linux NFS Drive into macOS
 
+To share a folder using NFS, setup a folder for on the host machine, for example, `/srv/nfs/share` and then append to `/etc/exports`:
+```bash
+/srv/nfs/share      127.0.0.1/0(insecure,rw,all_squash,anonuid=1000,anongid=985,no_subtree_check)
+```
+
+You may need to reload exports now, which will begin sharing that directory.
+
+```bash
+# reload shared folders
+sudo exportfs -arv
+```
+
+[Source & Explanation](https://serverfault.com/questions/716350/mount-nfs-volume-on-ubuntu-linux-server-from-macos-client)
+
+Give permissions on the shared folder for the `anonuid` and `anongid`, where `anonuid` and `anongid` matches that of your linux user; `id -u`
+
+`id -u ; id -g` will print `userid:groupid`
+```
+chown 1000:985 /srv/nfs/share
+chmod u+rwx /srv/nfs/share
+```
+
+Start the Docker-OSX container with the additional flag `--network host`
+
+Create and mount the nfs folder from the mac terminal:
+```
+mkdir -p ~/mnt
+sudo mount -t nfs 10.0.2.2:/srv/nfs/share ~/mnt
+```
 
 ### Share USB Drive into macOS over QEMU
 
