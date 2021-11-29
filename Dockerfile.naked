@@ -217,7 +217,8 @@ RUN sudo pacman -Syy \
     && sudo pacman -U "${LIBGUESTFS_PACKAGE_URL}" --noconfirm \
     && rm -rf /var/tmp/.guestfs-* \
     && yes | sudo pacman -Scc \
-    ; libguestfs-test-tool || exit 1
+    ; libguestfs-test-tool || exit 1 \
+    && rm -rf /var/tmp/.guestfs-*
 
 ####
 
@@ -251,7 +252,8 @@ ARG STOCK_BOOTDISK_NOPICKER=/home/arch/OSX-KVM/OpenCore/OpenCore-nopicker.qcow2
 #     --mac-address "${STOCK_MAC_ADDRESS}" \
 #     --width "${STOCK_WIDTH}" \
 #     --height "${STOCK_HEIGHT}" \
-#     --output-bootdisk "${STOCK_BOOTDISK}" || exit 1
+#     --output-bootdisk "${STOCK_BOOTDISK}" || exit 1 \
+#     ; rm -rf /var/tmp/.guestfs-*
 
 # RUN ./Docker-OSX/osx-serial-generator/generate-specific-bootdisk.sh \
 #     --master-plist-url="${STOCK_MASTER_PLIST_URL_NOPICKER}" \
@@ -262,7 +264,9 @@ ARG STOCK_BOOTDISK_NOPICKER=/home/arch/OSX-KVM/OpenCore/OpenCore-nopicker.qcow2
 #     --mac-address "${STOCK_MAC_ADDRESS}" \
 #     --width "${STOCK_WIDTH}" \
 #     --height "${STOCK_HEIGHT}" \
-#     --output-bootdisk "${STOCK_BOOTDISK_NOPICKER}" || exit 1
+#     --output-bootdisk "${STOCK_BOOTDISK_NOPICKER}" || exit 1 \
+#     ; rm -rf /var/tmp/.guestfs-*
+
 
 WORKDIR /home/arch/OSX-KVM
 

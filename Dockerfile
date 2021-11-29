@@ -145,7 +145,7 @@ WORKDIR /home/arch/OSX-KVM
 
 # RUN wget https://raw.githubusercontent.com/kholia/OSX-KVM/master/fetch-macOS-v2.py
 
-ARG SHORTNAME
+ARG SHORTNAME=catalina
 
 RUN make
 
@@ -226,7 +226,8 @@ RUN sudo pacman -Syy \
     && sudo pacman -U "${KERNEL_PACKAGE_URL}" --noconfirm \
     && sudo pacman -U "${LIBGUESTFS_PACKAGE_URL}" --noconfirm \
     && rm -rf /var/tmp/.guestfs-* \
-    ; libguestfs-test-tool || exit 1
+    ; libguestfs-test-tool || exit 1 \
+    ; rm -rf /var/tmp/.guestfs-*
 
 ####
 
@@ -260,7 +261,8 @@ RUN ./Docker-OSX/osx-serial-generator/generate-specific-bootdisk.sh \
     --mac-address "${STOCK_MAC_ADDRESS}" \
     --width "${STOCK_WIDTH}" \
     --height "${STOCK_HEIGHT}" \
-    --output-bootdisk "${STOCK_BOOTDISK}" || exit 1
+    --output-bootdisk "${STOCK_BOOTDISK}" || exit 1 \
+    ; rm -rf /var/tmp/.guestfs-*
 
 RUN ./Docker-OSX/osx-serial-generator/generate-specific-bootdisk.sh \
     --master-plist-url="${STOCK_MASTER_PLIST_URL_NOPICKER}" \
@@ -271,7 +273,8 @@ RUN ./Docker-OSX/osx-serial-generator/generate-specific-bootdisk.sh \
     --mac-address "${STOCK_MAC_ADDRESS}" \
     --width "${STOCK_WIDTH}" \
     --height "${STOCK_HEIGHT}" \
-    --output-bootdisk "${STOCK_BOOTDISK_NOPICKER}" || exit 1
+    --output-bootdisk "${STOCK_BOOTDISK_NOPICKER}" || exit 1 \
+    ; rm -rf /var/tmp/.guestfs-*
 
 ### symlink the old directory as upstream has renamed a directory. Symlinking purely for backwards compatability!
 RUN ln -s /home/arch/OSX-KVM/OpenCore /home/arch/OSX-KVM/OpenCore-Catalina || true
