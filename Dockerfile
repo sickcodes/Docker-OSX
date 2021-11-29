@@ -222,8 +222,8 @@ ENV KERNEL_PACKAGE_URL=https://archive.archlinux.org/packages/l/linux/linux-5.12
 ENV KERNEL_HEADERS_PACKAGE_URL=https://archive.archlinux.org/packages/l/linux/linux-headers-5.12.14.arch1-1-x86_64.pkg.tar.zst
 ENV LIBGUESTFS_PACKAGE_URL=https://archive.archlinux.org/packages/l/libguestfs/libguestfs-1.44.1-6-x86_64.pkg.tar.zst
 
-# fixe ad hoc errors from using the arch museum to get libguestfs
-RUN tee -a /etc/pacman.conf <<< "RemoteFileSigLevel = Optional"
+# fix ad hoc errors from using the arch museum to get libguestfs
+RUN sudo sed -i -e 's/^\#RemoteFileSigLevel/RemoteFileSigLevel/g' /etc/pacman.conf
 
 RUN sudo pacman -Syy \
     && sudo pacman -Rns linux --noconfirm \
