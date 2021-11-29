@@ -15,8 +15,6 @@ The Discord is active on #docker-osx and anyone is welcome to come and ask quest
 </p>
 
 
-
-
 ### Click to join the Discord server [https://discord.gg/sickchat](https://discord.gg/sickchat)
 
 ### Click to join the Telegram server [https://t.me/sickcodeschat](https://t.me/sickcodeschat)
@@ -44,6 +42,8 @@ If you like this project, consider contributing here or upstream!
 ## Quick Start Docker-OSX
 
 Video setup tutorial is also available here: https://www.youtube.com/watch?v=wLezYl77Ll8
+
+**Windows users:** [click here to see the notes below](https://github.com/kimjammer/Docker-OSX/tree/patch-1#id-like-to-run-docker-osx-on-windows)!
 
 <p align="center">
   <a href="https://www.youtube.com/watch?v=wLezYl77Ll8" target="_blank"><img src="https://raw.githubusercontent.com/sickcodes/Docker-OSX/master/Youtube-Screenshot-Docker-OSX-Setup.png"></a>
@@ -489,7 +489,7 @@ You need the official Docker Desktop exe: [https://desktop.docker.com/win/main/a
 
 #### Using WSLg (WSL GUI which includes Wayland or X applications to run)
 
-[https://github.com/microsoft/wslg[(https://github.com/microsoft/wslg)
+[https://github.com/microsoft/wslg](https://github.com/microsoft/wslg)
 
 To use WSLg's built in X11 server, change these two lines to point Docker-OSX to it.
 
