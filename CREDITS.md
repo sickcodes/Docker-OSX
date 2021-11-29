@@ -1,5 +1,7 @@
 # Credits
 
+The most important part of the project. You.
+
 ## Upstream Acknowledgements:
 
 This project uses OSX-KVM from https://github.com/kholia/OSX-KVM and fully appreciates the work done by [@Kholia](https://github.com/Kholia) and all the contributors who are listed: [https://github.com/kholia/OSX-KVM/blob/master/CREDITS.md](https://github.com/kholia/OSX-KVM/blob/master/CREDITS.md)
@@ -10,7 +12,7 @@ We use a special fork by [Nicholas Sherlock](https://www.nicksherlock.com/) of K
 
 This project now uses the fantastic OpenCore bootloader from the community OpenCore project: https://github.com/acidanthera/OpenCorePkg. You can join their [Subreddit here](https://www.reddit.com/r/hackintosh/)!
 
-## These credits refer to the contributors to this repository:
+## These credits refer to the legendary contributors to this repository:
 
 [@GreeFine](https://github.com/GreeFine) - Readme Typo #9 
 
@@ -72,7 +74,11 @@ This project now uses the fantastic OpenCore bootloader from the community OpenC
 
 [@ggjulio](https://github.com/ggjulio) - Restarting an "auto" container #216
 
+[@panos](https://github.com/panos) - Improved README #212
+
 [@panos](https://github.com/panos) - Made further improvements to the README #219
+
+[@kaoudis](https://github.com/kaoudis) README / troubleshooting docs improvements #235
 
 [@a10kiloham](https://github.com/a10kiloham) - Dockerfile for :naked image with VNC support #245 
 
@@ -82,7 +88,7 @@ This project now uses the fantastic OpenCore bootloader from the community OpenC
 
 [@tinjaw](https://github.com/tinjaw) - Fixed Type #258
 
-[@m-zheng](https://github.com/m-zheng) -  Update README.md #260 
+[@m-zheng](https://github.com/m-zheng) - Update README.md #260 
 
 [@johnjhacking](https://github.com/johnjhacking) - Change call function to Popen #288 
 
@@ -94,8 +100,16 @@ This project now uses the fantastic OpenCore bootloader from the community OpenC
 
 [@Silfalion](https://github.com/Silfalion) - [https://github.com/Silfalion/Iphone_docker_osx_passthrough](https://github.com/Silfalion/Iphone_docker_osx_passthrough)
 
+[@chirag350](https://github.com/chirag350) use LABEL instead of MAINTAINER since MAINTAINER is deprecated #352 
+
 [@Buthrakaur](https://github.com/Buthrakaur) readme - improve instructions for running on windows #361
 
-[@eggplants](https://github.com/eggplants)  Fix command to launch sickcodes/docker-osx:auto #366 
+[@TheHackerCoding](https://github.com/TheHackerCoding) Typo in README #367 
+
+[@cameronsteele](https://github.com/cameronsteele) fix Big Sur build example #378 
+
+[@eggplants](https://github.com/eggplants) Fix command to launch sickcodes/docker-osx:auto #366 
+
+[@martinmullins](https://github.com/martinmullins) Notes for mounting an NFS folder from a linux host #392
 
 [@kimjammer](https://github.com/kimjammer) Readme - Added instructions for using WSLg's built in X11 server #395

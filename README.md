@@ -43,7 +43,7 @@ If you like this project, consider contributing here or upstream!
 
 Video setup tutorial is also available here: https://www.youtube.com/watch?v=wLezYl77Ll8
 
-**Windows users:** [click here to see the notes below](https://github.com/kimjammer/Docker-OSX/tree/patch-1#id-like-to-run-docker-osx-on-windows)!
+**Windows users:** [click here to see the notes below](#id-like-to-run-docker-osx-on-windows)!
 
 <p align="center">
   <a href="https://www.youtube.com/watch?v=wLezYl77Ll8" target="_blank"><img src="https://raw.githubusercontent.com/sickcodes/Docker-OSX/master/Youtube-Screenshot-Docker-OSX-Setup.png"></a>
