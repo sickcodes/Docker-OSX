@@ -1182,7 +1182,7 @@ Or tell the container to use specific ones using `-e GENERATE_SPECIFIC=true`
 
 Running Docker-OSX on windows is possible just in WSL2 (Windows, Ubuntu).
 
-Ensure KVM is enabled and `x11-apps` is installed.
+Ensure KVM is enabled (Windows 11 required) and `x11-apps` is installed.
 
 To void troubles related to docker daemons on WLS 2, use Docker on Windows, and extern it to your distro.
 See Docker Docs for the complete detail setup [here](https://docs.docker.com/docker-for-windows/wsl/)
@@ -1191,10 +1191,13 @@ See Docker Docs for the complete detail setup [here](https://docs.docker.com/doc
 
 To use WSLg's built in X11 server, change these two lines to point Docker-OSX to it.
 
-`-e "DISPLAY=${DISPLAY:-:0}" \`
-`-v /mnt/wslg/.X11-unix:/tmp/.X11-unix \`
+```bash
+-e "DISPLAY=${DISPLAY:-:0}" \
+-v /mnt/wslg/.X11-unix:/tmp/.X11-unix \
+```
 
-See more in-depth discussion [here](https://github.com/sickcodes/Docker-OSX/issues/17) and [here](https://github.com/sickcodes/Docker-OSX/issues/60).
+
+See more in-depth discussion about Docker-OSX on Windows [here](https://github.com/sickcodes/Docker-OSX/issues/17) and [here](https://github.com/sickcodes/Docker-OSX/issues/60).
 
 
 ### Changing display resolution
