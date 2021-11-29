@@ -243,29 +243,29 @@ ARG STOCK_MASTER_PLIST_URL_NOPICKER=https://raw.githubusercontent.com/sickcodes/
 ARG STOCK_BOOTDISK=/home/arch/OSX-KVM/OpenCore/OpenCore.qcow2
 ARG STOCK_BOOTDISK_NOPICKER=/home/arch/OSX-KVM/OpenCore/OpenCore-nopicker.qcow2
 
-# RUN ./Docker-OSX/osx-serial-generator/generate-specific-bootdisk.sh \
-#     --master-plist-url="${STOCK_MASTER_PLIST_URL}" \
-#     --model "${STOCK_DEVICE_MODEL}" \
-#     --serial "${STOCK_SERIAL}" \
-#     --board-serial "${STOCK_BOARD_SERIAL}" \
-#     --uuid "${STOCK_UUID}" \
-#     --mac-address "${STOCK_MAC_ADDRESS}" \
-#     --width "${STOCK_WIDTH}" \
-#     --height "${STOCK_HEIGHT}" \
-#     --output-bootdisk "${STOCK_BOOTDISK}" || exit 1 \
-#     ; rm -rf /var/tmp/.guestfs-*
+RUN ./Docker-OSX/osx-serial-generator/generate-specific-bootdisk.sh \
+    --master-plist-url="${STOCK_MASTER_PLIST_URL}" \
+    --model "${STOCK_DEVICE_MODEL}" \
+    --serial "${STOCK_SERIAL}" \
+    --board-serial "${STOCK_BOARD_SERIAL}" \
+    --uuid "${STOCK_UUID}" \
+    --mac-address "${STOCK_MAC_ADDRESS}" \
+    --width "${STOCK_WIDTH}" \
+    --height "${STOCK_HEIGHT}" \
+    --output-bootdisk "${STOCK_BOOTDISK}" || exit 1 \
+    ; rm -rf /var/tmp/.guestfs-*
 
-# RUN ./Docker-OSX/osx-serial-generator/generate-specific-bootdisk.sh \
-#     --master-plist-url="${STOCK_MASTER_PLIST_URL_NOPICKER}" \
-#     --model "${STOCK_DEVICE_MODEL}" \
-#     --serial "${STOCK_SERIAL}" \
-#     --board-serial "${STOCK_BOARD_SERIAL}" \
-#     --uuid "${STOCK_UUID}" \
-#     --mac-address "${STOCK_MAC_ADDRESS}" \
-#     --width "${STOCK_WIDTH}" \
-#     --height "${STOCK_HEIGHT}" \
-#     --output-bootdisk "${STOCK_BOOTDISK_NOPICKER}" || exit 1 \
-#     ; rm -rf /var/tmp/.guestfs-*
+RUN ./Docker-OSX/osx-serial-generator/generate-specific-bootdisk.sh \
+    --master-plist-url="${STOCK_MASTER_PLIST_URL_NOPICKER}" \
+    --model "${STOCK_DEVICE_MODEL}" \
+    --serial "${STOCK_SERIAL}" \
+    --board-serial "${STOCK_BOARD_SERIAL}" \
+    --uuid "${STOCK_UUID}" \
+    --mac-address "${STOCK_MAC_ADDRESS}" \
+    --width "${STOCK_WIDTH}" \
+    --height "${STOCK_HEIGHT}" \
+    --output-bootdisk "${STOCK_BOOTDISK_NOPICKER}" || exit 1 \
+    ; rm -rf /var/tmp/.guestfs-*
 
 
 WORKDIR /home/arch/OSX-KVM

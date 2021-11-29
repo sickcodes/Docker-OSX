@@ -147,7 +147,9 @@ WORKDIR /home/arch/OSX-KVM
 
 ARG SHORTNAME=catalina
 
-RUN make
+RUN make \
+    && qemu-img convert BaseSystem.dmg -O qcow2 -p -c BaseSystem.img \
+    && rm ./BaseSystem.dmg
 
 ARG LINUX=true
 
@@ -182,7 +184,7 @@ RUN touch Launch.sh \
     && tee -a Launch.sh <<< '-smbios type=2 \' \
     && tee -a Launch.sh <<< '-audiodev ${AUDIO_DRIVER:-alsa},id=hda -device ich9-intel-hda -device hda-duplex,audiodev=hda \' \
     && tee -a Launch.sh <<< '-device ich9-ahci,id=sata \' \
-    && tee -a Launch.sh <<< '-drive id=OpenCoreBoot,if=none,snapshot=on,format=qcow2,file=${BOOTDISK:-/home/arch/OSX-KVM/OpenCore/OpenCore.qcow2} \' \
+    && tee -a Launch.sh <<< '-drive id=OpenCoreBoot,if=none,snapshot=on,format=${BASESYSTEM_FORMAT},file=${BOOTDISK:-/home/arch/OSX-KVM/OpenCore/OpenCore.qcow2} \' \
     && tee -a Launch.sh <<< '-device ide-hd,bus=sata.2,drive=OpenCoreBoot \' \
     && tee -a Launch.sh <<< '-device ide-hd,bus=sata.3,drive=InstallMedia \' \
     && tee -a Launch.sh <<< '-drive id=InstallMedia,if=none,file=/home/arch/OSX-KVM/BaseSystem.img,format=raw \' \
@@ -284,6 +286,11 @@ RUN ln -s /home/arch/OSX-KVM/OpenCore /home/arch/OSX-KVM/OpenCore-Catalina || tr
 # env -e ADDITIONAL_PORTS with a comma
 # for example, -e ADDITIONAL_PORTS=hostfwd=tcp::23-:23,
 ENV ADDITIONAL_PORTS=
+
+# since the Makefile uses raw, and raw uses the full disk amount
+# we want to use a compressed qcow2
+# ENV BASESYSTEM_FORMAT=raw
+ENV BASESYSTEM_FORMAT=qcow2
 
 # add additional QEMU boot arguments
 ENV BOOT_ARGS=
