@@ -145,9 +145,11 @@ WORKDIR /home/arch/OSX-KVM
 
 # RUN wget https://raw.githubusercontent.com/kholia/OSX-KVM/master/fetch-macOS-v2.py
 
-ARG SHORTNAME
+ARG SHORTNAME=catalina
 
-RUN make
+RUN make \
+    && qemu-img convert BaseSystem.dmg -O qcow2 -p -c BaseSystem.img \
+    && rm ./BaseSystem.dmg
 
 ARG LINUX=true
 
@@ -185,7 +187,7 @@ RUN touch Launch.sh \
     && tee -a Launch.sh <<< '-drive id=OpenCoreBoot,if=none,snapshot=on,format=qcow2,file=${BOOTDISK:-/home/arch/OSX-KVM/OpenCore/OpenCore.qcow2} \' \
     && tee -a Launch.sh <<< '-device ide-hd,bus=sata.2,drive=OpenCoreBoot \' \
     && tee -a Launch.sh <<< '-device ide-hd,bus=sata.3,drive=InstallMedia \' \
-    && tee -a Launch.sh <<< '-drive id=InstallMedia,if=none,file=/home/arch/OSX-KVM/BaseSystem.img,format=raw \' \
+    && tee -a Launch.sh <<< '-drive id=InstallMedia,if=none,file=/home/arch/OSX-KVM/BaseSystem.img,format=${BASESYSTEM_FORMAT} \' \
     && tee -a Launch.sh <<< '-drive id=MacHDD,if=none,file=${IMAGE_PATH:-/home/arch/OSX-KVM/mac_hdd_ng.img},format=${IMAGE_FORMAT:-qcow2} \' \
     && tee -a Launch.sh <<< '-device ide-hd,bus=sata.4,drive=MacHDD \' \
     && tee -a Launch.sh <<< '-netdev user,id=net0,hostfwd=tcp::${INTERNAL_SSH_PORT:-10022}-:22,hostfwd=tcp::${SCREEN_SHARE_PORT:-5900}-:5900,${ADDITIONAL_PORTS} \' \
@@ -220,13 +222,18 @@ ENV KERNEL_PACKAGE_URL=https://archive.archlinux.org/packages/l/linux/linux-5.12
 ENV KERNEL_HEADERS_PACKAGE_URL=https://archive.archlinux.org/packages/l/linux/linux-headers-5.12.14.arch1-1-x86_64.pkg.tar.zst
 ENV LIBGUESTFS_PACKAGE_URL=https://archive.archlinux.org/packages/l/libguestfs/libguestfs-1.44.1-6-x86_64.pkg.tar.zst
 
+# fix ad hoc errors from using the arch museum to get libguestfs
+RUN sudo sed -i -e 's/^\#RemoteFileSigLevel/RemoteFileSigLevel/g' /etc/pacman.conf
+
 RUN sudo pacman -Syy \
     && sudo pacman -Rns linux --noconfirm \
     ; sudo pacman -S mkinitcpio --noconfirm \
-    && sudo pacman -U "${KERNEL_PACKAGE_URL}" --noconfirm \
-    && sudo pacman -U "${LIBGUESTFS_PACKAGE_URL}" --noconfirm \
+    && sudo pacman -U "${KERNEL_PACKAGE_URL}" --noconfirm || exit 1 \
+    && sudo pacman -U "${LIBGUESTFS_PACKAGE_URL}" --noconfirm || exit 1 \
     && rm -rf /var/tmp/.guestfs-* \
-    ; libguestfs-test-tool || exit 1
+    && yes | sudo pacman -Scc \
+    && libguestfs-test-tool || exit 1 \
+    && rm -rf /var/tmp/.guestfs-*
 
 ####
 
@@ -260,7 +267,8 @@ RUN ./Docker-OSX/osx-serial-generator/generate-specific-bootdisk.sh \
     --mac-address "${STOCK_MAC_ADDRESS}" \
     --width "${STOCK_WIDTH}" \
     --height "${STOCK_HEIGHT}" \
-    --output-bootdisk "${STOCK_BOOTDISK}" || exit 1
+    --output-bootdisk "${STOCK_BOOTDISK}" || exit 1 \
+    ; rm -rf /var/tmp/.guestfs-*
 
 RUN ./Docker-OSX/osx-serial-generator/generate-specific-bootdisk.sh \
     --master-plist-url="${STOCK_MASTER_PLIST_URL_NOPICKER}" \
@@ -271,7 +279,8 @@ RUN ./Docker-OSX/osx-serial-generator/generate-specific-bootdisk.sh \
     --mac-address "${STOCK_MAC_ADDRESS}" \
     --width "${STOCK_WIDTH}" \
     --height "${STOCK_HEIGHT}" \
-    --output-bootdisk "${STOCK_BOOTDISK_NOPICKER}" || exit 1
+    --output-bootdisk "${STOCK_BOOTDISK_NOPICKER}" || exit 1 \
+    ; rm -rf /var/tmp/.guestfs-*
 
 ### symlink the old directory as upstream has renamed a directory. Symlinking purely for backwards compatability!
 RUN ln -s /home/arch/OSX-KVM/OpenCore /home/arch/OSX-KVM/OpenCore-Catalina || true
@@ -281,6 +290,11 @@ RUN ln -s /home/arch/OSX-KVM/OpenCore /home/arch/OSX-KVM/OpenCore-Catalina || tr
 # env -e ADDITIONAL_PORTS with a comma
 # for example, -e ADDITIONAL_PORTS=hostfwd=tcp::23-:23,
 ENV ADDITIONAL_PORTS=
+
+# since the Makefile uses raw, and raw uses the full disk amount
+# we want to use a compressed qcow2
+# ENV BASESYSTEM_FORMAT=raw
+ENV BASESYSTEM_FORMAT=qcow2
 
 # add additional QEMU boot arguments
 ENV BOOT_ARGS=
