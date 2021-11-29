@@ -4,6 +4,8 @@
 
 Run Mac OS X in Docker with near-native performance! X11 Forwarding! iMessage security research! iPhone USB working! macOS in a Docker container!
 
+Conduct Security Research on macOS using both Linux & Windows!
+
 # Docker-OSX now has a Discord server & Telegram!
 
 The Discord is active on #docker-osx and anyone is welcome to come and ask questions, ideas, etc.
@@ -11,8 +13,6 @@ The Discord is active on #docker-osx and anyone is welcome to come and ask quest
 <p align="center">
     <a href="https://hub.docker.com/r/sickcodes/docker-osx"><img src="https://dockeri.co/image/sickcodes/docker-osx"/></a><a href="https://discord.gg/sickchat"><a href="https://discord.gg/sickchat" target="_blank"><img src="https://raw.githubusercontent.com/sickcodes/Docker-OSX/master/discord-logo.svg"></a></a>
 </p>
-
-
 
 
 ### Click to join the Discord server [https://discord.gg/sickchat](https://discord.gg/sickchat)
@@ -42,6 +42,8 @@ If you like this project, consider contributing here or upstream!
 ## Quick Start Docker-OSX
 
 Video setup tutorial is also available here: https://www.youtube.com/watch?v=wLezYl77Ll8
+
+**Windows users:** [click here to see the notes below](https://github.com/kimjammer/Docker-OSX/tree/patch-1#id-like-to-run-docker-osx-on-windows)!
 
 <p align="center">
   <a href="https://www.youtube.com/watch?v=wLezYl77Ll8" target="_blank"><img src="https://raw.githubusercontent.com/sickcodes/Docker-OSX/master/Youtube-Screenshot-Docker-OSX-Setup.png"></a>
@@ -474,6 +476,30 @@ echo 1 | sudo tee /sys/module/kvm/parameters/ignore_msrs
 
 sudo modprobe kvm
 ```
+
+### I'd like to run Docker-OSX on Windows
+
+Running Docker-OSX on Windows is now possible using WSL2 (Windows + Ubuntu Subsystem!).
+
+Ensure KVM is enabled (Windows 11 is required) and `x11-apps` is installed.
+
+First, setup [Docker for Windows following the official Docker guide](https://docs.docker.com/desktop/windows/wsl/#download).
+
+You need the official Docker Desktop exe: [https://desktop.docker.com/win/main/amd64/Docker%20Desktop%20Installer.exe](https://desktop.docker.com/win/main/amd64/Docker%20Desktop%20Installer.exe).
+
+#### Using WSLg (WSL GUI which includes Wayland or X applications to run)
+
+[https://github.com/microsoft/wslg](https://github.com/microsoft/wslg)
+
+To use WSLg's built in X11 server, change these two lines to point Docker-OSX to it.
+
+```bash
+    -e "DISPLAY=${DISPLAY:-:0}" \
+    -v /mnt/wslg/.X11-unix:/tmp/.X11-unix \
+```
+
+See more in-depth discussion about Docker-OSX on Windows [here](https://github.com/sickcodes/Docker-OSX/issues/17) and [here](https://github.com/sickcodes/Docker-OSX/issues/60).
+
 
 ## Additional boot instructions for when you are [creating your container](#container-creation-examples)
 
@@ -1177,18 +1203,6 @@ Or tell the container to use specific ones using `-e GENERATE_SPECIFIC=true`
     -e UUID="5CCB366D-9118-4C61-A00A-E5BAF3BED451" \
     -e MAC_ADDRESS="A8:5C:2C:9A:46:2F" \
 ```
-
-### I'd like to run Docker-OSX on Windows
-
-Running Docker-OSX on windows is possible just in WSL2 (Windows, Ubuntu).
-
-Ensure KVM is enabled and `x11-apps` is installed.
-
-to void troubles related to docker daemons on WLS 2, use Docker on Windows, and extern it to your distro.
-See Docker Docs for the complete detail setup [here](https://docs.docker.com/docker-for-windows/wsl/)
-
-See more in-depth discussion [here](https://github.com/sickcodes/Docker-OSX/issues/17) and [here](https://github.com/sickcodes/Docker-OSX/issues/60).
-
 
 ### Changing display resolution
 
