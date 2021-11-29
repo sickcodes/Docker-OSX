@@ -133,26 +133,26 @@ fish part-add /dev/sda p 302048 -2048
 fish part-set-gpt-type /dev/sda 1 C12A7328-F81F-11D2-BA4B-00A0C93EC93B
 fish part-set-bootable /dev/sda 1 true
 fish mkfs vfat /dev/sda1 label:EFI
-fish mkfs vfat /dev/sda2 label:OpenCoreBoo
+fish mkfs vfat /dev/sda2 label:OpenCore
 fish mount /dev/sda2 /
 fish mkdir /ESP
 fish mount /dev/sda1 /ESP
 
 msg "copy files to disk image"
 cp -v "$cfg" $WORK/config.plist
-fish mkdir                                     /ESP/EFI
-fish mkdir                                     /ESP/EFI/OC
-fish mkdir                                     /ESP/EFI/OC/Kexts
-fish mkdir                                     /ESP/EFI/OC/ACPI
-fish mkdir                                     /ESP/EFI/OC/Resources
-fish mkdir                                     /ESP/EFI/OC/Tools
-fish copy-in $WORK/EFI/BOOT                    /ESP/EFI
-fish copy-in $WORK/EFI/OC/OpenCore.efi         /ESP/EFI/OC
-fish copy-in $WORK/EFI/OC/Drivers              /ESP/EFI/OC/
-fish copy-in $WORK/EFI/OC/Kexts                /ESP/EFI/OC/
-fish copy-in $WORK/EFI/OC/ACPI                 /ESP/EFI/OC/
-fish copy-in $WORK/EFI/OC/Resources            /ESP/EFI/OC/
-fish copy-in $WORK/EFI/OC/Tools                /ESP/EFI/OC/
+fish mkdir /ESP/EFI
+fish mkdir /ESP/EFI/OC
+fish mkdir /ESP/EFI/OC/Kexts
+fish mkdir /ESP/EFI/OC/ACPI
+fish mkdir /ESP/EFI/OC/Resources
+fish mkdir /ESP/EFI/OC/Tools
+fish copy-in $WORK/EFI/BOOT /ESP/EFI
+fish copy-in $WORK/EFI/OC/OpenCore.efi /ESP/EFI/OC
+fish copy-in $WORK/EFI/OC/Drivers /ESP/EFI/OC/
+fish copy-in $WORK/EFI/OC/Kexts /ESP/EFI/OC/
+fish copy-in $WORK/EFI/OC/ACPI /ESP/EFI/OC/
+fish copy-in $BASE/resources/OcBinaryData/Resources /ESP/EFI/OC/
+fish copy-in $WORK/EFI/OC/Tools /ESP/EFI/OC/
 
 # Note
 fish copy-in startup.nsh /

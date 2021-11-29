@@ -30,6 +30,7 @@ General options:
     --create-envs, --envs           Create all corresponding sourcable envs
     --create-plists, --plists       Create all corresponding config.plists
     --create-bootdisks, --bootdisks Create all corresponding bootdisks [SLOW]
+    --thinkpad                      Toggles ForceOcWriteFlash to true
     --help, -h, help                Display this help and exit
 
 Additional options only if you are creating ONE serial set:
@@ -38,7 +39,7 @@ Additional options only if you are creating ONE serial set:
 
 Custom plist placeholders:
     {{DEVICE_MODEL}}, {{SERIAL}}, {{BOARD_SERIAL}},
-    {{UUID}}, {{ROM}}, {{WIDTH}}, {{HEIGHT}}
+    {{UUID}}, {{ROM}}, {{WIDTH}}, {{HEIGHT}}, {{THINKPAD}}
 
 Example:
     ./generate-unique-machine-values.sh --count 1 --plists --bootdisks --envs
@@ -202,9 +203,14 @@ while (( "$#" )); do
                 export CREATE_ENVS=1
                 shift
             ;;
+    
+    --thinkpad )
+                export THINKPAD=true
+                shift
+            ;;
 
     *)
-                echo "Invalid option. Running with default values..."
+                echo "Invalid option ${1}. Running with default values..."
                 shift
             ;;
     esac
@@ -226,12 +232,12 @@ download_vendor_mac_addresses () {
 
 download_qcow_efi_folder () {
 
-    export EFI_FOLDER=./OpenCore-Catalina/EFI
+    export EFI_FOLDER=./OpenCore/EFI
     export RESOURCES_FOLDER=./resources/OcBinaryData/Resources
 
     # check if we are inside OSX-KVM already
     # if not, download OSX-KVM locally
-    [ -d ./OpenCore-Catalina/EFI/ ] || {
+    [ -d ./OpenCore/EFI/ ] || {
         [ -d ./OSX-KVM/ ] || git clone --recurse-submodules --depth 1 https://github.com/kholia/OSX-KVM.git
         export EFI_FOLDER="./OSX-KVM/${EFI_FOLDER}"
     }
@@ -313,6 +319,7 @@ export UUID="${UUID}"
 export MAC_ADDRESS="${MAC_ADDRESS}"
 export WIDTH="${WIDTH}"
 export HEIGHT="${HEIGHT}"
+export THINKPAD="${THINKPAD}"
 EOF
 
             fi
@@ -333,10 +340,17 @@ EOF
                     wget -O "${MASTER_PLIST:=./config-nopicker-custom.plist}" "${MASTER_PLIST_URL}"
                 fi
 
+                if [[ "${THINKPAD}" == true ]]; then
+                    echo "Thinkpads: setting ForceOcWriteFlash to true"
+                    export THINKPAD=true
+                else
+                    export THINKPAD=false
+                fi
+
                 mkdir -p "${OUTPUT_DIRECTORY}/plists"
                 source "${OUTPUT_ENV_FILE}"
-                ROM_VALUE="${MAC_ADDRESS//\:/}"
-                ROM_VALUE="${ROM_VALUE,,}"
+                ROM="${MAC_ADDRESS//\:/}"
+                ROM="${ROM,,}"
                 sed -e s/\{\{DEVICE_MODEL\}\}/"${DEVICE_MODEL}"/g \
                     -e s/\{\{SERIAL\}\}/"${SERIAL}"/g \
                     -e s/\{\{BOARD_SERIAL\}\}/"${BOARD_SERIAL}"/g \
@@ -344,6 +358,7 @@ EOF
                     -e s/\{\{ROM\}\}/"${ROM}"/g \
                     -e s/\{\{WIDTH\}\}/"${WIDTH}"/g \
                     -e s/\{\{HEIGHT\}\}/"${HEIGHT}"/g \
+                    -e s/\{\{THINKPAD\}\}/"${THINKPAD}"/g \
                     "${MASTER_PLIST}" > "${OUTPUT_DIRECTORY}/plists/${SERIAL}.config.plist" || exit 1
             fi
 
