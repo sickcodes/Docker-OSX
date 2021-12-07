@@ -201,6 +201,13 @@ If you have a desktop PC, you can use [@Silfalion](https://github.com/Silfalion)
 
 # (USBFLUXD) iPhone USB -> Network style passthrough OSX-KVM Docker-OSX
 
+Video setup tutorial for usbfluxd is also available here: https://www.youtube.com/watch?v=kTk5fGjK_PM
+
+<p align="center">
+  <a href="https://www.youtube.com/watch?v=kTk5fGjK_PM" target="_blank"><img alt="iPhone USB passthrough on macOS virtual machine Linux & Windows" src="https://raw.githubusercontent.com/sickcodes/Docker-OSX/master/Youtube-USBFLUXD-Screenshot-Docker-OSX.png"></a>
+</p>
+
+
 This method WORKS on laptop, PC, anything!
 
 Thank you [@nikias](https://github.com/nikias) for [usbfluxd](https://github.com/corellium/usbfluxd) via [https://github.com/corellium](https://github.com/corellium)!
@@ -261,6 +268,8 @@ sudo make install
 ```
 
 Accept the USB over TCP connection, and appear as local:
+
+(you may need to change `172.17.0.1` to the IP address of the host. e.g. check `ip addr`)
 
 ```bash
 # on the guest
