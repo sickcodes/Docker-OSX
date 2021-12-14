@@ -70,7 +70,8 @@
 # VNC Version
 # Let's piggyback the other image:
 
-FROM sickcodes/docker-osx:latest
+ARG BASE_IMAGE=sickcodes/docker-osx:latest
+FROM ${BASE_IMAGE}
 
 MAINTAINER 'https://twitter.com/sickcodes' <https://sick.codes>
 

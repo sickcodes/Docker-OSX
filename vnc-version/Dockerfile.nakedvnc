@@ -30,7 +30,8 @@
 #       docker run -it --device /dev/kvm -p 50922:10022 -v ${PWD}/mac_hdd_ng.img:/image -e "DISPLAY=${DISPLAY:-:0.0}" -v /tmp/.X11-unix:/tmp/.X11-unix docker-osx:nakedvnc
 # 
 
-FROM sickcodes/docker-osx:latest
+ARG BASE_IMAGE=sickcodes/docker-osx:latest
+FROM ${BASE_IMAGE}
 
 MAINTAINER 'https://twitter.com/sickcodes' <https://sick.codes>
 
