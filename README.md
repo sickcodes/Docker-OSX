@@ -881,7 +881,7 @@ Start the Docker-OSX container with the additional flag `--network host`
 Create and mount the nfs folder from the mac terminal:
 ```
 mkdir -p ~/mnt
-sudo mount -t nfs 10.0.2.2:/srv/nfs/share ~/mnt
+sudo mount_nfs -o locallocks 10.0.2.2:/srv/nfs/share ~/mnt
 ```
 
 ### Share USB Drive into macOS over QEMU
