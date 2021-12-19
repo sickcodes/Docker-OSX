@@ -22,6 +22,7 @@ General options:
     --output-dir <directory>        Optionally change the script output location
     --width <string>                Resolution x axis length in px, default 1920
     --height <string>               Resolution y axis length in px, default 1080
+    --kernel-args <string>          Additional boot-args
     --input-plist-url <url>         Specify an alternative master plist, via URL
     --master-plist-url <url>        Same as above.
     --custom-plist <filename>       Optionally change the input plist.
@@ -30,7 +31,6 @@ General options:
     --create-envs, --envs           Create all corresponding sourcable envs
     --create-plists, --plists       Create all corresponding config.plists
     --create-bootdisks, --bootdisks Create all corresponding bootdisks [SLOW]
-    --thinkpad                      Toggles ForceOcWriteFlash to true
     --help, -h, help                Display this help and exit
 
 Additional options only if you are creating ONE serial set:
@@ -39,7 +39,7 @@ Additional options only if you are creating ONE serial set:
 
 Custom plist placeholders:
     {{DEVICE_MODEL}}, {{SERIAL}}, {{BOARD_SERIAL}},
-    {{UUID}}, {{ROM}}, {{WIDTH}}, {{HEIGHT}}, {{THINKPAD}}
+    {{UUID}}, {{ROM}}, {{WIDTH}}, {{HEIGHT}}, {{KERNEL_ARGS}}
 
 Example:
     ./generate-unique-machine-values.sh --count 1 --plists --bootdisks --envs
@@ -203,14 +203,9 @@ while (( "$#" )); do
                 export CREATE_ENVS=1
                 shift
             ;;
-    
-    --thinkpad )
-                export THINKPAD=true
-                shift
-            ;;
 
     *)
-                echo "Invalid option ${1}. Running with default values..."
+                echo "Invalid option. Running with default values..."
                 shift
             ;;
     esac
@@ -295,14 +290,14 @@ generate_serial_sets () {
 
             # append to csv file
             tee -a "${CSV_SERIAL_SETS_FILE}" <<EOF
-"${DEVICE_MODEL}","${SERIAL}","${BOARD_SERIAL}","${UUID}","${MAC_ADDRESS}","${WIDTH}","${HEIGHT}"
+"${DEVICE_MODEL}","${SERIAL}","${BOARD_SERIAL}","${UUID}","${MAC_ADDRESS}","${WIDTH}","${HEIGHT}","${KERNEL_ARGS}"
 EOF
             echo "Wrote CSV to: ${CSV_SERIAL_SETS_FILE}"
 
             # append to tsv file
             T=$'\t'
             tee -a "${TSV_SERIAL_SETS_FILE}" <<EOF
-${DEVICE_MODEL}${T}${SERIAL}${T}${BOARD_SERIAL}${T}${UUID}${T}${MAC_ADDRESS}${T}${WIDTH}${T}${HEIGHT}
+${DEVICE_MODEL}${T}${SERIAL}${T}${BOARD_SERIAL}${T}${UUID}${T}${MAC_ADDRESS}${T}${WIDTH}${T}${HEIGHT}${T}${KERNEL_ARGS}
 EOF
             echo "Wrote TSV to: ${TSV_SERIAL_SETS_FILE}"
 
@@ -319,7 +314,6 @@ export UUID="${UUID}"
 export MAC_ADDRESS="${MAC_ADDRESS}"
 export WIDTH="${WIDTH}"
 export HEIGHT="${HEIGHT}"
-export THINKPAD="${THINKPAD}"
 EOF
 
             fi
@@ -340,13 +334,6 @@ EOF
                     wget -O "${MASTER_PLIST:=./config-nopicker-custom.plist}" "${MASTER_PLIST_URL}"
                 fi
 
-                if [[ "${THINKPAD}" == true ]]; then
-                    echo "Thinkpads: setting ForceOcWriteFlash to true"
-                    export THINKPAD=true
-                else
-                    export THINKPAD=false
-                fi
-
                 mkdir -p "${OUTPUT_DIRECTORY}/plists"
                 source "${OUTPUT_ENV_FILE}"
                 ROM="${MAC_ADDRESS//\:/}"
@@ -358,7 +345,7 @@ EOF
                     -e s/\{\{ROM\}\}/"${ROM}"/g \
                     -e s/\{\{WIDTH\}\}/"${WIDTH}"/g \
                     -e s/\{\{HEIGHT\}\}/"${HEIGHT}"/g \
-                    -e s/\{\{THINKPAD\}\}/"${THINKPAD}"/g \
+                    -e s/\{\{KERNEL_ARGS\}\}/"${KERNEL_ARGS:-}"/g \
                     "${MASTER_PLIST}" > "${OUTPUT_DIRECTORY}/plists/${SERIAL}.config.plist" || exit 1
             fi
 
@@ -376,11 +363,11 @@ EOF
         done
 
         [ -e "${CSV_SERIAL_SETS_FILE}" ] && \
-            cat <(echo "DEVICE_MODEL,SERIAL,BOARD_SERIAL,UUID,MAC_ADDRESS,WIDTH,HEIGHT") "${CSV_SERIAL_SETS_FILE}"
+            cat <(echo "DEVICE_MODEL,SERIAL,BOARD_SERIAL,UUID,MAC_ADDRESS,WIDTH,HEIGHT,KERNEL_ARGS") "${CSV_SERIAL_SETS_FILE}"
 
 
         [ -e "${TSV_SERIAL_SETS_FILE}" ] && \
-            cat <(printf "DEVICE_MODEL\tSERIAL\tBOARD_SERIAL\tUUID\tMAC_ADDRESS\tWIDTH\tHEIGHT\n") "${TSV_SERIAL_SETS_FILE}"
+            cat <(printf "DEVICE_MODEL\tSERIAL\tBOARD_SERIAL\tUUID\tMAC_ADDRESS\tWIDTH\tHEIGHT\tKERNEL_ARGS\n") "${TSV_SERIAL_SETS_FILE}"
 
 }
 
