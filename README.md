@@ -488,27 +488,52 @@ sudo modprobe kvm
 
 ### I'd like to run Docker-OSX on Windows
 
-Running Docker-OSX on Windows is now possible using WSL2 (Windows + Ubuntu Subsystem!).
+Running Docker-OSX on Windows is now possible using WSL2 (Windows 10/11 + WSL Subsystem).
 
-Ensure KVM is enabled (Windows 11 is required) and `x11-apps` is installed.
+Before continuing, you have to check your Windows 10 versione, in fact you need 20175 build or higher. If you are on Windows 11 you can continue it without care about your version.
 
-First, setup [Docker for Windows following the official Docker guide](https://docs.docker.com/desktop/windows/wsl/#download).
+Ensure you have enabled the features on your Windows. Search on start "Turn Windows Features on or off" and check these checkbox:
 
-You need the official Docker Desktop exe: [https://desktop.docker.com/win/main/amd64/Docker%20Desktop%20Installer.exe](https://desktop.docker.com/win/main/amd64/Docker%20Desktop%20Installer.exe).
-
-#### Using WSLg (WSL GUI which includes Wayland or X applications to run)
-
-[https://github.com/microsoft/wslg](https://github.com/microsoft/wslg)
-
-To use WSLg's built in X11 server, change these two lines to point Docker-OSX to it.
-
-```bash
-    -e "DISPLAY=${DISPLAY:-:0}" \
-    -v /mnt/wslg/.X11-unix:/tmp/.X11-unix \
+```
+Windows Subsystem For Linux
+Windows Hypervisor Platform
+Virtual Machine Platform
 ```
 
-See more in-depth discussion about Docker-OSX on Windows [here](https://github.com/sickcodes/Docker-OSX/issues/17) and [here](https://github.com/sickcodes/Docker-OSX/issues/60).
+Enabling all the options above, you will have WSL on your Windows OS and the third party application for virtualization like VMWare, VBox, etc... 
 
+After that, you need to have a version 2 WSL Distro installed, check [this link to upgrade from WSL1 to WSL2](https://docs.microsoft.com/en-us/windows/wsl/install#upgrade-version-from-wsl-1-to-wsl-2) in case you have already installed WSL Distro.
+
+After WSL installation, go to C:/Users/<Your_Name>/ and add `nestedVirtualization=true` to the end of the file (If the file not exist, create it).
+The result should be like this:
+```
+[wsl2]
+nestedVirtualization=true
+```
+
+Go to your WSL Distro and check if KVM is enabled by using `kvm-ok` command, the output should be like this:
+
+```
+INFO: /dev/kvm exists
+KVM acceleration can be used
+```
+
+It's time to download and install [Docker for Windows](https://docs.docker.com/desktop/windows/install/).
+
+After installation, go to Setting and check these 2 checkbox:
+
+```
+General -> "Use the WSL2 based engine";
+Resources -> "Enable integration with my default WSL distro"
+```
+
+Ensure `x11-apps` is installed, in case use the command `sudo apt install x11-apps -y`
+
+From now, you have 3 way to get video output:
+
+- WSLg: is the one I use, actually is not perfect, ex. keyboard is not fully passthrough or you will see second mouse on the desktop! [Here the issue on WSLg](https://github.com/microsoft/wslg/issues/376)
+- Desktop Environment: this will give you a full linux desktop expirience but it will use a little bit of resources "RAM, CPU, GPU, etc..". I will attach an example guide but you will find a tons of guide to set a DE. [DE Example](https://www.makeuseof.com/tag/linux-desktop-windows-subsystem/)
+- VNC: You can add -vnc argument to qemu and connect to your VM via VNC Client. [Here how to](https://wiki.archlinux.org/title/QEMU#VNC)
 
 ## Additional boot instructions for when you are [creating your container](#container-creation-examples)
 
