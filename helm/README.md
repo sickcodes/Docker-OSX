@@ -33,11 +33,11 @@ This installs `docker-osx` in Kubernetes.
 
 ## Requirements
 
-*) Install [host machine requirements](#INSTALL-QEMU-AND-GPU-IOMMU.md)
-    *) Ensure you are running QEMU 5.X
-*) Kubernetes
-*) Helm v2
-*) `sickcodes/docker-osx-vnc` Docker image
+* Install [host machine requirements](#INSTALL-QEMU-AND-GPU-IOMMU.md)
+    * Ensure you are running QEMU 5.X
+* Kubernetes
+* Helm v2
+* `sickcodes/docker-osx-vnc` Docker image
 
 ### Build `sickcodes/docker-osx-vnc`
 
