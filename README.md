@@ -492,16 +492,18 @@ Running Docker-OSX on Windows is possible using WSL2 (Windows 11 + Windows Subsy
 
 You must have Windows 11 installed with build 22000+ (21H2 or higher).
 
-First, install WSL on your computer by running this command in an administrator powershell. For more info, look [here](https://docs.microsoft.com/en-us/windows/wsl/install)
+First, install WSL on your computer by running this command in an administrator powershell. For more info, look [here](https://docs.microsoft.com/en-us/windows/wsl/install).
 
 This will install Ubuntu by default.
 ```
 wsl --install
 ```
 
+ You can confirm WSL2 is enabled using `wsl -l -v` in PowerShell. To see other distributions that are available, use `wsl --install -l -o`.
+
 If you have previously installed WSL1, upgrade to WSL 2. Check [this link to upgrade from WSL1 to WSL2](https://docs.microsoft.com/en-us/windows/wsl/install#upgrade-version-from-wsl-1-to-wsl-2).
 
-After WSL installation, go to `C:/Users/<Your_Name>/.wslconfig` and add `nestedVirtualization=true` to the end of the file (If the file doesn't exist, create it).
+After WSL installation, go to `C:/Users/<Your_Name>/.wslconfig` and add `nestedVirtualization=true` to the end of the file (If the file doesn't exist, create it). You may need to select "Show Hidden Files" and "Show File Extensions" in File Explorer options.
 The result should be like this:
 ```
 [wsl2]
