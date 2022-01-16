@@ -499,7 +499,7 @@ This will install Ubuntu by default.
 wsl --install
 ```
 
- You can confirm WSL2 is enabled using `wsl -l -v` in PowerShell. To see other distributions that are available, use `wsl --install -l -o`.
+ You can confirm WSL2 is enabled using `wsl -l -v` in PowerShell. To see other distributions that are available, use `wsl -l -o`.
 
 If you have previously installed WSL1, upgrade to WSL 2. Check [this link to upgrade from WSL1 to WSL2](https://docs.microsoft.com/en-us/windows/wsl/install#upgrade-version-from-wsl-1-to-wsl-2).
 
