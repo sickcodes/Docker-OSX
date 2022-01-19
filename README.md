@@ -490,7 +490,7 @@ sudo modprobe kvm
 
 Running Docker-OSX on Windows is now possible using WSL2 (Windows 10/11 + WSL Subsystem).
 
-Before continuing, you have to check your Windows 10 versione, in fact you need 20175 build or higher. If you are on Windows 11 you can continue it without care about your version.
+Before continuing, you have to check your Windows 10 version, in fact you need 20175 build or higher. If you are on Windows 11 you can continue it without care about your version.
 
 Ensure you have enabled the features on your Windows. Search on start "Turn Windows Features on or off" and check these checkbox:
 
@@ -504,7 +504,7 @@ Enabling all the options above, you will have WSL on your Windows OS and the thi
 
 After that, you need to have a version 2 WSL Distro installed, check [this link to upgrade from WSL1 to WSL2](https://docs.microsoft.com/en-us/windows/wsl/install#upgrade-version-from-wsl-1-to-wsl-2) in case you have already installed WSL Distro.
 
-After WSL installation, go to C:/Users/<Your_Name>/ and add `nestedVirtualization=true` to the end of the file (If the file not exist, create it).
+After WSL installation, go to C:/Users/<Your_Name>/.wslconfig and add `nestedVirtualization=true` to the end of the file (If the file not exist, create it).
 The result should be like this:
 ```
 [wsl2]
