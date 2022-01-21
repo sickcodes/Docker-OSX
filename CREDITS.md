@@ -113,3 +113,11 @@ This project now uses the fantastic OpenCore bootloader from the community OpenC
 [@martinmullins](https://github.com/martinmullins) Notes for mounting an NFS folder from a linux host #392
 
 [@kimjammer](https://github.com/kimjammer) Readme - Added instructions for using WSLg's built in X11 server #395
+
+[@jk2K](https://github.com/jk2K) fix: support dynamic change of Base image #408
+
+[@MikeCoder96](https://github.com/MikeCoder96) Update README.md with WSL how to #412
+
+[@aslafy-z](https://github.com/aslafy-z) chore(docs): update helm requirements list style #420
+
+@Mhartig -  Worked out issue `Enter a number (default=1): error: invalid number: y`
