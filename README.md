@@ -772,6 +772,17 @@ docker run \
     sickcodes/docker-osx pactl list
 ```
 
+#### PulseAudio with WSLg
+
+```bash
+docker run \
+    --device /dev/kvm \
+    -e AUDIO_DRIVER=pa,server=unix:/tmp/pulseaudio.socket \
+    -v /mnt/wslg/runtime-dir/pulse/native:/tmp/pulseaudio.socket \
+    -v /mnt/wslg/.X11-unix:/tmp/.X11-unix \
+    sickcodes/docker-osx
+```
+
 ### Forward additional ports (nginx hosting example)
 
 It's possible to forward additional ports depending on your needs. In this example, we'll use Mac OSX to host nginx:
