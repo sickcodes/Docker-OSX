@@ -296,6 +296,13 @@ SEE commands in [https://github.com/sickcodes/osx-optimizer](https://github.com/
 - Disable heavy login screen wallpaper
 - Disable updates (at your own risk!)
 
+## Increase disk space by mounting filesystem on separate physical disk
+
+For more information SEE https://sick.codes/how-to-run-docker-from-block-storage/
+
+- Mount /var/lib/docker on physical disk
+- Use cheap physical disk storage instead using your server's disk
+
 ## Important notices:
 
 **2021-11-14** - Added High Sierra, Mojave
