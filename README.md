@@ -296,6 +296,41 @@ SEE commands in [https://github.com/sickcodes/osx-optimizer](https://github.com/
 - Disable heavy login screen wallpaper
 - Disable updates (at your own risk!)
 
+## Increase disk space by moving /var/lib/docker to external drive, block storage, NFS, or any other location conceivable.
+
+Move /var/lib/docker, following the tutorial below
+
+- Cheap large physical disk storage instead using your server's disk, or SSD.
+- Block Storage, NFS, etc.
+
+Tutorial here: https://sick.codes/how-to-run-docker-from-block-storage/
+
+Only follow the above tutorial if you are happy with wiping all your current Docker images/layers.
+
+Safe mode: Disable docker temporarily so you can move the Docker folder temporarily.
+
+- Do NOT do this until you have moved your image out already [https://github.com/dulatello08/Docker-OSX/#quick-start-your-own-image-naked-container-image](https://github.com/dulatello08/Docker-OSX/#quick-start-your-own-image-naked-container-image)
+
+```bash
+killall dockerd
+systemctl disable --now docker
+systemctl disable --now docker.socket
+systemctl stop docker
+systemctl stop docker.socket
+```
+Now, that Docker daemon is off, move /var/lib/docker somewhere
+
+Then, symbolicly link /var/lib/docker somewhere:
+
+```bash
+mv /var/lib/docker /run/media/user/some_drive/docker
+ln -s /run/media/user/some_drive/docker /var/lib/docker
+
+# now check if /var/lib/docker is working still
+ls /var/lib/docker
+```
+If you see folders, then it worked. You can restart Docker, or just reboot if you want to be sure.
+
 ## Important notices:
 
 **2021-11-14** - Added High Sierra, Mojave
