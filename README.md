@@ -57,7 +57,7 @@ First time here? try [initial setup](#initial-setup), otherwise try the instruct
 ### Catalina [![https://img.shields.io/docker/image-size/sickcodes/docker-osx/latest?label=sickcodes%2Fdocker-osx%3Alatest](https://img.shields.io/docker/image-size/sickcodes/docker-osx/latest?label=sickcodes%2Fdocker-osx%3Alatest)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
 
 ```bash
-qemu-img create -f qcow2 image.img
+qemu-img create -f qcow2 image.img 512G
 
 docker run -it \
     --device /dev/kvm \
@@ -73,7 +73,7 @@ docker run -it \
 ### Big Sur [![https://img.shields.io/docker/image-size/sickcodes/docker-osx/big-sur?label=sickcodes%2Fdocker-osx%3Abig-sur](https://img.shields.io/docker/image-size/sickcodes/docker-osx/big-sur?label=sickcodes%2Fdocker-osx%3Abig-sur)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
 
 ```bash
-qemu-img create -f qcow2 image.img
+qemu-img create -f qcow2 image.img 512G
 
 docker run -it \
     --device /dev/kvm \
@@ -90,7 +90,7 @@ docker run -it \
 ### Monterey [![https://img.shields.io/docker/image-size/sickcodes/docker-osx/monterey?label=sickcodes%2Fdocker-osx%3Amonterey](https://img.shields.io/docker/image-size/sickcodes/docker-osx/monterey?label=sickcodes%2Fdocker-osx%3Amonterey)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
 
 ```bash
-qemu-img create -f qcow2 image.img
+qemu-img create -f qcow2 image.img 512G
 
 docker run -it \
     --device /dev/kvm \
@@ -129,7 +129,7 @@ docker run -it \
 ### High Sierra [![https://img.shields.io/docker/image-size/sickcodes/docker-osx/high-sierra?label=sickcodes%2Fdocker-osx%3Ahigh-sierra](https://img.shields.io/docker/image-size/sickcodes/docker-osx/high-sierra?label=sickcodes%2Fdocker-osx%3Ahigh-sierra)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
 
 ```bash
-qemu-img create -f qcow2 image.img
+qemu-img create -f qcow2 image.img 512G
 
 docker run -it \
     --device /dev/kvm \
@@ -145,7 +145,7 @@ docker run -it \
 ### Mojave [![https://img.shields.io/docker/image-size/sickcodes/docker-osx/mojave?label=sickcodes%2Fdocker-osx%3Amojave](https://img.shields.io/docker/image-size/sickcodes/docker-osx/mojave?label=sickcodes%2Fdocker-osx%3Amojave)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
 
 ```bash
-qemu-img create -f qcow2 image.img
+qemu-img create -f qcow2 image.img 512G
 
 docker run -it \
     --device /dev/kvm \
