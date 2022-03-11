@@ -125,6 +125,12 @@ TEST_BUILDS=(
     'docker-osx:auto'
 )
 
+TEST_BUILDS=(
+    'docker-osx:naked'
+    'docker-osx:naked-auto'
+    'docker-osx:auto'
+)
+
 VERSION_BUILDS=(
     'high-sierra'
     'mojave'
@@ -132,6 +138,20 @@ VERSION_BUILDS=(
     'big-sur'
     'monterey'
 )
+
+warning () {
+    clear
+    for j in {15..1}; do 
+        echo "############# WARNING: THIS SCRIPT IS NOT INTENDED FOR USE BY ################"
+        echo "############# IT IS USED BY THE PROJECT TO BUILD AND PUSH TO DOCKERHUB #######"
+        echo ""
+        echo "                     Press Ctrl C to stop.       "
+        MAX_COLS=$((${COLUMNS}/2))
+        printf "$j %.0s" {1..20}
+        echo
+        sleep 1
+    done
+}
 
 install_docker () {
     apt remove docker docker-engine docker.io containerd runc -y \
@@ -270,6 +290,7 @@ EOF
     systemctl enable --now docker
 }
 
+warning
 tee -a ~/.bashrc <<EOF
 export DEBIAN_FRONTEND=noninteractive
 export TZ=UTC
