@@ -569,10 +569,18 @@ Finally, there are 3 ways to get video output:
 
 To use WSLg's built-in X-11 server, change these two lines in the docker run command to point Docker-OSX to WSLg.
 
-```bash
+```
+-e "DISPLAY=${DISPLAY:-:0.0}" \
+-v /mnt/wslg/.X11-unix:/tmp/.X11-unix \
+```
+Or try:
+
+```
 -e "DISPLAY=${DISPLAY:-:0}" \
 -v /mnt/wslg/.X11-unix:/tmp/.X11-unix \
 ```
+
+For Ubuntu 20.x on Windows, see [https://github.com/sickcodes/Docker-OSX/discussions/458](https://github.com/sickcodes/Docker-OSX/discussions/458)
 
 - VNC: See the [VNC section](#building-a-headless-container-which-allows-insecure-vnc-on-localhost-for-local-use-only) for more information. You could also add -vnc argument to qemu. Connect to your mac VM via a VNC Client. [Here is a how to](https://wiki.archlinux.org/title/QEMU#VNC)
 - Desktop Environment: This will give you a full desktop linux experiencem but it will use a bit more of the computer's resources. Here is an example guide, but there are other guides that help set up a desktop environment. [DE Example](https://www.makeuseof.com/tag/linux-desktop-windows-subsystem/)
