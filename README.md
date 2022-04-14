@@ -642,13 +642,15 @@ Or
 
 #### Use more CPU Cores/SMP
 
-This will use all available cores; adjust accordingly to the day of the week:
+Examples:
 
-```
-    -e CPU_STRING=$(nproc) \
-```
+`-e EXTRA='-smp 6,sockets=3,cores=2'`
 
-This will use `-smp $(nproc)`
+`-e EXTRA='-smp 8,sockets=4,cores=2'`
+
+`-e EXTRA='-smp 16,sockets=8,cores=2'`
+
+Note, unlike memory, CPU usage is shared. so you can allocate all of your CPU's to the container.
 
 ### Confirm your user is part of the the Docker group, KVM group, libvirt group
 
