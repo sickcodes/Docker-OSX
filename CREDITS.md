@@ -120,4 +120,12 @@ This project now uses the fantastic OpenCore bootloader from the community OpenC
 
 [@aslafy-z](https://github.com/aslafy-z) chore(docs): update helm requirements list style #420
 
-@Mhartig -  Worked out issue `Enter a number (default=1): error: invalid number: y`
+[@kimjammer](https://github.com/kimjammer) Update Windows Installation section #422 
+
+[@Mhartig](https://github.com/Mhartig) -  Worked out issue `Enter a number (default=1): error: invalid number: y`
+
+[@felipestt](https://github.com/felipestt)  Use more CPU Cores/SMP' broken #440 
+
+[@routmoute](https://github.com/routmoute) README: add PulseAudio with WSLg #442 
+
+[@dulatello08](https://github.com/dulatello08) Update README.md #452
