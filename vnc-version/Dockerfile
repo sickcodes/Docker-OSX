@@ -95,8 +95,8 @@ RUN if [[ "${RANKMIRRORS}" ]]; then { pacman -Sy wget --noconfirm || pacman -Syu
 
 USER arch
 
-RUN sudo pacman -Syyuu --noconfirm \
-    && sudo pacman -S tigervnc xterm xorg-xhost xdotool ufw --noconfirm \
+RUN yes | sudo pacman -Syyuu --noconfirm \
+    && yes | sudo pacman -S tigervnc xterm xorg-xhost xdotool ufw --noconfirm \
     && mkdir -p ${HOME}/.vnc \
     && touch ~/.vnc/config \
     && tee -a ~/.vnc/config <<< 'geometry=1920x1080' \
