@@ -155,10 +155,16 @@ RUN make \
 
 ARG LINUX=true
 
+# Some package signature are invalid/expired, need to disable signature checking
+RUN sudo sed -i 's/SigLevel    = Required DatabaseOptional/SigLevel = Never/g' /etc/pacman.conf 
+
 # required to use libguestfs inside a docker container, to create bootdisks for docker-osx on-the-fly
 RUN if [[ "${LINUX}" == true ]]; then \
         sudo pacman -Syu linux libguestfs --noconfirm \
     ; fi
+
+# Restoring pacman conf
+sed -i 's/SigLevel = Never/SigLevel    = Required DatabaseOptional/g' /etc/pacman.conf
 
 # optional --build-arg to change branches for testing
 ARG BRANCH=master
