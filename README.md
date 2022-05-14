@@ -552,7 +552,7 @@ wsl --install
 
 If you have previously installed WSL1, upgrade to WSL 2. Check [this link to upgrade from WSL1 to WSL2](https://docs.microsoft.com/en-us/windows/wsl/install#upgrade-version-from-wsl-1-to-wsl-2).
 
-After WSL installation, go to `C:/Users/<Your_Name>/.wslconfig` and add `nestedVirtualization=true` to the end of the file (If the file doesn't exist, create it). You may need to select "Show Hidden Files" and "Show File Extensions" in File Explorer options.
+After WSL installation, go to `C:/Users/<Your_Name>/.wslconfig` and add `nestedVirtualization=true` to the end of the file (If the file doesn't exist, create it). For more information about the `.wslconfig` file check [this link](https://docs.microsoft.com/en-us/windows/wsl/wsl-config#wslconfig). Verify that you have selected "Show Hidden Files" and "Show File Extensions" in File Explorer options.
 The result should be like this:
 ```
 [wsl2]
@@ -1874,4 +1874,3 @@ You may when initialising or booting into a container see errors from the `(qemu
 `ALSA lib blahblahblah: (function name) returned error: no such file or directory`. These are more or less expected. As long as you are able to boot into the container and everything is working, no reason to worry about these.
 
 See also: [here](https://github.com/sickcodes/Docker-OSX/issues/174).
-
