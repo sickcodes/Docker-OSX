@@ -178,12 +178,15 @@ Enable SSH in network sharing inside the guest first. Change `-e "USERNAME=user"
 Since you can't see the screen, use the PLIST with nopicker, for example:
 
 ```bash
-wget https://images2.sick.codes/mac_hdd_ng_auto.img
+# Catalina
+# wget https://images2.sick.codes/mac_hdd_ng_auto.img
+# Monterey
+wget https://images.sick.codes/mac_hdd_ng_auto_monterey.img
 
 docker run -it \
     --device /dev/kvm \
     -p 50922:10022 \
-    -v "${PWD}/mac_hdd_ng_auto.img:/image" \
+    -v "${PWD}/mac_hdd_ng_auto_monterey:/image" \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
     -e "DISPLAY=${DISPLAY:-:0.0}" \
     -e "USERNAME=user" \
@@ -192,6 +195,17 @@ docker run -it \
     -e MASTER_PLIST_URL=https://raw.githubusercontent.com/sickcodes/Docker-OSX/master/custom/config-nopicker-custom.plist \
     sickcodes/docker-osx:naked-auto
 ```
+
+# Share directories, sharing files, shared folder, mount folder
+The easiest and most secure way is `sshfs`
+```bash
+# on Linux/Windows
+mkdir ~/mnt/osx
+sshfs user@localhost:/ -p 50922 ~/mnt/osx
+# wait a few seconds, and ~/mnt/osx will have full rootfs mounted over ssh, and in userspace
+# automated: sshpass -p <password> sshfs user@localhost:/ -p 50922 ~/mnt/osx
+```
+
 
 # (VFIO) iPhone USB passthrough (VFIO)
 
