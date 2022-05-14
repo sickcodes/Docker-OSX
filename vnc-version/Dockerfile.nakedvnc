@@ -180,8 +180,8 @@ CMD sudo touch /dev/kvm /dev/snd "${IMAGE_PATH}" "${BOOTDISK}" "${ENV}"  2>/dev/
 
 WORKDIR /home/arch/OSX-KVM
 
-RUN sudo pacman -Syyuu --noconfirm \
-    && sudo pacman -S tigervnc xterm xorg-xhost xdotool ufw --noconfirm \
+RUN yes | sudo pacman -Syyuu --noconfirm \
+    && yes | sudo pacman -S tigervnc xterm xorg-xhost xdotool ufw --noconfirm \
     && mkdir -p ${HOME}/.vnc \
     && touch ~/.vnc/config \
     && tee -a ~/.vnc/config <<< 'geometry=1920x1080' \
