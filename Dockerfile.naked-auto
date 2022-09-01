@@ -18,7 +18,7 @@
 
 FROM sickcodes/docker-osx:latest
 
-MAINTAINER 'https://twitter.com/sickcodes' <https://sick.codes>
+LABEL maintainer='https://twitter.com/sickcodes <https://sick.codes>'
 
 USER root
 
@@ -52,7 +52,7 @@ RUN if [[ "${RANKMIRRORS}" ]]; then \
 # For taking screenshots of the Xfvb screen, useful during development.
 ARG SCROT
 
-RUN pacman -Syu xorg-server-xvfb wget xterm xorg-xhost xorg-xrandr sshpass --noconfirm \
+RUN pacman -Syu xorg-server-xvfb wget xterm xorg-xhost xorg-xrandr --noconfirm \
     && if [[ "${SCROT}" ]]; then \
         pacman -Syu scrot base-devel --noconfirm \
         && git clone --recurse-submodules --depth 1 https://github.com/stolk/imcat.git \
@@ -68,6 +68,9 @@ RUN pacman -Syu xorg-server-xvfb wget xterm xorg-xhost xorg-xrandr sshpass --noc
         && chmod +x /usr/bin/scrotcat \
     ; fi \
     ; yes | pacman -Scc
+
+RUN pacman -S sshpass --noconfirm \
+    && yes | pacman -Scc
 
 USER arch
 

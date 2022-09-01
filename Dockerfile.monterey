@@ -21,7 +21,7 @@
 
 FROM sickcodes/docker-osx
 
-MAINTAINER 'https://twitter.com/sickcodes' <https://sick.codes>
+LABEL maintainer='https://twitter.com/sickcodes <https://sick.codes>'
 
 SHELL ["/bin/bash", "-c"]
 
