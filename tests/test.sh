@@ -137,6 +137,7 @@ VERSION_BUILDS=(
     'catalina'
     'big-sur'
     'monterey'
+    'ventura'
 )
 
 warning () {
