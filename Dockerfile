@@ -162,11 +162,17 @@ RUN make \
     && qemu-img convert BaseSystem.dmg -O qcow2 -p -c BaseSystem.img \
     && rm ./BaseSystem.dmg
 
+# fix invalid signature on old libguestfs
+ARG SIGLEVEL=Never
+
+RUN sudo tee -a /etc/pacman.conf <<< "SigLevel = ${SIGLEVEL}"
+
 ARG LINUX=true
 
 # required to use libguestfs inside a docker container, to create bootdisks for docker-osx on-the-fly
 RUN if [[ "${LINUX}" == true ]]; then \
-        sudo pacman -Syu linux libguestfs --noconfirm \
+        sudo pacman -Syu linux archlinux-keyring guestfs-tools --noconfirm \
+        && libguestfs-test-tool \
     ; fi
 
 # optional --build-arg to change branches for testing
@@ -222,31 +228,21 @@ USER arch
 
 ENV USER arch
 
-#### libguestfs versioning
-
-# 5.13+ problem resolved by building the qcow2 against 5.12 using libguestfs-1.44.1-6
-
-ENV SUPERMIN_KERNEL=/boot/vmlinuz-linux
-ENV SUPERMIN_MODULES=/lib/modules/5.12.14-arch1-1
-ENV SUPERMIN_KERNEL_VERSION=5.12.14-arch1-1
-ENV KERNEL_PACKAGE_URL=https://archive.archlinux.org/packages/l/linux/linux-5.12.14.arch1-1-x86_64.pkg.tar.zst
-ENV KERNEL_HEADERS_PACKAGE_URL=https://archive.archlinux.org/packages/l/linux/linux-headers-5.12.14.arch1-1-x86_64.pkg.tar.zst
-ENV LIBGUESTFS_PACKAGE_URL=https://archive.archlinux.org/packages/l/libguestfs/libguestfs-1.44.1-6-x86_64.pkg.tar.zst
-
 # fix ad hoc errors from using the arch museum to get libguestfs
 RUN sudo sed -i -e 's/^\#RemoteFileSigLevel/RemoteFileSigLevel/g' /etc/pacman.conf
 
-RUN sudo pacman -Syy \
+RUN  sudo tee -a /etc/pacman.conf <<< 'RemoteFileSigLevel = Optional' \
+    && sudo pacman -Syy \
     && sudo pacman -Rns linux --noconfirm \
-    ; sudo pacman -S mkinitcpio --noconfirm \
-    && sudo pacman -U "${KERNEL_PACKAGE_URL}" --noconfirm || exit 1 \
-    && sudo pacman -U "${LIBGUESTFS_PACKAGE_URL}" --noconfirm || exit 1 \
+    && sudo pacman -S mkinitcpio pcre pcre2 --noconfirm \
+    && sudo pacman -S linux linux-headers --noconfirm || exit 1 \
     && rm -rf /var/tmp/.guestfs-* \
     && yes | sudo pacman -Scc \
+    && export SUPERMIN_KERNEL_VERSION="$(uname -r)" \
+    && export SUPERMIN_MODULES="/lib/modules/$(uname -r)" \
+    && export SUPERMIN_KERNEL=/boot/vmlinuz-linux \
     && libguestfs-test-tool || exit 1 \
     && rm -rf /var/tmp/.guestfs-*
-
-####
 
 # These are hardcoded serials for non-iMessage related research
 # Overwritten by using GENERATE_UNIQUE=true
