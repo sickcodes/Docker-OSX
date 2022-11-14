@@ -95,6 +95,22 @@ docker run -it \
 # docker build -t docker-osx --build-arg SHORTNAME=monterey .
 ```
 
+### Ventura [![https://img.shields.io/docker/image-size/sickcodes/docker-osx/ventura?label=sickcodes%2Fdocker-osx%3Aventura](https://img.shields.io/docker/image-size/sickcodes/docker-osx/ventura?label=sickcodes%2Fdocker-osx%3Aventura)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
+
+```bash
+
+docker run -it \
+    --device /dev/kvm \
+    -p 50922:10022 \
+    -v /tmp/.X11-unix:/tmp/.X11-unix \
+    -e "DISPLAY=${DISPLAY:-:0.0}" \
+    -e GENERATE_UNIQUE=true \
+    -e MASTER_PLIST_URL='https://raw.githubusercontent.com/sickcodes/osx-serial-generator/master/config-custom.plist' \
+    sickcodes/docker-osx:ventura
+
+# docker build -t docker-osx --build-arg SHORTNAME=ventura .
+```
+
 #### Run Catalina Pre-Installed [![https://img.shields.io/docker/image-size/sickcodes/docker-osx/auto?label=sickcodes%2Fdocker-osx%3Aauto](https://img.shields.io/docker/image-size/sickcodes/docker-osx/auto?label=sickcodes%2Fdocker-osx%3Aauto)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
 
 ```bash
@@ -356,6 +372,7 @@ Pick one of these while **building**, irrelevant when using docker pull:
 --build-arg SHORTNAME=catalina
 --build-arg SHORTNAME=big-sur
 --build-arg SHORTNAME=monterey
+--build-arg SHORTNAME=ventura
 ```
 
 
@@ -368,6 +385,7 @@ There currently multiple images, each with different use cases (explained [below
 - Catalina
 - Big Sur
 - Monterey
+- Ventura
 - Auto (pre-made Catalina)
 - Naked (use your own .img)
 - Naked-Auto (user your own .img and SSH in)
@@ -504,6 +522,7 @@ Create your personal image using `:latest` or `big-sur`. Then, pull the image ou
 - `sickcodes/docker-osx:naked` - [I need iMessage/iCloud for security research.](#generating-serial-numbers)
 - `sickcodes/docker-osx:big-sur` - [I want to run Big Sur.](#quick-start-docker-osx)
 - `sickcodes/docker-osx:monterey` - [I want to run Monterey.](#quick-start-docker-osx)
+- `sickcodes/docker-osx:ventura` - [I want to run Ventura.](#quick-start-docker-osx)
 
 - `sickcodes/docker-osx:high-sierra` - I want to run High Sierra.
 - `sickcodes/docker-osx:mojave` - I want to run Mojave.
