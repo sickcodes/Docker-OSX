@@ -99,11 +99,11 @@ RUN pacman -Syu git zip vim nano alsa-utils openssh --noconfirm \
     && ln -s /bin/vim /bin/vi \
     && useradd arch -p arch \
     && tee -a /etc/sudoers <<< 'arch ALL=(ALL) NOPASSWD: ALL' \
-    && mkdir /home/arch \
+    && mkdir -p /home/arch \
     && chown arch:arch /home/arch
 
 # allow ssh to container
-RUN mkdir -m 700 /root/.ssh
+RUN mkdir -p -m 700 /root/.ssh
 
 WORKDIR /root/.ssh
 RUN touch authorized_keys \
