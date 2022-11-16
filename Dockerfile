@@ -67,9 +67,14 @@ ARG RANKMIRRORS
 ARG MIRROR_COUNTRY=US
 ARG MIRROR_COUNT=10
 
+# Fixes issue with invalid GPG keys: update the archlinux-keyring package to get the latest keys, then remove and regenerate gnupg keys
+RUN rm -rf /etc/pacman.d/gnupg \
+    && pacman-key --init \
+    && pacman-key --populate archlinux
+
 RUN if [[ "${RANKMIRRORS}" ]]; then \
         { pacman -Sy wget --noconfirm || pacman -Syu wget --noconfirm ; } \
-        ; wget -O ./rankmirrors "https://raw.githubusercontent.com/sickcodes/Docker-OSX/master/rankmirrors" \
+        ; wget -O ./rankmirrors "https://raw.githubusercontent.com/sickcodes/Docker-OSX/${BRANCH:=master}/rankmirrors" \
         ; wget -O- "https://www.archlinux.org/mirrorlist/?country=${MIRROR_COUNTRY:-US}&protocol=https&use_mirror_status=on" \
         | sed -e 's/^#Server/Server/' -e '/^#/d' \
         | head -n "$((${MIRROR_COUNT:-10}+1))" \
@@ -79,9 +84,6 @@ RUN if [[ "${RANKMIRRORS}" ]]; then \
         && tee -a /etc/pacman.d/mirrorlist <<< 'Server = https://mirror.rackspace.com/archlinux/$repo/os/$arch' \
         && cat /etc/pacman.d/mirrorlist \
     ; fi
-
-# Fixes issue with invalid GPG keys: update the archlinux-keyring package to get the latest keys, then remove and regenerate gnupg keys
-RUN pacman -Sy archlinux-keyring --noconfirm && rm -rf /etc/pacman.d/gnupg && pacman-key --init && pacman-key --populate
 
 RUN tee -a /etc/pacman.d/gnupg/gpg.conf <<< 'keyserver hkp://keyserver.ubuntu.com' \
     && tee -a /etc/pacman.d/gnupg/gpg.conf <<< 'keyserver hkps://hkps.pool.sks-keyservers.net:443' \
