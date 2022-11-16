@@ -80,9 +80,14 @@ RUN if [[ "${RANKMIRRORS}" ]]; then \
         && cat /etc/pacman.d/mirrorlist \
     ; fi
 
+# Fixes issue with invalid GPG keys: update the archlinux-keyring package to get the latest keys, then remove and regenerate gnupg keys
+RUN pacman -Sy archlinux-keyring --noconfirm && rm -rf /etc/pacman.d/gnupg && pacman-key --init && pacman-key --populate
+
 RUN tee -a /etc/pacman.d/gnupg/gpg.conf <<< 'keyserver hkp://keyserver.ubuntu.com' \
     && tee -a /etc/pacman.d/gnupg/gpg.conf <<< 'keyserver hkps://hkps.pool.sks-keyservers.net:443' \
-    && tee -a /etc/pacman.d/gnupg/gpg.conf <<< 'keyserver hkp://pgp.mit.edu:11371'
+    && tee -a /etc/pacman.d/gnupg/gpg.conf <<< 'keyserver hkp://pgp.mit.edu:11371' \
+    && tee -a /etc/pacman.d/gnupg/gpg.conf <<< 'keyserver hkps://keys.openpgp.org' \
+    && tee -a /etc/pacman.d/gnupg/gpg.conf <<< 'keyserver hkps://keys.mailvelope.com'
 
 # This fails on hub.docker.com, useful for debugging in cloud
 # RUN [[ $(egrep -c '(svm|vmx)' /proc/cpuinfo) -gt 0 ]] || { echo KVM not possible on this host && exit 1; }
@@ -94,11 +99,11 @@ RUN pacman -Syu git zip vim nano alsa-utils openssh --noconfirm \
     && ln -s /bin/vim /bin/vi \
     && useradd arch -p arch \
     && tee -a /etc/sudoers <<< 'arch ALL=(ALL) NOPASSWD: ALL' \
-    && mkdir /home/arch \
+    && mkdir -p /home/arch \
     && chown arch:arch /home/arch
 
 # allow ssh to container
-RUN mkdir -m 700 /root/.ssh
+RUN mkdir -p -m 700 /root/.ssh
 
 WORKDIR /root/.ssh
 RUN touch authorized_keys \
@@ -144,7 +149,7 @@ RUN touch enable-ssh.sh \
 
 # RUN yes | sudo pacman -Syu qemu libvirt dnsmasq virt-manager bridge-utils edk2-ovmf netctl libvirt-dbus --overwrite --noconfirm
 
-RUN yes | sudo pacman -Syu bc qemu libvirt dnsmasq virt-manager bridge-utils openresolv jack2 ebtables edk2-ovmf netctl libvirt-dbus wget --overwrite --noconfirm \
+RUN yes | sudo pacman -Syu bc qemu-desktop libvirt dnsmasq virt-manager bridge-utils openresolv jack2 ebtables edk2-ovmf netctl libvirt-dbus wget --overwrite --noconfirm \
     && yes | sudo pacman -Scc
 
 WORKDIR /home/arch/OSX-KVM
@@ -157,11 +162,17 @@ RUN make \
     && qemu-img convert BaseSystem.dmg -O qcow2 -p -c BaseSystem.img \
     && rm ./BaseSystem.dmg
 
+# fix invalid signature on old libguestfs
+ARG SIGLEVEL=Never
+
+RUN sudo tee -a /etc/pacman.conf <<< "SigLevel = ${SIGLEVEL}"
+
 ARG LINUX=true
 
 # required to use libguestfs inside a docker container, to create bootdisks for docker-osx on-the-fly
 RUN if [[ "${LINUX}" == true ]]; then \
-        sudo pacman -Syu linux libguestfs --noconfirm \
+        sudo pacman -Syu linux archlinux-keyring guestfs-tools --noconfirm \
+        && libguestfs-test-tool \
     ; fi
 
 # optional --build-arg to change branches for testing
@@ -217,31 +228,21 @@ USER arch
 
 ENV USER arch
 
-#### libguestfs versioning
-
-# 5.13+ problem resolved by building the qcow2 against 5.12 using libguestfs-1.44.1-6
-
-ENV SUPERMIN_KERNEL=/boot/vmlinuz-linux
-ENV SUPERMIN_MODULES=/lib/modules/5.12.14-arch1-1
-ENV SUPERMIN_KERNEL_VERSION=5.12.14-arch1-1
-ENV KERNEL_PACKAGE_URL=https://archive.archlinux.org/packages/l/linux/linux-5.12.14.arch1-1-x86_64.pkg.tar.zst
-ENV KERNEL_HEADERS_PACKAGE_URL=https://archive.archlinux.org/packages/l/linux/linux-headers-5.12.14.arch1-1-x86_64.pkg.tar.zst
-ENV LIBGUESTFS_PACKAGE_URL=https://archive.archlinux.org/packages/l/libguestfs/libguestfs-1.44.1-6-x86_64.pkg.tar.zst
-
 # fix ad hoc errors from using the arch museum to get libguestfs
 RUN sudo sed -i -e 's/^\#RemoteFileSigLevel/RemoteFileSigLevel/g' /etc/pacman.conf
 
-RUN sudo pacman -Syy \
+RUN  sudo tee -a /etc/pacman.conf <<< 'RemoteFileSigLevel = Optional' \
+    && sudo pacman -Syy \
     && sudo pacman -Rns linux --noconfirm \
-    ; sudo pacman -S mkinitcpio --noconfirm \
-    && sudo pacman -U "${KERNEL_PACKAGE_URL}" --noconfirm || exit 1 \
-    && sudo pacman -U "${LIBGUESTFS_PACKAGE_URL}" --noconfirm || exit 1 \
+    && sudo pacman -S mkinitcpio pcre pcre2 --noconfirm \
+    && sudo pacman -S linux linux-headers --noconfirm || exit 1 \
     && rm -rf /var/tmp/.guestfs-* \
     && yes | sudo pacman -Scc \
+    && export SUPERMIN_KERNEL_VERSION="$(uname -r)" \
+    && export SUPERMIN_MODULES="/lib/modules/$(uname -r)" \
+    && export SUPERMIN_KERNEL=/boot/vmlinuz-linux \
     && libguestfs-test-tool || exit 1 \
     && rm -rf /var/tmp/.guestfs-*
-
-####
 
 # These are hardcoded serials for non-iMessage related research
 # Overwritten by using GENERATE_UNIQUE=true
