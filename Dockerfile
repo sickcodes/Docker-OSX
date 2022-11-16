@@ -68,7 +68,8 @@ ARG MIRROR_COUNTRY=US
 ARG MIRROR_COUNT=10
 
 # Fixes issue with invalid GPG keys: update the archlinux-keyring package to get the latest keys, then remove and regenerate gnupg keys
-RUN rm -rf /etc/pacman.d/gnupg \
+RUN pacman -Sy archlinux-keyring --noconfirm \
+    && rm -rf /etc/pacman.d/gnupg \
     && pacman-key --init \
     && pacman-key --populate archlinux
 
