@@ -57,31 +57,40 @@ First time here? try [initial setup](#initial-setup), otherwise try the instruct
 ### Catalina [![https://img.shields.io/docker/image-size/sickcodes/docker-osx/latest?label=sickcodes%2Fdocker-osx%3Alatest](https://img.shields.io/docker/image-size/sickcodes/docker-osx/latest?label=sickcodes%2Fdocker-osx%3Alatest)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
 
 ```bash
+qemu-img create -f qcow2 image.img 512G
+
 docker run -it \
     --device /dev/kvm \
     -p 50922:10022 \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
     -e "DISPLAY=${DISPLAY:-:0.0}" \
+    -v "${PWD}/image.img:/image" \
     sickcodes/docker-osx:latest
 
 # docker build -t docker-osx .
+# if you want to keep everything inside the container, remove "${PWD}/image.img:/image" which will tell the Dockerfile to use the image at /image
 ```
 ### Big Sur [![https://img.shields.io/docker/image-size/sickcodes/docker-osx/big-sur?label=sickcodes%2Fdocker-osx%3Abig-sur](https://img.shields.io/docker/image-size/sickcodes/docker-osx/big-sur?label=sickcodes%2Fdocker-osx%3Abig-sur)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
 
 ```bash
+qemu-img create -f qcow2 image.img 512G
+
 docker run -it \
     --device /dev/kvm \
     -p 50922:10022 \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
     -e "DISPLAY=${DISPLAY:-:0.0}" \
+    -v "${PWD}/image.img:/image" \
     sickcodes/docker-osx:big-sur
 
 # docker build -t docker-osx --build-arg SHORTNAME=big-sur .
+# if you want to keep everything inside the container, remove "${PWD}/image.img:/image" which will tell the Dockerfile to use the image at /image
 ```
 
 ### Monterey [![https://img.shields.io/docker/image-size/sickcodes/docker-osx/monterey?label=sickcodes%2Fdocker-osx%3Amonterey](https://img.shields.io/docker/image-size/sickcodes/docker-osx/monterey?label=sickcodes%2Fdocker-osx%3Amonterey)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
 
 ```bash
+qemu-img create -f qcow2 image.img 512G
 
 docker run -it \
     --device /dev/kvm \
@@ -90,6 +99,7 @@ docker run -it \
     -e "DISPLAY=${DISPLAY:-:0.0}" \
     -e GENERATE_UNIQUE=true \
     -e MASTER_PLIST_URL='https://raw.githubusercontent.com/sickcodes/osx-serial-generator/master/config-custom.plist' \
+    -v "${PWD}/image.img:/image" \
     sickcodes/docker-osx:monterey
 
 # docker build -t docker-osx --build-arg SHORTNAME=monterey .
@@ -135,12 +145,14 @@ docker run -it \
 ### High Sierra [![https://img.shields.io/docker/image-size/sickcodes/docker-osx/high-sierra?label=sickcodes%2Fdocker-osx%3Ahigh-sierra](https://img.shields.io/docker/image-size/sickcodes/docker-osx/high-sierra?label=sickcodes%2Fdocker-osx%3Ahigh-sierra)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
 
 ```bash
+qemu-img create -f qcow2 image.img 512G
 
 docker run -it \
     --device /dev/kvm \
     -p 50922:10022 \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
     -e "DISPLAY=${DISPLAY:-:0.0}" \
+    -v "${PWD}/image.img:/image" \
     sickcodes/docker-osx:high-sierra
 
 # docker build -t docker-osx --build-arg SHORTNAME=high-sierra .
@@ -149,12 +161,14 @@ docker run -it \
 ### Mojave [![https://img.shields.io/docker/image-size/sickcodes/docker-osx/mojave?label=sickcodes%2Fdocker-osx%3Amojave](https://img.shields.io/docker/image-size/sickcodes/docker-osx/mojave?label=sickcodes%2Fdocker-osx%3Amojave)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
 
 ```bash
+qemu-img create -f qcow2 image.img 512G
 
 docker run -it \
     --device /dev/kvm \
     -p 50922:10022 \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
     -e "DISPLAY=${DISPLAY:-:0.0}" \
+    -v "${PWD}/image.img:/image" \
     sickcodes/docker-osx:mojave
 
 # docker build -t docker-osx --build-arg SHORTNAME=mojave .
