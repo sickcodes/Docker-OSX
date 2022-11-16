@@ -314,6 +314,7 @@ reset_docker_hard
 echo killall Xvfb
 clone_repo "${BRANCH}" "${REPO}"
 cd ./Docker-OSX
+git pull
 
 for SHORTNAME in "${VERSION_BUILDS[@]}"; do
     docker-osx:version "${SHORTNAME}"
