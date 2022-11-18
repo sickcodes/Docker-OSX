@@ -165,7 +165,9 @@ RUN make \
 # fix invalid signature on old libguestfs
 ARG SIGLEVEL=Never
 
-RUN sudo tee -a /etc/pacman.conf <<< "SigLevel = ${SIGLEVEL}"
+RUN sudo tee -a /etc/pacman.conf <<< "SigLevel = ${SIGLEVEL}" \
+    && sudo tee -a /etc/pacman.conf <<< 'RemoteFileSigLevel = Optional' \
+    && sudo sed -i -e 's/^\#RemoteFileSigLevel/RemoteFileSigLevel/g' /etc/pacman.conf
 
 ARG LINUX=true
 
