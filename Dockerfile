@@ -61,7 +61,6 @@ ARG SIZE=200G
 
 # OPTIONAL: Arch Linux server mirrors for super fast builds
 # set RANKMIRRORS to any value other that nothing, e.g. -e RANKMIRRORS=true
-
 RUN perl -i -p -e s/^\#Color/Color$'\n'ParallelDownloads\ =\ 30/g /etc/pacman.conf 
 ARG RANKMIRRORS
 ARG MIRROR_COUNTRY=US
@@ -127,7 +126,6 @@ RUN tee -a sshd_config <<< 'AllowTcpForwarding yes' \
 USER arch
 
 # download OSX-KVM
-# RUN git clone --recurse-submodules --depth 1 https://github.com/kholia/OSX-KVM.git /home/arch/OSX-KVM
 RUN git clone --recurse-submodules --depth 1 https://github.com/kholia/OSX-KVM.git /home/arch/OSX-KVM
 
 # enable ssh
@@ -158,8 +156,6 @@ RUN yes | sudo pacman -Syu bc qemu-desktop libvirt dnsmasq virt-manager bridge-u
 
 WORKDIR /home/arch/OSX-KVM
 
-# RUN wget https://raw.githubusercontent.com/kholia/OSX-KVM/master/fetch-macOS-v2.py
-
 ARG SHORTNAME=catalina
 
 RUN make \
@@ -175,14 +171,15 @@ ARG LINUX=true
 
 # required to use libguestfs inside a docker container, to create bootdisks for docker-osx on-the-fly
 RUN if [[ "${LINUX}" == true ]]; then \
-        sudo pacman -Syu linux archlinux-keyring guestfs-tools --noconfirm \
+        sudo pacman -Syu linux linux-headers archlinux-keyring guestfs-tools mkinitcpio pcre pcre2 --noconfirm \
         && libguestfs-test-tool \
+        && rm -rf /var/tmp/.guestfs-* \
+        && yes | sudo pacman -Scc \
     ; fi
 
 # optional --build-arg to change branches for testing
 ARG BRANCH=master
 ARG REPO='https://github.com/sickcodes/Docker-OSX.git'
-# RUN git clone --recurse-submodules --depth 1 --branch "${BRANCH}" "${REPO}"
 RUN git clone --recurse-submodules --depth 1 --branch "${BRANCH}" "${REPO}"
 
 RUN touch Launch.sh \
@@ -231,22 +228,6 @@ RUN grep -v InstallMedia ./Launch.sh > ./Launch-nopicker.sh \
 USER arch
 
 ENV USER arch
-
-# fix ad hoc errors from using the arch museum to get libguestfs
-RUN sudo sed -i -e 's/^\#RemoteFileSigLevel/RemoteFileSigLevel/g' /etc/pacman.conf
-
-RUN  sudo tee -a /etc/pacman.conf <<< 'RemoteFileSigLevel = Optional' \
-    && sudo pacman -Syy \
-    && sudo pacman -Rns linux --noconfirm \
-    && sudo pacman -S mkinitcpio pcre pcre2 --noconfirm \
-    && sudo pacman -S linux linux-headers --noconfirm || exit 1 \
-    && rm -rf /var/tmp/.guestfs-* \
-    && yes | sudo pacman -Scc \
-    && export SUPERMIN_KERNEL_VERSION="$(uname -r)" \
-    && export SUPERMIN_MODULES="/lib/modules/$(uname -r)" \
-    && export SUPERMIN_KERNEL=/boot/vmlinuz-linux \
-    && libguestfs-test-tool || exit 1 \
-    && rm -rf /var/tmp/.guestfs-*
 
 # These are hardcoded serials for non-iMessage related research
 # Overwritten by using GENERATE_UNIQUE=true
