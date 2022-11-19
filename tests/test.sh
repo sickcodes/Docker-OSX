@@ -337,6 +337,10 @@ if [[ "${DOCKER_USERNAME}" ]] && [[ "${DOCKER_PASSWORD}" ]]; then
             docker push "sickcodes/docker-osx:${SHORTNAME}"
         done \
         && touch PUSHED
+    docker push sickcodes/docker-osx:naked
+    docker push sickcodes/docker-osx:auto
+    docker push sickcodes/docker-osx:naked-auto
+
 fi
 
 # connect remotely to your server to use VNC
