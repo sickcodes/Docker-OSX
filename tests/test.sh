@@ -308,11 +308,12 @@ yes | apt install -y --no-install-recommends tzdata -y
 install_scrotcat
 yes | install_vnc
 export_display_99
+apt install xvfb -y
 start_xvfb
 # start_vnc
 enable_kvm
 reset_docker_hard
-echo killall Xvfb
+# echo killall Xvfb
 clone_repo "${BRANCH}" "${REPO}"
 cd ./Docker-OSX
 git pull
