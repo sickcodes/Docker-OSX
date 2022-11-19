@@ -42,20 +42,36 @@ RUN rm -f /home/arch/OSX-KVM/mac_hdd_ng.img
 
 # OPTIONAL: Arch Linux server mirrors for super fast builds
 # set RANKMIRRORS to any value other that nothing, e.g. -e RANKMIRRORS=true
+RUN perl -i -p -e s/^\#Color/Color$'\n'ParallelDownloads\ =\ 30/g /etc/pacman.conf 
 ARG RANKMIRRORS
 ARG MIRROR_COUNTRY=US
 ARG MIRROR_COUNT=10
-RUN if [[ "${RANKMIRRORS}" ]]; then { pacman -Sy wget --noconfirm || pacman -Syu wget --noconfirm ; } \
-        ; wget -O ./rankmirrors "https://raw.githubusercontent.com/sickcodes/Docker-OSX/master/rankmirrors" \
+
+RUN tee /etc/pacman.d/mirrorlist <<< 'Server = https://geo.mirror.pkgbuild.com/$repo/os/$arch' \
+    && tee -a /etc/pacman.d/mirrorlist <<< 'Server = http://mirror.rackspace.com/archlinux/$repo/os/$arch' \
+    && tee -a /etc/pacman.d/mirrorlist <<< 'Server = https://mirror.rackspace.com/archlinux/$repo/os/$arch'
+
+# Fixes issue with invalid GPG keys: update the archlinux-keyring package to get the latest keys, then remove and regenerate gnupg keys
+RUN pacman -Sy archlinux-keyring --noconfirm \
+    && rm -rf /etc/pacman.d/gnupg \
+    && pacman-key --init \
+    && pacman-key --populate archlinux
+
+RUN if [[ "${RANKMIRRORS}" ]]; then \
+        { pacman -Sy wget --noconfirm || pacman -Syu wget --noconfirm ; } \
+        ; wget -O ./rankmirrors "https://raw.githubusercontent.com/sickcodes/Docker-OSX/${BRANCH:=master}/rankmirrors" \
         ; wget -O- "https://www.archlinux.org/mirrorlist/?country=${MIRROR_COUNTRY:-US}&protocol=https&use_mirror_status=on" \
         | sed -e 's/^#Server/Server/' -e '/^#/d' \
         | head -n "$((${MIRROR_COUNT:-10}+1))" \
         | bash ./rankmirrors --verbose --max-time 5 - > /etc/pacman.d/mirrorlist \
-        && tee -a /etc/pacman.d/mirrorlist <<< 'Server = http://mirrors.evowise.com/archlinux/$repo/os/$arch' \
-        && tee -a /etc/pacman.d/mirrorlist <<< 'Server = http://mirror.rackspace.com/archlinux/$repo/os/$arch' \
-        && tee -a /etc/pacman.d/mirrorlist <<< 'Server = https://mirror.rackspace.com/archlinux/$repo/os/$arch' \
         && cat /etc/pacman.d/mirrorlist \
     ; fi
+
+RUN tee -a /etc/pacman.d/gnupg/gpg.conf <<< 'keyserver hkp://keyserver.ubuntu.com' \
+    && tee -a /etc/pacman.d/gnupg/gpg.conf <<< 'keyserver hkps://hkps.pool.sks-keyservers.net:443' \
+    && tee -a /etc/pacman.d/gnupg/gpg.conf <<< 'keyserver hkp://pgp.mit.edu:11371' \
+    && tee -a /etc/pacman.d/gnupg/gpg.conf <<< 'keyserver hkps://keys.openpgp.org' \
+    && tee -a /etc/pacman.d/gnupg/gpg.conf <<< 'keyserver hkps://keys.mailvelope.com'
 
 # For taking screenshots of the Xfvb screen, useful during development.
 ARG SCROT
@@ -80,28 +96,6 @@ RUN pacman -Syu xorg-server-xvfb wget xterm xorg-xhost xorg-xrandr sshpass --noc
 USER arch
 
 ENV USER arch
-
-#### libguestfs versioning
-
-# 5.13+ problem resolved by building the qcow2 against 5.12 using libguestfs-1.44.1-6
-
-ENV SUPERMIN_KERNEL=/boot/vmlinuz-linux
-ENV SUPERMIN_MODULES=/lib/modules/5.12.14-arch1-1
-ENV SUPERMIN_KERNEL_VERSION=5.12.14-arch1-1
-ENV KERNEL_PACKAGE_URL=https://archive.archlinux.org/packages/l/linux/linux-5.12.14.arch1-1-x86_64.pkg.tar.zst
-ENV KERNEL_HEADERS_PACKAGE_URL=https://archive.archlinux.org/packages/l/linux/linux-headers-5.12.14.arch1-1-x86_64.pkg.tar.zst
-ENV LIBGUESTFS_PACKAGE_URL=https://archive.archlinux.org/packages/l/libguestfs/libguestfs-1.44.1-6-x86_64.pkg.tar.zst
-
-RUN sudo pacman -Syy \
-    && sudo pacman -Rns linux --noconfirm \
-    ; sudo pacman -S mkinitcpio --noconfirm \
-    && sudo pacman -U "${KERNEL_PACKAGE_URL}" --noconfirm \
-    && sudo pacman -U "${LIBGUESTFS_PACKAGE_URL}" --noconfirm \
-    && rm -rf /var/tmp/.guestfs-* \
-    ; libguestfs-test-tool || exit 1
-
-####
-
 
 WORKDIR /home/arch/OSX-KVM
 
