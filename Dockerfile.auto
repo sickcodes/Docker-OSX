@@ -81,13 +81,12 @@ RUN if [[ "${RANKMIRRORS}" ]]; then \
         && cat /etc/pacman.d/mirrorlist \
     ; fi
 
-
 RUN tee -a /etc/pacman.d/gnupg/gpg.conf <<< 'keyserver hkp://keyserver.ubuntu.com' \
     && tee -a /etc/pacman.d/gnupg/gpg.conf <<< 'keyserver hkps://hkps.pool.sks-keyservers.net:443' \
     && tee -a /etc/pacman.d/gnupg/gpg.conf <<< 'keyserver hkp://pgp.mit.edu:11371' \
     && tee -a /etc/pacman.d/gnupg/gpg.conf <<< 'keyserver hkps://keys.openpgp.org' \
     && tee -a /etc/pacman.d/gnupg/gpg.conf <<< 'keyserver hkps://keys.mailvelope.com'
-
+    
 RUN pacman -Syu xorg-server-xvfb wget xterm xorg-xhost xorg-xrandr --noconfirm \
     && if [[ "${SCROT}" ]]; then \
         pacman -Syu scrot base-devel --noconfirm \
@@ -111,34 +110,6 @@ RUN pacman -S sshpass --noconfirm \
 USER arch
 
 ENV USER arch
-
-
-#### libguestfs versioning
-
-# 5.13+ problem resolved by building the qcow2 against 5.12 using libguestfs-1.44.1-6
-
-ENV SUPERMIN_KERNEL=/boot/vmlinuz-linux
-ENV SUPERMIN_MODULES=/lib/modules/5.12.14-arch1-1
-ENV SUPERMIN_KERNEL_VERSION=5.12.14-arch1-1
-ENV KERNEL_PACKAGE_URL=https://archive.archlinux.org/packages/l/linux/linux-5.12.14.arch1-1-x86_64.pkg.tar.zst
-ENV KERNEL_HEADERS_PACKAGE_URL=https://archive.archlinux.org/packages/l/linux/linux-headers-5.12.14.arch1-1-x86_64.pkg.tar.zst
-ENV LIBGUESTFS_PACKAGE_URL=https://archive.archlinux.org/packages/l/libguestfs/libguestfs-1.44.1-6-x86_64.pkg.tar.zst
-
-# fix ad hoc errors from using the arch museum to get libguestfs
-RUN sudo sed -i -e 's/^\#RemoteFileSigLevel/RemoteFileSigLevel/g' /etc/pacman.conf
-
-RUN sudo pacman -Syy \
-    && sudo pacman -Rns linux --noconfirm \
-    ; sudo pacman -S mkinitcpio --noconfirm \
-    && sudo pacman -U "${KERNEL_PACKAGE_URL}" --noconfirm || exit 1 \
-    && sudo pacman -U "${LIBGUESTFS_PACKAGE_URL}" --noconfirm || exit 1 \
-    && rm -rf /var/tmp/.guestfs-* \
-    && yes | sudo pacman -Scc \
-    && libguestfs-test-tool || exit 1 \
-    && rm -rf /var/tmp/.guestfs-*
-
-####
-
 
 WORKDIR /home/arch/OSX-KVM
 
