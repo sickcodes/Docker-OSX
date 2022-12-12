@@ -166,5 +166,5 @@ ENV HEIGHT=1080
 ENV LIBGUESTFS_DEBUG=1
 ENV LIBGUESTFS_TRACE=1
 
-COPY entrypoint.naked.sh .
-CMD ["bash", "-c", "entrypoint.naked.sh"]
+COPY entrypoint.naked.sh ./entrypoint.sh
+CMD ["bash", "-c", "entrypoint.sh"]

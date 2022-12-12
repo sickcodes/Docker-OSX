@@ -354,7 +354,7 @@ VOLUME ["/tmp/.X11-unix"]
 # the default serial numbers are already contained in ./OpenCore/OpenCore.qcow2
 # And the default serial numbers
 
-COPY entrypoint.sh .
+COPY entrypoint.sh ./entrypoint.sh
 CMD ["bash", "-c", "entrypoint.sh"]
 
 # virt-manager mode: eta son
