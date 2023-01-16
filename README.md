@@ -323,7 +323,7 @@ SEE commands in [https://github.com/sickcodes/osx-optimizer](https://github.com/
 
 - Skip the GUI login screen (at your own risk!)
 - Disable spotlight indexing on macOS to heavily speed up Virtual Instances.
-- Disable heavy login screen wallpaper
+- Disable heavy login screen wallpaper.
 - Disable updates (at your own risk!)
 
 ## Increase disk space by moving /var/lib/docker to external drive, block storage, NFS, or any other location conceivable.
@@ -1075,11 +1075,11 @@ egrep -c '(svm|vmx)' /proc/cpuinfo
   Xcode platforms, etc.
 - Once you are satisfied with the amount of free space, enable trim with `sudo trimforce enable`, and reboot.
 - Zero out the empty space on the disk with `dd if=/dev/zero of=./empty && rm -f empty`
-- Shut down the VM and copy out the qcow image with `docker cp stoppedcontainer:/home/arch/OSX-KVM/mac_hdd_ng.img .`
+- Shut down the VM and copy out the qcow image with `docker cp stoppedcontainer:/home/arch/OSX-KVM/mac_hdd_ng.img.`
 - Run `qemu-img check -r all mac_hdd_ng.img` to fix any errors.
-- Run `qemu-img convert -O qcow2 mac_hdd_ng.img deduped.img` and check for errors again
+- Run `qemu-img convert -O qcow2 mac_hdd_ng.img deduped.img` and check for errors again.
 - **OPTIONAL:** Run `qemu-img convert -c -O qcow2 deduped.img compressed.img` to further compress the image. This may reduce the runtime speed though, but it should reduce the size by roughly 25%.
-- Check for errors again, and build a fresh docker image. E.g. with this Dockerfile
+- Check for errors again, and build a fresh docker image. E.g. with this Dockerfile.
 
 ```
 FROM sickcodes/docker-osx
