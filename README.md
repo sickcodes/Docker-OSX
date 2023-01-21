@@ -585,7 +585,7 @@ INFO: /dev/kvm exists
 KVM acceleration can be used
 ```
 
-Use the command `sudo apt -y install bridge-utils cpu-checker libvirt-clients libvirt-daemon qemu qemu-kvm --fix-missing` to install it if it isn't.
+Use the command `sudo apt -y install bridge-utils cpu-checker libvirt-clients libvirt-daemon qemu qemu-kvm` to install it if it isn't.
 
 Now download and install [Docker for Windows](https://docs.docker.com/desktop/windows/install/) if it is not already installed.
 
