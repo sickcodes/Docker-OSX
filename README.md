@@ -227,7 +227,7 @@ sshfs user@localhost:/ -p 50922 ~/mnt/osx
 
 If you have a laptop see the next usbfluxd section.
 
-If you have a desktop PC, you can use [@Silfalion](https://github.com/Silfalion)'s instructions : [https://github.com/Silfalion/Iphone_docker_osx_passthrough](https://github.com/Silfalion/Iphone_docker_osx_passthrough)
+If you have a desktop PC, you can use [@Silfalion](https://github.com/Silfalion)'s instructions: [https://github.com/Silfalion/Iphone_docker_osx_passthrough](https://github.com/Silfalion/Iphone_docker_osx_passthrough)
 
 # (USBFLUXD) iPhone USB -> Network style passthrough OSX-KVM Docker-OSX
 
@@ -378,7 +378,7 @@ Pick one of these while **building**, irrelevant when using docker pull:
 
 ## Technical details
 
-There currently multiple images, each with different use cases (explained [below](#container-images)):
+There are currently multiple images, each with different use cases (explained [below](#container-images)):
 
 - High Sierra
 - Mojave
@@ -490,7 +490,7 @@ In case you're interested, contact [@sickcodes on Twitter](https://twitter.com/s
 
 ## License/Contributing
 
-Docker-OSX is licensed under the [GPL v3+](LICENSE). Contributions are welcomed and immensely appreciated. You are in-fact permitted to use Docker-OSX as a tool to create proprietary software.
+Docker-OSX is licensed under the [GPL v3+](LICENSE). Contributions are welcomed and immensely appreciated. You are in fact permitted to use Docker-OSX as a tool to create proprietary software.
 
 ### Other cool Docker/QEMU based projects
 - [Run Android in a Docker Container with Dock Droid](https://github.com/sickcodes/dock-droid)
@@ -510,7 +510,7 @@ Product names, logos, brands and other trademarks referred to within this projec
 
 ### Already set up or just looking to make a container quickly? Check out our [quick start](#quick-start-docker-osx) or see a bunch more use cases under our [container creation examples](#container-creation-examples) section.
 
-There are several different Docker-OSX images available which are suitable for different purposes.
+There are several different Docker-OSX images available that are suitable for different purposes.
 
 - `sickcodes/docker-osx:latest` - [I just want to try it out.](#quick-start-docker-osx)
 - `sickcodes/docker-osx:latest` - [I want to use Docker-OSX to develop/secure apps in Xcode (sign into Xcode, Transporter)](#quick-start-your-own-image-naked-container-image)
@@ -685,7 +685,7 @@ Examples:
 
 Note, unlike memory, CPU usage is shared. so you can allocate all of your CPU's to the container.
 
-### Confirm your user is part of the the Docker group, KVM group, libvirt group
+### Confirm your user is part of the Docker group, KVM group, libvirt group
 
 #### Add yourself to the Docker group
 
@@ -1037,7 +1037,7 @@ IP_ADDRESS=172.17.0.1
 
 ### Fedora: enable internet connectivity with a bridged network
 
-Fedora's default firewall settings may prevent Docker's network interface from reaching the internet. In order to reoslve this, you will need to whitelist the interface in your firewall:
+Fedora's default firewall settings may prevent Docker's network interface from reaching the internet. In order to resolve this, you will need to whitelist the interface in your firewall:
 
 ```bash
 # Set the docker0 bridge to the trusted zone
@@ -1399,7 +1399,7 @@ docker run -it \
     sickcodes/docker-osx:latest
 ```
 
-Here's a few other resolutions! If you resolution is invalid, it will default to 800x600.
+Here's a few other resolutions! If your resolution is invalid, it will default to 800x600.
 
 ```
     -e WIDTH=800 \
@@ -1688,7 +1688,7 @@ docker run -it \
     sickcodes/docker-osx:naked
 ```
 
-### Building a headless container which allows insecure VNC on localhost (!for local use only!)
+### Building a headless container that allows insecure VNC on localhost (!for local use only!)
 
 **Must change -it to -i to be able to interact with the QEMU console**
 
@@ -1733,7 +1733,7 @@ You also need the container IP: `docker inspect <containerid> | jq -r '.[0].Netw
 
 Or `ip n` will usually show the container IP first.
 
-Now VNC connect using the Docker container IP, for example `172.17.0.2:5999`
+Now VNC connects using the Docker container IP, for example `172.17.0.2:5999`
 
 Remote VNC over SSH: `ssh -N root@1.1.1.1 -L  5999:172.17.0.2:5999`, where `1.1.1.1` is your remote server IP and `172.17.0.2` is your LAN container IP.
 
