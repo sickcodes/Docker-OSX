@@ -1579,7 +1579,7 @@ Important Note: this will cause the host system to lose access to the USB device
 
 This is my favourite container. You can supply an existing disk image as a Docker command line argument.
 
-- Pull images out using `sudo find /var/lib/docker -size +10G | grep mac_hdd_ng.img`
+- Pull images out using `sudo find /var/lib/docker -name mac_hdd_ng.img -size +10G`
 
 - Supply your own local image with the command argument `-v "${PWD}/mac_hdd_ng.img:/image"` and use `sickcodes/docker-osx:naked` when instructing Docker to create your container.
 
