@@ -162,7 +162,7 @@ docker run -it \
 
 
 
-#### Download the image manually and use it in Docker 
+#### Download the image manually and use it in Docker
 
 [![https://img.shields.io/docker/image-size/sickcodes/docker-osx/naked?label=sickcodes%2Fdocker-osx%3Anaked](https://img.shields.io/docker/image-size/sickcodes/docker-osx/naked?label=sickcodes%2Fdocker-osx%3Anaked)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
 
@@ -367,7 +367,7 @@ If you see folders, then it worked. You can restart Docker, or just reboot if yo
 
 Pick one of these while **building**, irrelevant when using docker pull:
 ```
---build-arg SHORTNAME=high-sierra 
+--build-arg SHORTNAME=high-sierra
 --build-arg SHORTNAME=mojave
 --build-arg SHORTNAME=catalina
 --build-arg SHORTNAME=big-sur
@@ -578,14 +578,14 @@ The result should be like this:
 nestedVirtualization=true
 ```
 
-Go into your WSL distro (Run `wsl` in powershell) and check if KVM is enabled by using the `kvm-ok` command. The output should look like this:
+Go into your WSL distro (Run `wsl` in powershell) and use the command `sudo apt install cpu-checker` and check if KVM is enabled by using the `kvm-ok` command. The output should look like this:
 
 ```
 INFO: /dev/kvm exists
 KVM acceleration can be used
 ```
 
-Use the command `sudo apt -y install bridge-utils cpu-checker libvirt-clients libvirt-daemon qemu qemu-kvm` to install it if it isn't.
+First update apt `sudo apt-get update`, then use the command `sudo apt -y install bridge-utils cpu-checker libvirt-clients libvirt-daemon qemu qemu-kvm` to install it if it isn't.
 
 Now download and install [Docker for Windows](https://docs.docker.com/desktop/windows/install/) if it is not already installed.
 
@@ -593,7 +593,7 @@ After installation, go into Settings and check these 2 boxes:
 
 ```
 General -> "Use the WSL2 based engine";
-Resources -> WSL Integration -> "Enable integration with my default WSL distro", 
+Resources -> WSL Integration -> "Enable integration with my default WSL distro",
 ```
 
 Ensure `x11-apps` is installed. Use the command `sudo apt install x11-apps -y` to install it if it isn't.
@@ -731,13 +731,13 @@ Big thank you to our contributors who have worked out almost every conceivable i
 
 ### Start the same container later (persistent disk)
 
-Created a container with `docker run` and want to reuse the underlying image again later? 
+Created a container with `docker run` and want to reuse the underlying image again later?
 
 NB: see [container creation examples](#container-creation-examples) first for how to get to the point where this is applicable.
 
 This is for when you want to run the SAME container again later. You may need to use `docker commit` to save your container before you can reuse it. Check if your container is persisted with `docker ps --all`.
 
-If you don't run this you will have a new image every time. 
+If you don't run this you will have a new image every time.
 
 ```bash
 # look at your recent containers and copy the CONTAINER ID
@@ -753,7 +753,7 @@ docker start -ai abc123xyz567
 
 ```
 
-You can also pull the `.img` file out of the container, which is stored in `/var/lib/docker`, and supply it as a runtime argument to the `:naked` Docker image. 
+You can also pull the `.img` file out of the container, which is stored in `/var/lib/docker`, and supply it as a runtime argument to the `:naked` Docker image.
 
 See also: [here](https://github.com/sickcodes/Docker-OSX/issues/197).
 
@@ -1434,7 +1434,7 @@ First step is to stop the docker daemon
 ```
 sudo systemctl stop docker
 ```
-The second step is to change container config in 
+The second step is to change container config in
 ```
 /var/lib/docker/containers/[container-id]/config.v2.json
 ```
@@ -1520,7 +1520,7 @@ sudo rmmod nbd
 
 ### USB Passthrough
 
-Firstly, QEMU must be started as root. 
+Firstly, QEMU must be started as root.
 
 It is also potentially possible to accomplish USB passthrough by changing the permissions of the device in the container.
 See [here](https://www.linuxquestions.org/questions/slackware-14/qemu-usb-permissions-744557/#post3628691).
@@ -1621,7 +1621,7 @@ The Quick Start command should work out of the box, provided that you keep the f
     -e "DISPLAY=${DISPLAY:-:0.0}" \
 ```
 
-#### Prebuilt image with arbitrary command line arguments 
+#### Prebuilt image with arbitrary command line arguments
 
 [![https://img.shields.io/docker/image-size/sickcodes/docker-osx/auto?label=sickcodes%2Fdocker-osx%3Aauto](https://img.shields.io/docker/image-size/sickcodes/docker-osx/auto?label=sickcodes%2Fdocker-osx%3Aauto)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
 
@@ -1675,7 +1675,7 @@ For a headless container, **remove** the following two lines from your `docker r
     # -e "DISPLAY=${DISPLAY:-:0.0}" \
 ```
 
-#### Building a headless container from a custom image 
+#### Building a headless container from a custom image
 
 [![https://img.shields.io/docker/image-size/sickcodes/docker-osx/naked?label=sickcodes%2Fdocker-osx%3Anaked](https://img.shields.io/docker/image-size/sickcodes/docker-osx/naked?label=sickcodes%2Fdocker-osx%3Anaked)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
 
@@ -1891,7 +1891,7 @@ If we let the Docker container use the same display socket as our own environmen
 
 ### ALSA errors on startup or container creation
 
-You may when initialising or booting into a container see errors from the `(qemu)` console of the following form: 
+You may when initialising or booting into a container see errors from the `(qemu)` console of the following form:
 `ALSA lib blahblahblah: (function name) returned error: no such file or directory`. These are more or less expected. As long as you are able to boot into the container and everything is working, no reason to worry about these.
 
 See also: [here](https://github.com/sickcodes/Docker-OSX/issues/174).
