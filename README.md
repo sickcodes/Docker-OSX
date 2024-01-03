@@ -558,7 +558,7 @@ sudo modprobe kvm
 
 Running Docker-OSX on Windows is possible using WSL2 (Windows 11 + Windows Subsystem for Linux).
 
-You must have Windows 11 installed with build 22000+ (21H2 or higher).
+You must have Windows 11 installed with build 22000+ (21H2 or higher). Please note that while WSL2 *does* exist on Windows 10, it is missing functionality that is required such as Nested Virtualization.
 
 First, install WSL on your computer by running this command in an administrator powershell. For more info, look [here](https://docs.microsoft.com/en-us/windows/wsl/install).
 
@@ -1091,7 +1091,7 @@ COPY --chown=arch ./deduped.img /home/arch/OSX-KVM/mac_hdd_ng.img
 
 ### Run Docker-OSX headlessly with Telnet
 
-First make sure [autoboot is enabled](#autoboot-into-osx-after-youve-installed-everything)
+First make sure [autoboot is enabled](#autoboot-into-os-x-after-youve-installed-everything)
 
 Next, you will want to set up SSH to be automatically started.
 
