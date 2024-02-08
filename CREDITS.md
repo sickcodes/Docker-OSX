@@ -127,5 +127,7 @@ This project now uses the fantastic OpenCore bootloader from the community OpenC
 [@felipestt](https://github.com/felipestt)  Use more CPU Cores/SMP' broken #440 
 
 [@routmoute](https://github.com/routmoute) README: add PulseAudio with WSLg #442 
-
 [@dulatello08](https://github.com/dulatello08) Update README.md #452
+
+[@Anthropohedron](https://github.com/Anthropohedron) Added FAQ.md
+
