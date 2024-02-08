@@ -164,6 +164,10 @@ Congratulations, you got a macOS VM up and running! Now what?
 
 The macOS UI expects and relies on GPU acceleration, and there is (currently) no way to provide GPU acceleration in the virtual hardware. See [osx-optimizer](https://github.com/sickcodes/osx-optimizer) for macOS configuration to speed things up.
 
+### Extract the Virtual Disk
+
+With the container stopped, `sudo find /var/lib/docker -size +10G -name mac_hdd_ng.img` to find the disk image then copy it where you want it.
+
 ### Disk Space
 
 Is your host machine's disk, specifically `/var` (because of `/var/lib/docker`), getting full? [Fix it](README.md#increase-disk-space-by-moving-varlibdocker-to-external-drive-block-storage-nfs-or-any-other-location-conceivable).
