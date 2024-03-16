@@ -676,14 +676,16 @@ Or
 
 
 #### Use more CPU Cores/SMP
+By default container will get 4 cpu cores to run OS, you can allocate more cores by use environment variable `CPU_STRING='<smp_num>,cores=<core_num>'` or `SMP=<smp_num> CORES=<core_num>` when create container.
 
 Examples:
 
-`-e EXTRA='-smp 6,sockets=3,cores=2'`
+`-e CPU_STRING='16,cores=16'` 
 
-`-e EXTRA='-smp 8,sockets=4,cores=2'`
+or 
 
-`-e EXTRA='-smp 16,sockets=8,cores=2'`
+`-e SMP=16 -e CORES=16`
+
 
 Note, unlike memory, CPU usage is shared. so you can allocate all of your CPU's to the container.
 
