@@ -138,6 +138,7 @@ VERSION_BUILDS=(
     'big-sur'
     'monterey'
     'ventura'
+    'sonoma'
 )
 
 warning () {

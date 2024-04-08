@@ -111,6 +111,24 @@ docker run -it \
 # docker build -t docker-osx --build-arg SHORTNAME=ventura .
 ```
 
+### Sonoma [![https://img.shields.io/docker/image-size/sickcodes/docker-osx/sonoma?label=sickcodes%2Fdocker-osx%3Asonoma](https://img.shields.io/docker/image-size/sickcodes/docker-osx/sonoma?label=sickcodes%2Fdocker-osx%3Asonoma)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
+
+```bash
+
+docker run -it \
+    --device /dev/kvm \
+    -p 50922:10022 \
+    -v /tmp/.X11-unix:/tmp/.X11-unix \
+    -e "DISPLAY=${DISPLAY:-:0.0}" \
+    -e GENERATE_UNIQUE=true \
+    -e CPU='Haswell-noTSX' \
+    -e CPUID_FLAGS='kvm=on,vendor=GenuineIntel,+invtsc,vmware-cpuid-freq=on' \
+    -e MASTER_PLIST_URL='https://raw.githubusercontent.com/sickcodes/osx-serial-generator/master/config-sonoma-custom.plist' \
+    sickcodes/docker-osx:sonoma
+
+# docker build -t docker-osx --build-arg SHORTNAME=sonoma .
+```
+
 #### Run Catalina Pre-Installed [![https://img.shields.io/docker/image-size/sickcodes/docker-osx/auto?label=sickcodes%2Fdocker-osx%3Aauto](https://img.shields.io/docker/image-size/sickcodes/docker-osx/auto?label=sickcodes%2Fdocker-osx%3Aauto)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
 
 ```bash
@@ -373,6 +391,7 @@ Pick one of these while **building**, irrelevant when using docker pull:
 --build-arg SHORTNAME=big-sur
 --build-arg SHORTNAME=monterey
 --build-arg SHORTNAME=ventura
+--build-arg SHORTNAME=sonoma
 ```
 
 
@@ -386,6 +405,7 @@ There are currently multiple images, each with different use cases (explained [b
 - Big Sur
 - Monterey
 - Ventura
+- Sonoma
 - Auto (pre-made Catalina)
 - Naked (use your own .img)
 - Naked-Auto (user your own .img and SSH in)
@@ -409,6 +429,14 @@ Big-Sur:
 Monterey make your own image:
 
 [![https://img.shields.io/docker/image-size/sickcodes/docker-osx/monterey?label=sickcodes%2Fdocker-osx%3Amonterey](https://img.shields.io/docker/image-size/sickcodes/docker-osx/monterey?label=sickcodes%2Fdocker-osx%3Amonterey)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
+
+Ventura make your own image:
+
+[![https://img.shields.io/docker/image-size/sickcodes/docker-osx/ventura?label=sickcodes%2Fdocker-osx%3Aventura](https://img.shields.io/docker/image-size/sickcodes/docker-osx/ventura?label=sickcodes%2Fdocker-osx%3Aventura)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
+
+Sonoma make your own image:
+
+[![https://img.shields.io/docker/image-size/sickcodes/docker-osx/sonoma?label=sickcodes%2Fdocker-osx%3Asonoma](https://img.shields.io/docker/image-size/sickcodes/docker-osx/sonoma?label=sickcodes%2Fdocker-osx%3Asonoma)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
 
 Pre-made **Catalina** system by [Sick.Codes](https://sick.codes): username: `user`, password: `alpine`
 
@@ -523,6 +551,7 @@ Create your personal image using `:latest` or `big-sur`. Then, pull the image ou
 - `sickcodes/docker-osx:big-sur` - [I want to run Big Sur.](#quick-start-docker-osx)
 - `sickcodes/docker-osx:monterey` - [I want to run Monterey.](#quick-start-docker-osx)
 - `sickcodes/docker-osx:ventura` - [I want to run Ventura.](#quick-start-docker-osx)
+- `sickcodes/docker-osx:sonoma` - [I want to run Sonoma.](#quick-start-docker-osx)
 
 - `sickcodes/docker-osx:high-sierra` - I want to run High Sierra.
 - `sickcodes/docker-osx:mojave` - I want to run Mojave.
