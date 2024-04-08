@@ -17,6 +17,7 @@
 # scrot -o big-sur_master.png
 # scrot -o monterey_master.png
 # scrot -o ventura_master.png
+# scrot --overwrite --display :99 --file ~/${TEST}.png
 # pull off remote server to the tests folder
 # REMOTE_SERVER=
 # scp root@"${REMOTE_SERVER}":~/*_master.png .
@@ -30,6 +31,7 @@ TESTS=(
     big-sur
     monterey
     ventura
+    sonoma
 )
 
 # test each docker image to see if they boot to their unique respective installation screens.
