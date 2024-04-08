@@ -123,7 +123,7 @@ docker run -it \
     -e GENERATE_UNIQUE=true \
     -e CPU='Haswell-noTSX' \
     -e CPUID_FLAGS='kvm=on,vendor=GenuineIntel,+invtsc,vmware-cpuid-freq=on' \
-    -e MASTER_PLIST_URL='https://raw.githubusercontent.com/sickcodes/osx-serial-generator/master/config-sonoma-custom.plist' \
+    -e MASTER_PLIST_URL='https://raw.githubusercontent.com/sickcodes/osx-serial-generator/master/config-custom-sonoma.plist' \
     sickcodes/docker-osx:sonoma
 
 # docker build -t docker-osx --build-arg SHORTNAME=sonoma .
