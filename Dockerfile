@@ -24,6 +24,7 @@
 #
 #       docker build -t docker-osx .
 #       docker build -t docker-osx --build-arg VERSION=10.15.5 --build-arg SIZE=200G .
+#       docker build -t docker-osx-sonoma --build-arg BRANCH=sonoma --build-arg SHORTNAME=sonoma .
 #
 # Basic Run:
 #
@@ -58,10 +59,12 @@ SHELL ["/bin/bash", "-c"]
 
 # change disk size here or add during build, e.g. --build-arg VERSION=10.14.5 --build-arg SIZE=50G
 ARG SIZE=200G
+ARG PARALLEL_DOWNLOADS=30
 
 # OPTIONAL: Arch Linux server mirrors for super fast builds
 # set RANKMIRRORS to any value other that nothing, e.g. -e RANKMIRRORS=true
-RUN perl -i -p -e s/^\#Color/Color$'\n'ParallelDownloads\ =\ 30/g /etc/pacman.conf 
+RUN perl -i -p -e s/^\#Color/Color$'\n'ParallelDownloads\ =\ ${PARALLEL_DOWNLOADS:=30}/g /etc/pacman.conf 
+
 ARG RANKMIRRORS
 ARG MIRROR_COUNTRY=US
 ARG MIRROR_COUNT=10
@@ -125,7 +128,7 @@ RUN tee -a sshd_config <<< 'AllowTcpForwarding yes' \
 
 USER arch
 
-# download OSX-KVM
+# download OSX-KVM for the submodules
 RUN git clone --recurse-submodules --depth 1 https://github.com/kholia/OSX-KVM.git /home/arch/OSX-KVM
 
 # enable ssh
@@ -151,11 +154,12 @@ RUN touch enable-ssh.sh \
 
 # RUN yes | sudo pacman -Syu qemu libvirt dnsmasq virt-manager bridge-utils edk2-ovmf netctl libvirt-dbus --overwrite --noconfirm
 
-RUN yes | sudo pacman -Syu bc qemu-desktop libvirt dnsmasq virt-manager bridge-utils openresolv jack2 ebtables edk2-ovmf netctl libvirt-dbus wget --overwrite --noconfirm \
+RUN yes | sudo pacman -Syu bc qemu-desktop libvirt dnsmasq virt-manager bridge-utils openresolv jack2 ebtables edk2-ovmf netctl libvirt-dbus wget scrot --overwrite --noconfirm \
     && yes | sudo pacman -Scc
 
 WORKDIR /home/arch/OSX-KVM
 
+# shortname default is catalina, which means :latest is catalina
 ARG SHORTNAME=catalina
 
 RUN make \
@@ -172,6 +176,7 @@ RUN sudo tee -a /etc/pacman.conf <<< "SigLevel = ${SIGLEVEL}" \
 ARG LINUX=true
 
 # required to use libguestfs inside a docker container, to create bootdisks for docker-osx on-the-fly
+# reminder this is what makes :naked image larger than expected
 RUN if [[ "${LINUX}" == true ]]; then \
         sudo pacman -Syu linux linux-headers archlinux-keyring guestfs-tools mkinitcpio pcre pcre2 --noconfirm \
         && libguestfs-test-tool \
@@ -182,7 +187,7 @@ RUN if [[ "${LINUX}" == true ]]; then \
 # optional --build-arg to change branches for testing
 ARG BRANCH=master
 ARG REPO='https://github.com/sickcodes/Docker-OSX.git'
-RUN git clone --recurse-submodules --depth 1 --branch "${BRANCH}" "${REPO}"
+RUN git clone --recurse-submodules --depth 1 --branch "${BRANCH:=master}" "${REPO:=https://github.com/sickcodes/Docker-OSX.git}"
 
 RUN touch Launch.sh \
     && chmod +x ./Launch.sh \
