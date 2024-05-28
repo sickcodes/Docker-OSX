@@ -607,6 +607,27 @@ The result should be like this:
 nestedVirtualization=true
 ```
 
+Then you can choose to directly run Docker-OSX in powershell or run it in WSL distros.
+
+#### Run in powershell
+
+Download and install [Docker for Windows](https://docs.docker.com/desktop/windows/install/) if it is not already installed.
+
+Then go into Settings and check a box:
+
+```
+General -> "Use the WSL2 based engine";
+```
+
+Next, run the following command in powershell(we run Ventura here as an example):
+
+```powershell
+docker run  --device /dev/kvm    -v /run/desktop/mnt/host/wslg/.X11-unix:/tmp/.X11-unix -v /run/desktop/mnt/host/wslg:/mnt/wslg   -e DISPLAY=:0 sickcodes/docker-osx:ventura
+```
+
+It points Docker-OSX to wslg in `docker-desktop` (a special distro created by Docker Desktop) and run Docker-OSX.
+
+#### Run in distros
 Go into your WSL distro (Run `wsl` in powershell) and check if KVM is enabled by using the `kvm-ok` command. The output should look like this:
 
 ```
