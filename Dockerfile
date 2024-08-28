@@ -235,7 +235,7 @@ RUN grep -v InstallMedia ./Launch.sh > ./Launch-nopicker.sh \
 
 USER arch
 
-ENV USER arch
+ENV USER=arch
 
 # These are hardcoded serials for non-iMessage related research
 # Overwritten by using GENERATE_UNIQUE=true
