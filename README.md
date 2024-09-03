@@ -54,7 +54,9 @@ First time here? try [initial setup](#initial-setup), otherwise try the instruct
 ## Any questions, ideas, or just want to hang out?
 # [https://discord.gg/sickchat](https://discord.gg/sickchat)
 
-### Catalina [![https://img.shields.io/docker/image-size/sickcodes/docker-osx/latest?label=sickcodes%2Fdocker-osx%3Alatest](https://img.shields.io/docker/image-size/sickcodes/docker-osx/latest?label=sickcodes%2Fdocker-osx%3Alatest)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
+Release names and their version:
+
+### Catalina (10.15) [![https://img.shields.io/docker/image-size/sickcodes/docker-osx/latest?label=sickcodes%2Fdocker-osx%3Alatest](https://img.shields.io/docker/image-size/sickcodes/docker-osx/latest?label=sickcodes%2Fdocker-osx%3Alatest)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
 
 ```bash
 docker run -it \
@@ -66,7 +68,7 @@ docker run -it \
 
 # docker build -t docker-osx .
 ```
-### Big Sur [![https://img.shields.io/docker/image-size/sickcodes/docker-osx/big-sur?label=sickcodes%2Fdocker-osx%3Abig-sur](https://img.shields.io/docker/image-size/sickcodes/docker-osx/big-sur?label=sickcodes%2Fdocker-osx%3Abig-sur)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
+### Big Sur (11) [![https://img.shields.io/docker/image-size/sickcodes/docker-osx/big-sur?label=sickcodes%2Fdocker-osx%3Abig-sur](https://img.shields.io/docker/image-size/sickcodes/docker-osx/big-sur?label=sickcodes%2Fdocker-osx%3Abig-sur)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
 
 ```bash
 docker run -it \
@@ -79,7 +81,7 @@ docker run -it \
 # docker build -t docker-osx --build-arg SHORTNAME=big-sur .
 ```
 
-### Monterey [![https://img.shields.io/docker/image-size/sickcodes/docker-osx/monterey?label=sickcodes%2Fdocker-osx%3Amonterey](https://img.shields.io/docker/image-size/sickcodes/docker-osx/monterey?label=sickcodes%2Fdocker-osx%3Amonterey)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
+### Monterey (12) [![https://img.shields.io/docker/image-size/sickcodes/docker-osx/monterey?label=sickcodes%2Fdocker-osx%3Amonterey](https://img.shields.io/docker/image-size/sickcodes/docker-osx/monterey?label=sickcodes%2Fdocker-osx%3Amonterey)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
 
 ```bash
 
@@ -95,7 +97,7 @@ docker run -it \
 # docker build -t docker-osx --build-arg SHORTNAME=monterey .
 ```
 
-### Ventura [![https://img.shields.io/docker/image-size/sickcodes/docker-osx/ventura?label=sickcodes%2Fdocker-osx%3Aventura](https://img.shields.io/docker/image-size/sickcodes/docker-osx/ventura?label=sickcodes%2Fdocker-osx%3Aventura)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
+### Ventura (13) [![https://img.shields.io/docker/image-size/sickcodes/docker-osx/ventura?label=sickcodes%2Fdocker-osx%3Aventura](https://img.shields.io/docker/image-size/sickcodes/docker-osx/ventura?label=sickcodes%2Fdocker-osx%3Aventura)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
 
 ```bash
 
@@ -111,7 +113,7 @@ docker run -it \
 # docker build -t docker-osx --build-arg SHORTNAME=ventura .
 ```
 
-### Sonoma [![https://img.shields.io/docker/image-size/sickcodes/docker-osx/sonoma?label=sickcodes%2Fdocker-osx%3Asonoma](https://img.shields.io/docker/image-size/sickcodes/docker-osx/sonoma?label=sickcodes%2Fdocker-osx%3Asonoma)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
+### Sonoma (14) [![https://img.shields.io/docker/image-size/sickcodes/docker-osx/sonoma?label=sickcodes%2Fdocker-osx%3Asonoma](https://img.shields.io/docker/image-size/sickcodes/docker-osx/sonoma?label=sickcodes%2Fdocker-osx%3Asonoma)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
 
 ```bash
 
@@ -399,13 +401,13 @@ Pick one of these while **building**, irrelevant when using docker pull:
 
 There are currently multiple images, each with different use cases (explained [below](#container-images)):
 
-- High Sierra
-- Mojave
-- Catalina
-- Big Sur
-- Monterey
-- Ventura
-- Sonoma
+- High Sierra (10.13)
+- Mojave (10.14)
+- Catalina (10.15)
+- Big Sur (11)
+- Monterey (12)
+- Ventura (13)
+- Sonoma (14)
 - Auto (pre-made Catalina)
 - Naked (use your own .img)
 - Naked-Auto (user your own .img and SSH in)
