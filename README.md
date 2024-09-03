@@ -147,7 +147,7 @@ docker run -it \
     sickcodes/docker-osx:auto
 
 # username is user
-# passsword is alpine
+# password is alpine
 ```
 
 ### Older Systems
@@ -1818,7 +1818,7 @@ docker run -it \
     sickcodes/docker-osx:auto
 
 # username is user
-# passsword is alpine
+# password is alpine
 # Wait 2-3 minutes until you drop into the shell.
 ```
 
