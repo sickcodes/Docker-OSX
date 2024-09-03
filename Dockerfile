@@ -216,8 +216,8 @@ RUN touch Launch.sh \
     && tee -a Launch.sh <<< '-drive id=InstallMedia,if=none,file=/home/arch/OSX-KVM/BaseSystem.img,format=${BASESYSTEM_FORMAT:-qcow2} \' \
     && tee -a Launch.sh <<< '-drive id=MacHDD,if=none,file=${IMAGE_PATH:-/home/arch/OSX-KVM/mac_hdd_ng.img},format=${IMAGE_FORMAT:-qcow2} \' \
     && tee -a Launch.sh <<< '-device ide-hd,bus=sata.4,drive=MacHDD \' \
-    && tee -a Launch.sh <<< '-netdev user,id=net0,hostfwd=tcp::${INTERNAL_SSH_PORT:-10022}-:22,hostfwd=tcp::${SCREEN_SHARE_PORT:-5900}-:5900,${ADDITIONAL_PORTS} \' \
-    && tee -a Launch.sh <<< '-device ${NETWORKING:-vmxnet3},netdev=net0,id=net0,mac=${MAC_ADDRESS:-52:54:00:09:49:17} \' \
+    && tee -a Launch.sh <<< '-netdev ${NETDEV:-user,id=net0,hostfwd=tcp::${INTERNAL_SSH_PORT:-10022}-:22,hostfwd=tcp::${SCREEN_SHARE_PORT:-5900}-:5900,${ADDITIONAL_PORTS}} \' \
+    && tee -a Launch.sh <<< '-device ${NETWORKING_DEVICE:-vmxnet3},netdev=net0,id=net0,mac=${MAC_ADDRESS:-52:54:00:09:49:17} \' \
     && tee -a Launch.sh <<< '-monitor stdio \' \
     && tee -a Launch.sh <<< '-boot menu=on \' \
     && tee -a Launch.sh <<< '-vga vmware \' \
@@ -323,8 +323,14 @@ ENV KVM='accel=kvm:tcg'
 
 ENV MASTER_PLIST_URL="https://raw.githubusercontent.com/sickcodes/osx-serial-generator/master/config-custom.plist"
 
+# Add NETDEV for bridged networking option, see https://github.com/sickcodes/Docker-OSX/issues/72
+# ENV NETDEV='tap,id=net0,ifname=tap0,script=no,downscript=no'
+# ENV NETDEV='user,id=net0,hostfwd=tcp::${INTERNAL_SSH_PORT:-10022}-:22,hostfwd=tcp::${SCREEN_SHARE_PORT:-5900}-:5900,${ADDITIONAL_PORTS}'
+
 # ENV NETWORKING=e1000-82545em
+# renamed to NETWORKING_DEVICE, but not deprecated
 ENV NETWORKING=vmxnet3
+ENV NETWORKING_DEVICE="${NETWORKING}"
 
 # boolean for skipping the disk selection menu at in the boot process
 ENV NOPICKER=false
