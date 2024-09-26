@@ -159,9 +159,6 @@ RUN yes | sudo pacman -Syu bc qemu-desktop libvirt dnsmasq virt-manager bridge-u
 
 WORKDIR /home/arch/OSX-KVM
 
-# shortname default is catalina, which means :latest is catalina
-ARG SHORTNAME=catalina
-
 # fix invalid signature on old libguestfs
 ARG SIGLEVEL=Never
 
@@ -357,9 +354,12 @@ VOLUME ["/tmp/.X11-unix"]
 # And the default serial numbers
 
 # DMCA compliant download process
-# If BaseSystem.img does not exist, download $SHORTNAME
+# If BaseSystem.img does not exist, download ${SHORTNAME}
 
-ARG BASESYSTEM_IMAGE=BaseSystem.img
+# shortname default is catalina, which means :latest is catalina
+ENV SHORTNAME=sonoma
+
+ENV BASESYSTEM_IMAGE=BaseSystem.img
 
 CMD ! [[ -e "${BASESYSTEM_IMAGE:-BaseSystem.img}" ]] \
         && printf '%s\n' "No BaseSystem.img available, downloading ${SHORTNAME}" \
