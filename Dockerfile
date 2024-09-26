@@ -185,17 +185,7 @@ ARG BRANCH=master
 ARG REPO='https://github.com/sickcodes/Docker-OSX.git'
 RUN git clone --recurse-submodules --depth 1 --branch "${BRANCH:=master}" "${REPO:=https://github.com/sickcodes/Docker-OSX.git}"
 
-# DMCA compliant download process
-# If BaseSystem.img does not exist, download $SHORTNAME
-
-ARG BASESYSTEM_IMAGE=BaseSystem.img
-
-RUN ! [[ -e "${BASESYSTEM_IMAGE:-BaseSystem.img}" ]] \
-    && printf '%s\n' "No BaseSystem.img available, downloading ${SHORTNAME}" \
-    && make \
-    && qemu-img convert BaseSystem.dmg -O qcow2 -p -c ${BASESYSTEM_IMAGE:-BaseSystem.img} \
-    && rm ./BaseSystem.dmg \
-    ; touch Launch.sh \
+RUN touch Launch.sh \
     && chmod +x ./Launch.sh \
     && tee -a Launch.sh <<< '#!/bin/bash' \
     && tee -a Launch.sh <<< 'set -eux' \
@@ -366,7 +356,17 @@ VOLUME ["/tmp/.X11-unix"]
 # the default serial numbers are already contained in ./OpenCore/OpenCore.qcow2
 # And the default serial numbers
 
-CMD sudo touch /dev/kvm /dev/snd "${IMAGE_PATH}" "${BOOTDISK}" "${ENV}" 2>/dev/null || true \
+# DMCA compliant download process
+# If BaseSystem.img does not exist, download $SHORTNAME
+
+ARG BASESYSTEM_IMAGE=BaseSystem.img
+
+CMD ! [[ -e "${BASESYSTEM_IMAGE:-BaseSystem.img}" ]] \
+        && printf '%s\n' "No BaseSystem.img available, downloading ${SHORTNAME}" \
+        && make \
+        && qemu-img convert BaseSystem.dmg -O qcow2 -p -c ${BASESYSTEM_IMAGE:-BaseSystem.img} \
+        && rm ./BaseSystem.dmg \
+    ; sudo touch /dev/kvm /dev/snd "${IMAGE_PATH}" "${BOOTDISK}" "${ENV}" 2>/dev/null || true \
     ; sudo chown -R $(id -u):$(id -g) /dev/kvm /dev/snd "${IMAGE_PATH}" "${BOOTDISK}" "${ENV}" 2>/dev/null || true \
     ; [[ "${NOPICKER}" == true ]] && { \
         sed -i '/^.*InstallMedia.*/d' Launch.sh \
