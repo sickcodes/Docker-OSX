@@ -125,4 +125,17 @@ RUN printf '\n\n\n\n%s\n%s\n\n\n\n' '===========VNC_PASSWORD========== ' "$(<vnc
 
 WORKDIR /home/arch/OSX-KVM
 
-CMD ./enable-ssh.sh && envsubst < ./Launch_custom.sh | bash
+# DMCA compliant download process
+# If BaseSystem.img does not exist, download ${SHORTNAME}
+
+# shortname default is catalina, which means :latest is catalina
+ENV SHORTNAME=sonoma
+
+ENV BASESYSTEM_IMAGE=BaseSystem.img
+
+CMD ! [[ -e "${BASESYSTEM_IMAGE:-BaseSystem.img}" ]] \
+        && printf '%s\n' "No BaseSystem.img available, downloading ${SHORTNAME}" \
+        && make \
+        && qemu-img convert BaseSystem.dmg -O qcow2 -p -c ${BASESYSTEM_IMAGE:-BaseSystem.img} \
+        && rm ./BaseSystem.dmg \
+    ; ./enable-ssh.sh && envsubst < ./Launch_custom.sh | bash

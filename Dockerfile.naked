@@ -166,7 +166,20 @@ ENV HEIGHT=1080
 ENV LIBGUESTFS_DEBUG=1
 ENV LIBGUESTFS_TRACE=1
 
-CMD sudo touch /dev/kvm /dev/snd "${IMAGE_PATH}" "${BOOTDISK}" "${ENV}" 2>/dev/null || true \
+# DMCA compliant download process
+# If BaseSystem.img does not exist, download ${SHORTNAME}
+
+# shortname default is catalina, which means :latest is catalina
+ENV SHORTNAME=sonoma
+
+ENV BASESYSTEM_IMAGE=BaseSystem.img
+
+CMD ! [[ -e "${BASESYSTEM_IMAGE:-BaseSystem.img}" ]] \
+        && printf '%s\n' "No BaseSystem.img available, downloading ${SHORTNAME}" \
+        && make \
+        && qemu-img convert BaseSystem.dmg -O qcow2 -p -c ${BASESYSTEM_IMAGE:-BaseSystem.img} \
+        && rm ./BaseSystem.dmg \
+    ; sudo touch /dev/kvm /dev/snd "${IMAGE_PATH}" "${BOOTDISK}" "${ENV}" 2>/dev/null || true \
     ; sudo chown -R $(id -u):$(id -g) /dev/kvm /dev/snd "${IMAGE_PATH}" "${BOOTDISK}" "${ENV}" 2>/dev/null || true \
     ; { [[ "${DISPLAY}" = ':99' ]] || [[ "${HEADLESS}" == true ]] ; } && { \
         nohup Xvfb :99 -screen 0 1920x1080x16 \

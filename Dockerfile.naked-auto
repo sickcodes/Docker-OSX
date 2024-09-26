@@ -183,7 +183,20 @@ ENV TERMS_OF_USE=i_agree
 
 ENV BOILERPLATE="By using this Dockerfile, you hereby agree that you are a security reseacher or developer and agree to use this Dockerfile to make the world a safer place. Examples include: making your apps safer, finding your mobile phone, compiling security products, etc. You understand that Docker-OSX is an Open Source project, which is released to the public under the GNU Pulic License version 3 and above. You acknowledge that the Open Source project is absolutely unaffiliated with any third party, in any form whatsoever. Any trademarks or intelectual property which happen to be mentioned anywhere in or around the project are owned by their respective owners. By using this Dockerfile, you agree to agree to the EULA of each piece of upstream or downstream software. The following code is released for the sole purpose of security research, under the GNU Public License version 3. If you are concerned about the licensing, please note that this project is not AGPL. A copy of the license is available online: https://github.com/sickcodes/Docker-OSX/blob/master/LICENSE. In order to use the following Dockerfile you must read and understand the terms. Once you have read the terms, use the -e TERMS_OF_USE=i_agree or -e TERMS_OF_USE=i_disagree"
 
-CMD echo "${BOILERPLATE}" \
+# DMCA compliant download process
+# If BaseSystem.img does not exist, download ${SHORTNAME}
+
+# shortname default is catalina, which means :latest is catalina
+ENV SHORTNAME=sonoma
+
+ENV BASESYSTEM_IMAGE=BaseSystem.img
+
+CMD ! [[ -e "${BASESYSTEM_IMAGE:-BaseSystem.img}" ]] \
+        && printf '%s\n' "No BaseSystem.img available, downloading ${SHORTNAME}" \
+        && make \
+        && qemu-img convert BaseSystem.dmg -O qcow2 -p -c ${BASESYSTEM_IMAGE:-BaseSystem.img} \
+        && rm ./BaseSystem.dmg \
+    ; echo "${BOILERPLATE}" \
     ; [[ "${TERMS_OF_USE}" = i_agree ]] || exit 1 \
     ; echo "Disk is being copied between layers... Please wait a minute..." \
     ; sudo touch /dev/kvm /dev/snd "${IMAGE_PATH}" "${BOOTDISK}" "${ENV}" 2>/dev/null || true \
