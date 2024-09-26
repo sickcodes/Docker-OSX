@@ -162,10 +162,6 @@ WORKDIR /home/arch/OSX-KVM
 # shortname default is catalina, which means :latest is catalina
 ARG SHORTNAME=catalina
 
-RUN make \
-    && qemu-img convert BaseSystem.dmg -O qcow2 -p -c BaseSystem.img \
-    && rm ./BaseSystem.dmg
-
 # fix invalid signature on old libguestfs
 ARG SIGLEVEL=Never
 
@@ -189,7 +185,17 @@ ARG BRANCH=master
 ARG REPO='https://github.com/sickcodes/Docker-OSX.git'
 RUN git clone --recurse-submodules --depth 1 --branch "${BRANCH:=master}" "${REPO:=https://github.com/sickcodes/Docker-OSX.git}"
 
-RUN touch Launch.sh \
+# DMCA compliant download process
+# If BaseSystem.img does not exist, download $SHORTNAME
+
+ARG BASESYSTEM_IMAGE=BaseSystem.img
+
+RUN ! [[ -e "${BASESYSTEM_IMAGE:-BaseSystem.img}" ]] \
+    && printf '%s\n' "No BaseSystem.img available, downloading ${SHORTNAME}" \
+    && make \
+    && qemu-img convert BaseSystem.dmg -O qcow2 -p -c ${BASESYSTEM_IMAGE:-BaseSystem.img} \
+    && rm ./BaseSystem.dmg \
+    ; touch Launch.sh \
     && chmod +x ./Launch.sh \
     && tee -a Launch.sh <<< '#!/bin/bash' \
     && tee -a Launch.sh <<< 'set -eux' \
