@@ -212,4 +212,3 @@ Is your host machine's disk, specifically `/var` (because of `/var/lib/docker`),
 ### Increase RAM or CPUs/cores
 
 The `RAM`, `SMP`, and `CORES` options are all docker environment variables, which means it uses whatever you provide any time you start a container.
-
