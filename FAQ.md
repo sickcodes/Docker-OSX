@@ -3,38 +3,41 @@
 These questions come up regularly, so here are the answers.
 # Table of Contents
 
-| [[#Is this legal?]]                                |
-| :------------------------------------------------- |
-| [What Is this Project?](#What-does-Docker-OSX-do?) |
-| [Why use Docker?](#Why-docker?)                    |
-**[Can I...](#Can-I...)**
+| [Is this legal?](#is-this-legal)                  |
+| :------------------------------------------------ |
+| [What Is this Project?](#what-does-docker-osx-do) |
+| [Why use Docker?](#why-docker)                    |
 
-| *[[#...run BlueBubbles/AirMessage/Beeper on it?]]*     |
-| :----------------------------------------------------- |
-| *[[#...develop iPhone apps on it?]]*                   |
-| *[[#...connect my iPhone or other USB device to it?]]* |
-| *[[#...run CI/CD processes with it?]]*                 |
-| *[[#...run on Linux but with Wayland?]]*               |
-| *[[#...run on Windows?]]*                              |
-| *[[#...run on macOS?]]*                                |
-| *[[#...run on cloud services?]]*                       |
-**[Common Errors:](#Common-Errors)**
+#### [Can I...](#can-i)
 
-| *[[#Docker Errors]]*                      |
-| :---------------------------------------- |
-| *[[#GTK Initialization Failed]]*          |
-| *[[#KVM Error]]*                          |
-| *[[#ALSA Error]]*                         |
-| *[[#No Disk to Install On]]*              |
-| *[[#Slow Installation]]*                  |
-| *[[#Installer After Completing Install]]* |
-**[Next Steps](#Next-Steps)**
+| *[...run BlueBubbles/AirMessage/Beeper on it?](#run-bluebubblesairmessagebeeper-on-it)*           |
+| :------------------------------------------------------------------------------------------------ |
+| *[...develop iPhone apps on it?](#develop-iphone-apps-on-it)*                                     |
+| *[...connect my iPhone or other USB device to it?](#connect-my-iphone-or-other-usb-device-to-it)* |
+| *[...run CI/CD processes with it?](#run-cicd-processes-with-it)*                                  |
+| *[...run on Linux but with Wayland?](#run-on-linux-but-with-wayland)*                             |
+| *[...run on Windows?](#run-on-windows)*                                                           |
+| *[...run on macOS?](#run-on-macos)*                                                               |
+| *[...run on cloud services?](#run-on-cloud-services)*                                             |
 
-| [[#Slow UI]]                    |
-| ------------------------------- |
-| [[#Extract the Virtual Disk]]   |
-| [[#Disk Space]]                 |
-| [[#Increase RAM or CPUs/cores]] |
+#### [Common Errors:](#Common-Errors)
+
+| *[Docker Errors](#docker-errors)*                                           |
+| :-------------------------------------------------------------------------- |
+| *[GTK Initialization Failed](#gtk-initialization-failed)*                   |
+| *[KVM Error](#kvm-error)*                                                   |
+| *[ALSA Error](#alsa-error)*                                                 |
+| *[No Disk to Install On](#no-disk-to-install-on)*                           |
+| *[Slow Installation](#slow-installation)*                                   |
+| *[Installer After Completing Install](#installer-after-completing-install)* |
+
+#### [Next Steps](#Next-Steps)
+
+| [Slow UI](#slow-ui)                                      |
+| -------------------------------------------------------- |
+| [Extract the Virtual Disk](#extract-the-virtual-disk)    |
+| [Disk Space](#disk-space)                                |
+| [Increase RAM or CPUs/cores](#increase-ram-or-cpuscores) |
 
 ## Basics
 
