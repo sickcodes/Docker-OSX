@@ -1,6 +1,40 @@
 # Frequently Asked Questions
 
 These questions come up regularly, so here are the answers.
+# Table of Contents
+
+| [[#Is this legal?]]                                |
+| :------------------------------------------------- |
+| [What Is this Project?](#What-does-Docker-OSX-do?) |
+| [Why use Docker?](#Why-docker?)                    |
+**[Can I...](#Can-I...)**
+
+| *[[#...run BlueBubbles/AirMessage/Beeper on it?]]*     |
+| :----------------------------------------------------- |
+| *[[#...develop iPhone apps on it?]]*                   |
+| *[[#...connect my iPhone or other USB device to it?]]* |
+| *[[#...run CI/CD processes with it?]]*                 |
+| *[[#...run on Linux but with Wayland?]]*               |
+| *[[#...run on Windows?]]*                              |
+| *[[#...run on macOS?]]*                                |
+| *[[#...run on cloud services?]]*                       |
+**[Common Errors:](#Common-Errors)**
+
+| *[[#Docker Errors]]*                      |
+| :---------------------------------------- |
+| *[[#GTK Initialization Failed]]*          |
+| *[[#KVM Error]]*                          |
+| *[[#ALSA Error]]*                         |
+| *[[#No Disk to Install On]]*              |
+| *[[#Slow Installation]]*                  |
+| *[[#Installer After Completing Install]]* |
+**[Next Steps](#Next-Steps)**
+
+| [[#Slow UI]]                    |
+| ------------------------------- |
+| [[#Extract the Virtual Disk]]   |
+| [[#Disk Space]]                 |
+| [[#Increase RAM or CPUs/cores]] |
 
 ## Basics
 
