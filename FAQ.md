@@ -33,11 +33,11 @@ These questions come up regularly, so here are the answers.
 
 #### [Next Steps](#Next-Steps)
 
-| [Slow UI](#slow-ui)                                      |
+| *[Slow UI](#slow-ui)*                                      |
 | -------------------------------------------------------- |
-| [Extract the Virtual Disk](#extract-the-virtual-disk)    |
-| [Disk Space](#disk-space)                                |
-| [Increase RAM or CPUs/cores](#increase-ram-or-cpuscores) |
+| *[Extract the Virtual Disk](#extract-the-virtual-disk)*    |
+| *[Disk Space](#disk-space)*                                |
+| *[Increase RAM or CPUs/cores](#increase-ram-or-cpuscores)* |
 
 ## Basics
 
