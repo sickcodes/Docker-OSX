@@ -11,7 +11,7 @@ Conduct Security Research on macOS using both Linux & Windows!
 The Discord is active on #docker-osx and anyone is welcome to come and ask questions, ideas, etc.
 
 <p align="center">
-    <a href="https://hub.docker.com/r/sickcodes/docker-osx"><img src="https://dockeri.co/image/sickcodes/docker-osx"/></a><a href="https://discord.gg/sickchat"><a href="https://discord.gg/sickchat" target="_blank"><img src="https://raw.githubusercontent.com/sickcodes/Docker-OSX/master/discord-logo.svg"></a></a>
+    <a href="https://hub.docker.com/r/dickhub/docker-osx"><img src="https://dockeri.co/image/dickhub/docker-osx"/></a><a href="https://discord.gg/sickchat"><a href="https://discord.gg/sickchat" target="_blank"><img src="https://raw.githubusercontent.com/dickhub/docker-osx/master/discord-logo.svg"></a></a>
 </p>
 
 
@@ -27,9 +27,9 @@ Or via [https://sick.codes/contact/](https://sick.codes/contact/)
 
 This project is maintained by [Sick.Codes](https://sick.codes/). [(Twitter)](https://twitter.com/sickcodes)
 
-Additional credits can be found here: https://github.com/sickcodes/Docker-OSX/blob/master/CREDITS.md
+Additional credits can be found here: https://github.com/dickhub/docker-osx/blob/master/CREDITS.md
 
-Additionally, comprehensive list of all contributors can be found here: https://github.com/sickcodes/Docker-OSX/graphs/contributors
+Additionally, comprehensive list of all contributors can be found here: https://github.com/dickhub/docker-osx/graphs/contributors
 
 Big thanks to [@kholia](https://twitter.com/kholia) for maintaining the upstream project, which Docker-OSX is built on top of: [OSX-KVM](https://github.com/kholia/OSX-KVM).
 
@@ -46,7 +46,7 @@ Video setup tutorial is also available here: https://www.youtube.com/watch?v=wLe
 **Windows users:** [click here to see the notes below](#id-like-to-run-docker-osx-on-windows)!
 
 <p align="center">
-  <a href="https://www.youtube.com/watch?v=wLezYl77Ll8" target="_blank"><img src="https://raw.githubusercontent.com/sickcodes/Docker-OSX/master/Youtube-Screenshot-Docker-OSX-Setup.png"></a>
+  <a href="https://www.youtube.com/watch?v=wLezYl77Ll8" target="_blank"><img src="https://raw.githubusercontent.com/dickhub/docker-osx/master/Youtube-Screenshot-Docker-OSX-Setup.png"></a>
 </p>
 
 First time here? try [initial setup](#initial-setup), otherwise try the instructions below to use either Catalina or Big Sur.
@@ -56,7 +56,7 @@ First time here? try [initial setup](#initial-setup), otherwise try the instruct
 
 Release names and their version:
 
-### Catalina (10.15) [![https://img.shields.io/docker/image-size/sickcodes/docker-osx/latest?label=sickcodes%2Fdocker-osx%3Alatest](https://img.shields.io/docker/image-size/sickcodes/docker-osx/latest?label=sickcodes%2Fdocker-osx%3Alatest)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
+### Catalina (10.15) [![https://img.shields.io/docker/image-size/dickhub/docker-osx/latest?label=sickcodes%2Fdocker-osx%3Alatest](https://img.shields.io/docker/image-size/dickhub/docker-osx/latest?label=sickcodes%2Fdocker-osx%3Alatest)](https://hub.docker.com/r/dickhub/docker-osx/tags?page=1&ordering=last_updated)
 
 ```bash
 docker run -it \
@@ -65,11 +65,11 @@ docker run -it \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
     -e "DISPLAY=${DISPLAY:-:0.0}" \
     -e SHORTNAME=catalina \
-    sickcodes/docker-osx:latest
+    dickhub/docker-osx:latest
 
 # docker build -t docker-osx .
 ```
-### Big Sur (11) [![https://img.shields.io/docker/image-size/sickcodes/docker-osx/big-sur?label=sickcodes%2Fdocker-osx%3Abig-sur](https://img.shields.io/docker/image-size/sickcodes/docker-osx/big-sur?label=sickcodes%2Fdocker-osx%3Abig-sur)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
+### Big Sur (11) [![https://img.shields.io/docker/image-size/dickhub/docker-osx/big-sur?label=sickcodes%2Fdocker-osx%3Abig-sur](https://img.shields.io/docker/image-size/dickhub/docker-osx/big-sur?label=sickcodes%2Fdocker-osx%3Abig-sur)](https://hub.docker.com/r/dickhub/docker-osx/tags?page=1&ordering=last_updated)
 
 ```bash
 docker run -it \
@@ -78,12 +78,12 @@ docker run -it \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
     -e "DISPLAY=${DISPLAY:-:0.0}" \
     -e SHORTNAME=big-sur \
-    sickcodes/docker-osx:latest
+    dickhub/docker-osx:latest
 
 # docker build -t docker-osx .
 ```
 
-### Monterey (12) [![https://img.shields.io/docker/image-size/sickcodes/docker-osx/monterey?label=sickcodes%2Fdocker-osx%3Amonterey](https://img.shields.io/docker/image-size/sickcodes/docker-osx/monterey?label=sickcodes%2Fdocker-osx%3Amonterey)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
+### Monterey (12) [![https://img.shields.io/docker/image-size/dickhub/docker-osx/monterey?label=sickcodes%2Fdocker-osx%3Amonterey](https://img.shields.io/docker/image-size/dickhub/docker-osx/monterey?label=sickcodes%2Fdocker-osx%3Amonterey)](https://hub.docker.com/r/dickhub/docker-osx/tags?page=1&ordering=last_updated)
 
 ```bash
 
@@ -95,12 +95,12 @@ docker run -it \
     -e GENERATE_UNIQUE=true \
     -e MASTER_PLIST_URL='https://raw.githubusercontent.com/sickcodes/osx-serial-generator/master/config-custom.plist' \
     -e SHORTNAME=monterey \
-    sickcodes/docker-osx:latest
+    dickhub/docker-osx:latest
 
 # docker build -t docker-osx .
 ```
 
-### Ventura (13) [![https://img.shields.io/docker/image-size/sickcodes/docker-osx/ventura?label=sickcodes%2Fdocker-osx%3Aventura](https://img.shields.io/docker/image-size/sickcodes/docker-osx/ventura?label=sickcodes%2Fdocker-osx%3Aventura)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
+### Ventura (13) [![https://img.shields.io/docker/image-size/dickhub/docker-osx/ventura?label=sickcodes%2Fdocker-osx%3Aventura](https://img.shields.io/docker/image-size/dickhub/docker-osx/ventura?label=sickcodes%2Fdocker-osx%3Aventura)](https://hub.docker.com/r/dickhub/docker-osx/tags?page=1&ordering=last_updated)
 
 ```bash
 
@@ -112,12 +112,12 @@ docker run -it \
     -e GENERATE_UNIQUE=true \
     -e MASTER_PLIST_URL='https://raw.githubusercontent.com/sickcodes/osx-serial-generator/master/config-custom.plist' \
     -e SHORTNAME=ventura \
-    sickcodes/docker-osx:latest
+    dickhub/docker-osx:latest
 
 # docker build -t docker-osx .
 ```
 
-### Sonoma (14) [![https://img.shields.io/docker/image-size/sickcodes/docker-osx/sonoma?label=sickcodes%2Fdocker-osx%3Asonoma](https://img.shields.io/docker/image-size/sickcodes/docker-osx/sonoma?label=sickcodes%2Fdocker-osx%3Asonoma)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
+### Sonoma (14) [![https://img.shields.io/docker/image-size/dickhub/docker-osx/sonoma?label=sickcodes%2Fdocker-osx%3Asonoma](https://img.shields.io/docker/image-size/dickhub/docker-osx/sonoma?label=sickcodes%2Fdocker-osx%3Asonoma)](https://hub.docker.com/r/dickhub/docker-osx/tags?page=1&ordering=last_updated)
 
 ```bash
 
@@ -131,16 +131,16 @@ docker run -it \
     -e CPUID_FLAGS='kvm=on,vendor=GenuineIntel,+invtsc,vmware-cpuid-freq=on' \
     -e MASTER_PLIST_URL='https://raw.githubusercontent.com/sickcodes/osx-serial-generator/master/config-custom-sonoma.plist' \
     -e SHORTNAME=sonoma \
-    sickcodes/docker-osx:latest
+    dickhub/docker-osx:latest
 
 # docker build -t docker-osx .
 ```
 
-#### Run Catalina Pre-Installed [![https://img.shields.io/docker/image-size/sickcodes/docker-osx/auto?label=sickcodes%2Fdocker-osx%3Aauto](https://img.shields.io/docker/image-size/sickcodes/docker-osx/auto?label=sickcodes%2Fdocker-osx%3Aauto)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
+#### Run Catalina Pre-Installed [![https://img.shields.io/docker/image-size/dickhub/docker-osx/auto?label=sickcodes%2Fdocker-osx%3Aauto](https://img.shields.io/docker/image-size/dickhub/docker-osx/auto?label=sickcodes%2Fdocker-osx%3Aauto)](https://hub.docker.com/r/dickhub/docker-osx/tags?page=1&ordering=last_updated)
 
 ```bash
 # 40GB disk space required: 20GB original image 20GB your container.
-docker pull sickcodes/docker-osx:auto
+docker pull dickhub/docker-osx:auto
 
 # boot directly into a real OS X shell with a visual display [NOT HEADLESS]
 docker run -it \
@@ -149,7 +149,7 @@ docker run -it \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
     -e "DISPLAY=${DISPLAY:-:0.0}" \
     -e GENERATE_UNIQUE=true \
-    sickcodes/docker-osx:auto
+    dickhub/docker-osx:auto
 
 # username is user
 # password is alpine
@@ -157,7 +157,7 @@ docker run -it \
 
 ### Older Systems
 
-### High Sierra [![https://img.shields.io/docker/image-size/sickcodes/docker-osx/high-sierra?label=sickcodes%2Fdocker-osx%3Ahigh-sierra](https://img.shields.io/docker/image-size/sickcodes/docker-osx/high-sierra?label=sickcodes%2Fdocker-osx%3Ahigh-sierra)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
+### High Sierra [![https://img.shields.io/docker/image-size/dickhub/docker-osx/high-sierra?label=sickcodes%2Fdocker-osx%3Ahigh-sierra](https://img.shields.io/docker/image-size/dickhub/docker-osx/high-sierra?label=sickcodes%2Fdocker-osx%3Ahigh-sierra)](https://hub.docker.com/r/dickhub/docker-osx/tags?page=1&ordering=last_updated)
 
 ```bash
 
@@ -167,12 +167,12 @@ docker run -it \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
     -e "DISPLAY=${DISPLAY:-:0.0}" \
     -e SHORTNAME=high-sierra \
-    sickcodes/docker-osx:latest
+    dickhub/docker-osx:latest
 
 # docker build -t docker-osx .
 ```
 
-### Mojave [![https://img.shields.io/docker/image-size/sickcodes/docker-osx/mojave?label=sickcodes%2Fdocker-osx%3Amojave](https://img.shields.io/docker/image-size/sickcodes/docker-osx/mojave?label=sickcodes%2Fdocker-osx%3Amojave)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
+### Mojave [![https://img.shields.io/docker/image-size/dickhub/docker-osx/mojave?label=sickcodes%2Fdocker-osx%3Amojave](https://img.shields.io/docker/image-size/dickhub/docker-osx/mojave?label=sickcodes%2Fdocker-osx%3Amojave)](https://hub.docker.com/r/dickhub/docker-osx/tags?page=1&ordering=last_updated)
 
 ```bash
 
@@ -182,7 +182,7 @@ docker run -it \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
     -e "DISPLAY=${DISPLAY:-:0.0}" \
     -e SHORTNAME=mojave \
-    sickcodes/docker-osx:latest
+    dickhub/docker-osx:latest
 
 # docker build -t docker-osx .
 ```
@@ -191,7 +191,7 @@ docker run -it \
 
 #### Download the image manually and use it in Docker 
 
-[![https://img.shields.io/docker/image-size/sickcodes/docker-osx/naked?label=sickcodes%2Fdocker-osx%3Anaked](https://img.shields.io/docker/image-size/sickcodes/docker-osx/naked?label=sickcodes%2Fdocker-osx%3Anaked)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
+[![https://img.shields.io/docker/image-size/dickhub/docker-osx/naked?label=sickcodes%2Fdocker-osx%3Anaked](https://img.shields.io/docker/image-size/dickhub/docker-osx/naked?label=sickcodes%2Fdocker-osx%3Anaked)](https://hub.docker.com/r/dickhub/docker-osx/tags?page=1&ordering=last_updated)
 
 
 This is a particularly good way for downloading the container, in case Docker's CDN (or your connection) happens to be slow.
@@ -206,15 +206,15 @@ docker run -it \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
     -e "DISPLAY=${DISPLAY:-:0.0}" \
     -e GENERATE_UNIQUE=true \
-    -e MASTER_PLIST_URL=https://raw.githubusercontent.com/sickcodes/Docker-OSX/master/custom/config-nopicker-custom.plist \
+    -e MASTER_PLIST_URL=https://raw.githubusercontent.com/dickhub/docker-osx/master/custom/config-nopicker-custom.plist \
     -e SHORTNAME=catalina \
-    sickcodes/docker-osx:naked
+    dickhub/docker-osx:naked
 ```
 
 
 #### Use your own image and manually and automatically log into a shell
 
-[![https://img.shields.io/docker/image-size/sickcodes/docker-osx/naked-auto?label=sickcodes%2Fdocker-osx%3Anaked-auto](https://img.shields.io/docker/image-size/sickcodes/docker-osx/naked-auto?label=sickcodes%2Fdocker-osx%3Anaked-auto)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
+[![https://img.shields.io/docker/image-size/dickhub/docker-osx/naked-auto?label=sickcodes%2Fdocker-osx%3Anaked-auto](https://img.shields.io/docker/image-size/dickhub/docker-osx/naked-auto?label=sickcodes%2Fdocker-osx%3Anaked-auto)](https://hub.docker.com/r/dickhub/docker-osx/tags?page=1&ordering=last_updated)
 
 
 Enable SSH in network sharing inside the guest first. Change `-e "USERNAME=user"` and `-e "PASSWORD=password"` to your credentials. The container will add itself to `~/.ssh/authorized_keys`
@@ -236,9 +236,9 @@ docker run -it \
     -e "USERNAME=user" \
     -e "PASSWORD=alpine" \
     -e GENERATE_UNIQUE=true \
-    -e MASTER_PLIST_URL=https://raw.githubusercontent.com/sickcodes/Docker-OSX/master/custom/config-nopicker-custom.plist \
+    -e MASTER_PLIST_URL=https://raw.githubusercontent.com/dickhub/docker-osx/master/custom/config-nopicker-custom.plist \
     -e SHORTNAME=monterey \
-    sickcodes/docker-osx:naked-auto
+    dickhub/docker-osx:naked-auto
 ```
 
 # Share directories, sharing files, shared folder, mount folder
@@ -263,7 +263,7 @@ If you have a desktop PC, you can use [@Silfalion](https://github.com/Silfalion)
 Video setup tutorial for usbfluxd is also available here: https://www.youtube.com/watch?v=kTk5fGjK_PM
 
 <p align="center">
-  <a href="https://www.youtube.com/watch?v=kTk5fGjK_PM" target="_blank"><img alt="iPhone USB passthrough on macOS virtual machine Linux & Windows" src="https://raw.githubusercontent.com/sickcodes/Docker-OSX/master/Youtube-USBFLUXD-Screenshot-Docker-OSX.png"></a>
+  <a href="https://www.youtube.com/watch?v=kTk5fGjK_PM" target="_blank"><img alt="iPhone USB passthrough on macOS virtual machine Linux & Windows" src="https://raw.githubusercontent.com/dickhub/docker-osx/master/Youtube-USBFLUXD-Screenshot-Docker-OSX.png"></a>
 </p>
 
 
@@ -423,43 +423,43 @@ There are currently multiple images, each with different use cases (explained [b
 
 High Sierra:
 
-[![https://img.shields.io/docker/image-size/sickcodes/docker-osx/high-sierra?label=sickcodes%2Fdocker-osx%3Ahigh-sierra](https://img.shields.io/docker/image-size/sickcodes/docker-osx/high-sierra?label=sickcodes%2Fdocker-osx%3Ahigh-sierra)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
+[![https://img.shields.io/docker/image-size/dickhub/docker-osx/high-sierra?label=sickcodes%2Fdocker-osx%3Ahigh-sierra](https://img.shields.io/docker/image-size/dickhub/docker-osx/high-sierra?label=sickcodes%2Fdocker-osx%3Ahigh-sierra)](https://hub.docker.com/r/dickhub/docker-osx/tags?page=1&ordering=last_updated)
 
 Mojave:
 
-[![https://img.shields.io/docker/image-size/sickcodes/docker-osx/mojave?label=sickcodes%2Fdocker-osx%3Amojave](https://img.shields.io/docker/image-size/sickcodes/docker-osx/mojave?label=sickcodes%2Fdocker-osx%3Amojave)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
+[![https://img.shields.io/docker/image-size/dickhub/docker-osx/mojave?label=sickcodes%2Fdocker-osx%3Amojave](https://img.shields.io/docker/image-size/dickhub/docker-osx/mojave?label=sickcodes%2Fdocker-osx%3Amojave)](https://hub.docker.com/r/dickhub/docker-osx/tags?page=1&ordering=last_updated)
 
 Catalina:
 
-[![https://img.shields.io/docker/image-size/sickcodes/docker-osx/latest?label=sickcodes%2Fdocker-osx%3Alatest](https://img.shields.io/docker/image-size/sickcodes/docker-osx/latest?label=sickcodes%2Fdocker-osx%3Alatest)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
+[![https://img.shields.io/docker/image-size/dickhub/docker-osx/latest?label=sickcodes%2Fdocker-osx%3Alatest](https://img.shields.io/docker/image-size/dickhub/docker-osx/latest?label=sickcodes%2Fdocker-osx%3Alatest)](https://hub.docker.com/r/dickhub/docker-osx/tags?page=1&ordering=last_updated)
 
 Big-Sur:
 
-[![https://img.shields.io/docker/image-size/sickcodes/docker-osx/big-sur?label=sickcodes%2Fdocker-osx%3Abig-sur](https://img.shields.io/docker/image-size/sickcodes/docker-osx/big-sur?label=sickcodes%2Fdocker-osx%3Abig-sur)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
+[![https://img.shields.io/docker/image-size/dickhub/docker-osx/big-sur?label=sickcodes%2Fdocker-osx%3Abig-sur](https://img.shields.io/docker/image-size/dickhub/docker-osx/big-sur?label=sickcodes%2Fdocker-osx%3Abig-sur)](https://hub.docker.com/r/dickhub/docker-osx/tags?page=1&ordering=last_updated)
 
 Monterey make your own image:
 
-[![https://img.shields.io/docker/image-size/sickcodes/docker-osx/monterey?label=sickcodes%2Fdocker-osx%3Amonterey](https://img.shields.io/docker/image-size/sickcodes/docker-osx/monterey?label=sickcodes%2Fdocker-osx%3Amonterey)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
+[![https://img.shields.io/docker/image-size/dickhub/docker-osx/monterey?label=sickcodes%2Fdocker-osx%3Amonterey](https://img.shields.io/docker/image-size/dickhub/docker-osx/monterey?label=sickcodes%2Fdocker-osx%3Amonterey)](https://hub.docker.com/r/dickhub/docker-osx/tags?page=1&ordering=last_updated)
 
 Ventura make your own image:
 
-[![https://img.shields.io/docker/image-size/sickcodes/docker-osx/ventura?label=sickcodes%2Fdocker-osx%3Aventura](https://img.shields.io/docker/image-size/sickcodes/docker-osx/ventura?label=sickcodes%2Fdocker-osx%3Aventura)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
+[![https://img.shields.io/docker/image-size/dickhub/docker-osx/ventura?label=sickcodes%2Fdocker-osx%3Aventura](https://img.shields.io/docker/image-size/dickhub/docker-osx/ventura?label=sickcodes%2Fdocker-osx%3Aventura)](https://hub.docker.com/r/dickhub/docker-osx/tags?page=1&ordering=last_updated)
 
 Sonoma make your own image:
 
-[![https://img.shields.io/docker/image-size/sickcodes/docker-osx/sonoma?label=sickcodes%2Fdocker-osx%3Asonoma](https://img.shields.io/docker/image-size/sickcodes/docker-osx/sonoma?label=sickcodes%2Fdocker-osx%3Asonoma)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
+[![https://img.shields.io/docker/image-size/dickhub/docker-osx/sonoma?label=sickcodes%2Fdocker-osx%3Asonoma](https://img.shields.io/docker/image-size/dickhub/docker-osx/sonoma?label=sickcodes%2Fdocker-osx%3Asonoma)](https://hub.docker.com/r/dickhub/docker-osx/tags?page=1&ordering=last_updated)
 
 Pre-made **Catalina** system by [Sick.Codes](https://sick.codes): username: `user`, password: `alpine`
 
-[![https://img.shields.io/docker/image-size/sickcodes/docker-osx/auto?label=sickcodes%2Fdocker-osx%3Aauto](https://img.shields.io/docker/image-size/sickcodes/docker-osx/auto?label=sickcodes%2Fdocker-osx%3Aauto)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
+[![https://img.shields.io/docker/image-size/dickhub/docker-osx/auto?label=sickcodes%2Fdocker-osx%3Aauto](https://img.shields.io/docker/image-size/dickhub/docker-osx/auto?label=sickcodes%2Fdocker-osx%3Aauto)](https://hub.docker.com/r/dickhub/docker-osx/tags?page=1&ordering=last_updated)
 
 Naked: Bring-your-own-image setup (use any of the above first):
 
-[![https://img.shields.io/docker/image-size/sickcodes/docker-osx/naked?label=sickcodes%2Fdocker-osx%3Anaked](https://img.shields.io/docker/image-size/sickcodes/docker-osx/naked?label=sickcodes%2Fdocker-osx%3Anaked)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
+[![https://img.shields.io/docker/image-size/dickhub/docker-osx/naked?label=sickcodes%2Fdocker-osx%3Anaked](https://img.shields.io/docker/image-size/dickhub/docker-osx/naked?label=sickcodes%2Fdocker-osx%3Anaked)](https://hub.docker.com/r/dickhub/docker-osx/tags?page=1&ordering=last_updated)
 
 Naked Auto: same as above but with `-e USERNAME` & `-e PASSWORD` and `-e OSX_COMMANDS="put your commands here"`
 
-[![https://img.shields.io/docker/image-size/sickcodes/docker-osx/naked-auto?label=sickcodes%2Fdocker-osx%3Anaked-auto](https://img.shields.io/docker/image-size/sickcodes/docker-osx/naked-auto?label=sickcodes%2Fdocker-osx%3Anaked-auto)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
+[![https://img.shields.io/docker/image-size/dickhub/docker-osx/naked-auto?label=sickcodes%2Fdocker-osx%3Anaked-auto](https://img.shields.io/docker/image-size/dickhub/docker-osx/naked-auto?label=sickcodes%2Fdocker-osx%3Anaked-auto)](https://hub.docker.com/r/dickhub/docker-osx/tags?page=1&ordering=last_updated)
 
 ## Capabilities
 - use iPhone OSX KVM on Linux using [usbfluxd](https://github.com/corellium/usbfluxd)!
@@ -489,7 +489,7 @@ Naked Auto: same as above but with `-e USERNAME` & `-e PASSWORD` and `-e OSX_COM
 
 ## Docker
 
-Images built on top of the contents of this repository are also available on **Docker Hub** for convenience: https://hub.docker.com/r/sickcodes/docker-osx
+Images built on top of the contents of this repository are also available on **Docker Hub** for convenience: https://hub.docker.com/r/dickhub/docker-osx
 
 A comprehensive list of the available Docker images and their intended purpose can be found in the [Instructions](#instructions).
 
@@ -507,11 +507,11 @@ Thanks [cephasara](https://github.com/cephasara) for contributing this major con
 
 ### Small questions & issues
 
-Feel free to open an [issue](https://github.com/sickcodes/Docker-OSX/issues/new/choose), should you come across minor issues with running Docker-OSX or have any questions.
+Feel free to open an [issue](https://github.com/dickhub/docker-osx/issues/new/choose), should you come across minor issues with running Docker-OSX or have any questions.
 
 #### Resolved issues
 
-Before you open an issue, however, please check the [closed issues](https://github.com/sickcodes/Docker-OSX/issues?q=is%3Aissue+is%3Aclosed) and confirm that you're using the latest version of this repository — your issues may have already been resolved! You might also see your answer in our questions and answers section [below](#more-questions-and-answers).
+Before you open an issue, however, please check the [closed issues](https://github.com/dickhub/docker-osx/issues?q=is%3Aissue+is%3Aclosed) and confirm that you're using the latest version of this repository — your issues may have already been resolved! You might also see your answer in our questions and answers section [below](#more-questions-and-answers).
 
 ### Feature requests and updates
 
@@ -551,21 +551,21 @@ Product names, logos, brands and other trademarks referred to within this projec
 
 There are several different Docker-OSX images available that are suitable for different purposes.
 
-- `sickcodes/docker-osx:latest` - [I just want to try it out.](#quick-start-docker-osx)
-- `sickcodes/docker-osx:latest` - [I want to use Docker-OSX to develop/secure apps in Xcode (sign into Xcode, Transporter)](#quick-start-your-own-image-naked-container-image)
-- `sickcodes/docker-osx:naked` - [I want to use Docker-OSX for CI/CD-related purposes (sign into Xcode, Transporter)](#building-a-headless-container-from-a-custom-image)
+- `dickhub/docker-osx:latest` - [I just want to try it out.](#quick-start-docker-osx)
+- `dickhub/docker-osx:latest` - [I want to use Docker-OSX to develop/secure apps in Xcode (sign into Xcode, Transporter)](#quick-start-your-own-image-naked-container-image)
+- `dickhub/docker-osx:naked` - [I want to use Docker-OSX for CI/CD-related purposes (sign into Xcode, Transporter)](#building-a-headless-container-from-a-custom-image)
 
 Create your personal image using `:latest` or `big-sur`. Then, pull the image out the image. Afterwards, you will be able to duplicate that image and import it to the `:naked` container, in order to revert the container to a previous state repeatedly.
 
-- `sickcodes/docker-osx:auto` - [I'm only interested in using the command line (useful for compiling software or using Homebrew headlessly).](#prebuilt-image-with-arbitrary-command-line-arguments)
-- `sickcodes/docker-osx:naked` - [I need iMessage/iCloud for security research.](#generating-serial-numbers)
-- `sickcodes/docker-osx:big-sur` - [I want to run Big Sur.](#quick-start-docker-osx)
-- `sickcodes/docker-osx:monterey` - [I want to run Monterey.](#quick-start-docker-osx)
-- `sickcodes/docker-osx:ventura` - [I want to run Ventura.](#quick-start-docker-osx)
-- `sickcodes/docker-osx:sonoma` - [I want to run Sonoma.](#quick-start-docker-osx)
+- `dickhub/docker-osx:auto` - [I'm only interested in using the command line (useful for compiling software or using Homebrew headlessly).](#prebuilt-image-with-arbitrary-command-line-arguments)
+- `dickhub/docker-osx:naked` - [I need iMessage/iCloud for security research.](#generating-serial-numbers)
+- `dickhub/docker-osx:big-sur` - [I want to run Big Sur.](#quick-start-docker-osx)
+- `dickhub/docker-osx:monterey` - [I want to run Monterey.](#quick-start-docker-osx)
+- `dickhub/docker-osx:ventura` - [I want to run Ventura.](#quick-start-docker-osx)
+- `dickhub/docker-osx:sonoma` - [I want to run Sonoma.](#quick-start-docker-osx)
 
-- `sickcodes/docker-osx:high-sierra` - I want to run High Sierra.
-- `sickcodes/docker-osx:mojave` - I want to run Mojave.
+- `dickhub/docker-osx:high-sierra` - I want to run High Sierra.
+- `dickhub/docker-osx:mojave` - I want to run Mojave.
 
 ## Initial setup
 Before you do anything else, you will need to turn on hardware virtualization in your BIOS. Precisely how will depend on your particular machine (and BIOS), but it should be straightforward.
@@ -655,7 +655,7 @@ Or try:
 -v /mnt/wslg/.X11-unix:/tmp/.X11-unix \
 ```
 
-For Ubuntu 20.x on Windows, see [https://github.com/sickcodes/Docker-OSX/discussions/458](https://github.com/sickcodes/Docker-OSX/discussions/458)
+For Ubuntu 20.x on Windows, see [https://github.com/dickhub/docker-osx/discussions/458](https://github.com/dickhub/docker-osx/discussions/458)
 
 - VNC: See the [VNC section](#building-a-headless-container-which-allows-insecure-vnc-on-localhost-for-local-use-only) for more information. You could also add -vnc argument to qemu. Connect to your mac VM via a VNC Client. [Here is a how to](https://wiki.archlinux.org/title/QEMU#VNC)
 - Desktop Environment: This will give you a full desktop linux experience but it will use a bit more of the computer's resources. Here is an example guide, but there are other guides that help set up a desktop environment. [DE Example](https://www.makeuseof.com/tag/linux-desktop-windows-subsystem/)
@@ -683,7 +683,7 @@ This is a great place to start if you are having trouble getting going, especial
 
 Just looking to make a container quickly? Check out our [container creation examples](#container-creation-examples) section.
 
-More specific/advanced troubleshooting questions and answers may be found in [More Questions and Answers](#more-questions-and-answers). You should also check out the [closed issues](https://github.com/sickcodes/Docker-OSX/issues?q=is%3Aissue+is%3Aclosed). Someone else might have gotten a question like yours answered already even if you can't find it in this document!
+More specific/advanced troubleshooting questions and answers may be found in [More Questions and Answers](#more-questions-and-answers). You should also check out the [closed issues](https://github.com/dickhub/docker-osx/issues?q=is%3Aissue+is%3Aclosed). Someone else might have gotten a question like yours answered already even if you can't find it in this document!
 
 #### Confirm that your CPU supports virtualization
 
@@ -766,7 +766,7 @@ systemctl start docker
 
 Big thank you to our contributors who have worked out almost every conceivable issue so far!
 
-[https://github.com/sickcodes/Docker-OSX/blob/master/CREDITS.md](https://github.com/sickcodes/Docker-OSX/blob/master/CREDITS.md)
+[https://github.com/dickhub/docker-osx/blob/master/CREDITS.md](https://github.com/dickhub/docker-osx/blob/master/CREDITS.md)
 
 
 ### Start the same container later (persistent disk)
@@ -787,7 +787,7 @@ docker ps --all
 docker start -ai abc123xyz567
 
 # if you have many containers, you can try automate it with filters like this
-# docker ps --all --filter "ancestor=sickcodes/docker-osx"
+# docker ps --all --filter "ancestor=dickhub/docker-osx"
 # for locally tagged/built containers
 # docker ps --all --filter "ancestor=docker-osx"
 
@@ -795,11 +795,11 @@ docker start -ai abc123xyz567
 
 You can also pull the `.img` file out of the container, which is stored in `/var/lib/docker`, and supply it as a runtime argument to the `:naked` Docker image. 
 
-See also: [here](https://github.com/sickcodes/Docker-OSX/issues/197).
+See also: [here](https://github.com/dickhub/docker-osx/issues/197).
 
 ### I have used Docker-OSX before and want to restart a container that starts automatically
 
-Containers that use `sickcodes/docker-osx:auto` can be stopped while being started.
+Containers that use `dickhub/docker-osx:auto` can be stopped while being started.
 
 ```bash
 # find last container
@@ -813,7 +813,7 @@ docker start -ai -i <Replace this with your ID>
 
 You may see one or more libgtk-related errors if you do not have everything set up for hardware virtualisation yet. If you have not yet done so, check out the [initial setup](#initial-setup) section and the [routine checks](#routine-checks) section as you may have missed a setup step or may not have all the needed Docker dependencies ready to go.
 
-See also: [here](https://github.com/sickcodes/Docker-OSX/issues/174).
+See also: [here](https://github.com/dickhub/docker-osx/issues/174).
 
 #### Permissions denied error
 
@@ -839,7 +839,7 @@ xhost +
 ### RAM over-allocation
 You cannot allocate more RAM than your machine has. The default is 3 Gigabytes: `-e RAM=3`.
 
-If you are trying to allocate more RAM to the container than you currently have available, you may see an error like the following: `cannot set up guest memory 'pc.ram': Cannot allocate memory`. See also: [here](https://github.com/sickcodes/Docker-OSX/issues/188), [here](https://github.com/sickcodes/Docker-OSX/pull/189).
+If you are trying to allocate more RAM to the container than you currently have available, you may see an error like the following: `cannot set up guest memory 'pc.ram': Cannot allocate memory`. See also: [here](https://github.com/dickhub/docker-osx/issues/188), [here](https://github.com/dickhub/docker-osx/pull/189).
 
 For example (below) the `buff/cache` already contains 20 Gigabytes of allocated RAM:
 
@@ -877,7 +877,7 @@ docker run \
     -e AUDIO_DRIVER=pa,server=unix:/tmp/pulseaudio.socket \
     -v "/run/user/$(id -u)/pulse/native:/tmp/pulseaudio.socket" \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
-    sickcodes/docker-osx
+    dickhub/docker-osx
 ```
 
 #### PulseAudio debugging
@@ -889,7 +889,7 @@ docker run \
     -v "/run/user/$(id -u)/pulse/native:/tmp/pulseaudio.socket" \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
     -e PULSE_SERVER=unix:/tmp/pulseaudio.socket \
-    sickcodes/docker-osx pactl list
+    dickhub/docker-osx pactl list
 ```
 
 #### PulseAudio with WSLg
@@ -900,7 +900,7 @@ docker run \
     -e AUDIO_DRIVER=pa,server=unix:/tmp/pulseaudio.socket \
     -v /mnt/wslg/runtime-dir/pulse/native:/tmp/pulseaudio.socket \
     -v /mnt/wslg/.X11-unix:/tmp/.X11-unix \
-    sickcodes/docker-osx
+    dickhub/docker-osx
 ```
 
 ### Forward additional ports (nginx hosting example)
@@ -919,7 +919,7 @@ docker run -it \
     -p 50922:10022 \
     -e ADDITIONAL_PORTS='hostfwd=tcp::10023-:80,' \
     -p 10023:10023 \
-    sickcodes/docker-osx:auto
+    dickhub/docker-osx:auto
 ```
 
 In a Terminal session running the container, run:
@@ -947,7 +947,7 @@ Additionally, you can string multiple statements together, for example:
 
 You might not need to do anything with the default setup to enable internet connectivity from inside the container. Additionally, `curl` may work even if `ping` doesn't.
 
-See discussion [here](https://github.com/sickcodes/Docker-OSX/issues/177) and [here](https://github.com/sickcodes/Docker-OSX/issues/72) and [here](https://github.com/sickcodes/Docker-OSX/issues/88).
+See discussion [here](https://github.com/dickhub/docker-osx/issues/177) and [here](https://github.com/dickhub/docker-osx/issues/72) and [here](https://github.com/dickhub/docker-osx/issues/88).
 
 ### Enable IPv4 forwarding for bridged network connections for remote installations
 
@@ -1009,7 +1009,7 @@ docker run -it \
     -v "${PWD}/mac_hdd_ng.img:/home/arch/OSX-KVM/mac_hdd_ng.img" \
     -v "${SHARE}:/mnt/hostshare" \
     -e EXTRA="-virtfs local,path=/mnt/hostshare,mount_tag=hostshare,security_model=passthrough,id=hostshare" \
-    sickcodes/docker-osx:latest
+    dickhub/docker-osx:latest
 
 # !!! Open Terminal inside macOS and run the following command to mount the virtual file system
 # sudo -S mount_9p hostshare
@@ -1124,7 +1124,7 @@ egrep -c '(svm|vmx)' /proc/cpuinfo
 - Check for errors again, and build a fresh docker image. E.g. with this Dockerfile
 
 ```
-FROM sickcodes/docker-osx
+FROM dickhub/docker-osx
 USER arch
 COPY --chown=arch ./deduped.img /home/arch/OSX-KVM/mac_hdd_ng.img
 ```
@@ -1231,7 +1231,7 @@ These two files are from OSX-KVM.
 
 You don't need to touch these two files.
 
-The config.plist has 5 values replaced with placeholders. [Click here to see those values for no reason.](https://github.com/sickcodes/Docker-OSX/blob/master/custom/config-nopicker-custom.plist#L705)
+The config.plist has 5 values replaced with placeholders. [Click here to see those values for no reason.](https://github.com/dickhub/docker-osx/blob/master/custom/config-nopicker-custom.plist#L705)
 
 - `generate-unique-machine-values.sh`
 This script will generate serial numbers, with Mac Addresses, plus output to CSV/TSV, plus make a `bootdisk image`.
@@ -1269,7 +1269,7 @@ docker run --rm -it \
     -e NOPICKER=true \
     -e GENERATE_UNIQUE=true \
     -e DEVICE_MODEL="iMacPro1,1" \
-    sickcodes/docker-osx:auto
+    dickhub/docker-osx:auto
 
 # -e OSX_COMMANDS='ioreg -l | grep IOPlatformSerialNumber' \
 ```
@@ -1291,7 +1291,7 @@ docker run -it \
     -e UUID="5CCB366D-9118-4C61-A00A-E5BAF3BED451" \
     -e MAC_ADDRESS="A8:5C:2C:9A:46:2F" \
     -e OSX_COMMANDS='ioreg -l | grep IOPlatformSerialNumber' \
-    sickcodes/docker-osx:auto
+    dickhub/docker-osx:auto
 ```
 
 #### This example generates a specific set of serial numbers at runtime, with your existing image, at 1000x1000 display resolution
@@ -1316,7 +1316,7 @@ docker run -it \
     -e MAC_ADDRESS="A8:5C:2C:9A:46:2F" \
     -e WIDTH=1000 \
     -e HEIGHT=1000 \
-    sickcodes/docker-osx:naked
+    dickhub/docker-osx:naked
 ```
 
 If you want to generate serial numbers, either make them at runtime using
@@ -1351,7 +1351,7 @@ docker run -it \
     -e DEVICE_MODEL="iMacPro1,1" \
     -v "${PWD}/output.env:/env" \
     -v "${PWD}/mac_hdd_ng_testing.img:/image" \
-    sickcodes/docker-osx:naked
+    dickhub/docker-osx:naked
 ```
 
 To use iMessage or iCloud you need to change `5` values.
@@ -1380,7 +1380,7 @@ Or tell the container to use specific ones using `-e GENERATE_SPECIFIC=true`
 
 The display resolution is controlled by this line:
 
-https://github.com/sickcodes/Docker-OSX/blob/master/custom/config-nopicker-custom.plist#L819
+https://github.com/dickhub/docker-osx/blob/master/custom/config-nopicker-custom.plist#L819
 
 Instead of mounting that disk, Docker-OSX will generate a new `OpenCore.qcow2` by using this one cool trick:
 
@@ -1422,10 +1422,10 @@ docker run -it \
     -e BOARD_SERIAL="C027251024NJG36UE" \
     -e UUID="5CCB366D-9118-4C61-A00A-E5BAF3BED451" \
     -e MAC_ADDRESS="A8:5C:2C:9A:46:2F" \
-    -e MASTER_PLIST_URL=https://raw.githubusercontent.com/sickcodes/Docker-OSX/master/custom/config-nopicker-custom.plist \
+    -e MASTER_PLIST_URL=https://raw.githubusercontent.com/dickhub/docker-osx/master/custom/config-nopicker-custom.plist \
     -e WIDTH=1600 \
     -e HEIGHT=900 \
-    sickcodes/docker-osx:naked
+    dickhub/docker-osx:naked
 ```
 
 ```bash
@@ -1438,7 +1438,7 @@ docker run -it \
     -e GENERATE_UNIQUE=true \
     -e WIDTH=800 \
     -e HEIGHT=600 \
-    sickcodes/docker-osx:latest
+    dickhub/docker-osx:latest
 ```
 
 Here's a few other resolutions! If your resolution is invalid, it will default to 800x600.
@@ -1514,10 +1514,10 @@ docker run -it \
     -v "${OSX_IMAGE}":/image \
     -v "${DISK_TWO}":/disktwo \
     -e EXTRA='-device ide-hd,bus=sata.5,drive=DISK-TWO -drive id=DISK-TWO,if=none,file=/disktwo,format=qcow2' \
-    sickcodes/docker-osx:naked
+    dickhub/docker-osx:naked
 ```
 
-See also: [here](https://github.com/sickcodes/Docker-OSX/issues/222).
+See also: [here](https://github.com/dickhub/docker-osx/issues/222).
 
 
 #### Extracting the APFS disk on Linux
@@ -1568,7 +1568,7 @@ See [here](https://www.linuxquestions.org/questions/slackware-14/qemu-usb-permis
 For example, create a new Dockerfile with the following
 
 ```bash
-FROM sickcodes/docker-osx
+FROM dickhub/docker-osx
 USER arch
 RUN sed -i -e s/exec\ qemu/exec\ sudo\ qemu/ ./Launch.sh
 COPY --chown=arch ./new_image.img /home/arch/OSX-KVM/mac_hdd_ng.img
@@ -1621,7 +1621,7 @@ This is my favourite container. You can supply an existing disk image as a Docke
 
 - Pull images out using `sudo find /var/lib/docker -name mac_hdd_ng.img -size +10G`
 
-- Supply your own local image with the command argument `-v "${PWD}/mac_hdd_ng.img:/image"` and use `sickcodes/docker-osx:naked` when instructing Docker to create your container.
+- Supply your own local image with the command argument `-v "${PWD}/mac_hdd_ng.img:/image"` and use `dickhub/docker-osx:naked` when instructing Docker to create your container.
 
   - Naked image is for booting any existing .img file, e.g in the current working directory (`$PWD`)
   - By default, this image has a variable called `NOPICKER` which is `"true"`. This skips the disk selection menu. Use `-e NOPICKER=false` or any other string than the word `true` to enter the boot menu.
@@ -1629,7 +1629,7 @@ This is my favourite container. You can supply an existing disk image as a Docke
     This lets you use other disks instead of skipping the boot menu, e.g. recovery disk or disk utility.
 
 ```bash
-docker pull sickcodes/docker-osx:naked
+docker pull dickhub/docker-osx:naked
 
 # run your own image + SSH
 # change mac_hdd_ng.img
@@ -1639,7 +1639,7 @@ docker run -it \
     -v "${PWD}/mac_hdd_ng.img:/image" \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
     -e "DISPLAY=${DISPLAY:-:0.0}" \
-    sickcodes/docker-osx:naked
+    dickhub/docker-osx:naked
 
 # run local copy of the auto image + SSH + Boot menu
 docker run -it \
@@ -1649,7 +1649,7 @@ docker run -it \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
     -e "DISPLAY=${DISPLAY:-:0.0}" \
     -e "NOPICKER=false" \
-    sickcodes/docker-osx:naked
+    dickhub/docker-osx:naked
 ```
 
 ### Building an OSX container with video output
@@ -1663,12 +1663,12 @@ The Quick Start command should work out of the box, provided that you keep the f
 
 #### Prebuilt image with arbitrary command line arguments 
 
-[![https://img.shields.io/docker/image-size/sickcodes/docker-osx/auto?label=sickcodes%2Fdocker-osx%3Aauto](https://img.shields.io/docker/image-size/sickcodes/docker-osx/auto?label=sickcodes%2Fdocker-osx%3Aauto)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
+[![https://img.shields.io/docker/image-size/dickhub/docker-osx/auto?label=sickcodes%2Fdocker-osx%3Aauto](https://img.shields.io/docker/image-size/dickhub/docker-osx/auto?label=sickcodes%2Fdocker-osx%3Aauto)](https://hub.docker.com/r/dickhub/docker-osx/tags?page=1&ordering=last_updated)
 
 `-e OSX_COMMANDS` lets you run any commands inside the container
 
 ```bash
-docker pull sickcodes/docker-osx:auto
+docker pull dickhub/docker-osx:auto
 
 # boot to OS X shell + display + specify commands to run inside OS X!
 docker run -it \
@@ -1677,7 +1677,7 @@ docker run -it \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
     -e "DISPLAY=${DISPLAY:-:0.0}" \
     -e "OSX_COMMANDS=/bin/bash -c \"put your commands here\"" \
-    sickcodes/docker-osx:auto
+    dickhub/docker-osx:auto
 
 # Boots in a minute or two!
 ```
@@ -1685,7 +1685,7 @@ docker run -it \
 OR if you have an image already and just want to log in and execute arbitrary commands:
 
 ```bash
-docker pull sickcodes/docker-osx:naked-auto
+docker pull dickhub/docker-osx:naked-auto
 
 # boot to OS X shell + display + specify commands to run inside OS X!
 docker run -it \
@@ -1696,7 +1696,7 @@ docker run -it \
     -e USERNAME=yourusername \
     -e PASSWORD=yourpassword \
     -e "OSX_COMMANDS=/bin/bash -c \"put your commands here\"" \
-    sickcodes/docker-osx:naked-auto
+    dickhub/docker-osx:naked-auto
 
 # Boots in a minute or two!
 
@@ -1717,7 +1717,7 @@ For a headless container, **remove** the following two lines from your `docker r
 
 #### Building a headless container from a custom image 
 
-[![https://img.shields.io/docker/image-size/sickcodes/docker-osx/naked?label=sickcodes%2Fdocker-osx%3Anaked](https://img.shields.io/docker/image-size/sickcodes/docker-osx/naked?label=sickcodes%2Fdocker-osx%3Anaked)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
+[![https://img.shields.io/docker/image-size/dickhub/docker-osx/naked?label=sickcodes%2Fdocker-osx%3Anaked](https://img.shields.io/docker/image-size/dickhub/docker-osx/naked?label=sickcodes%2Fdocker-osx%3Anaked)](https://hub.docker.com/r/dickhub/docker-osx/tags?page=1&ordering=last_updated)
 
 This is particularly helpful for CI/CD pipelines.
 
@@ -1727,7 +1727,7 @@ docker run -it \
     --device /dev/kvm \
     -p 50922:10022 \
     -v "${PWD}/mac_hdd_ng.img:/image" \
-    sickcodes/docker-osx:naked
+    dickhub/docker-osx:naked
 ```
 
 ### Building a headless container that allows insecure VNC on localhost (!for local use only!)
@@ -1746,7 +1746,7 @@ docker run -i \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
     -e "DISPLAY=${DISPLAY:-:0.0}" \
     -e EXTRA="-display none -vnc 0.0.0.0:99,password=on" \
-    sickcodes/docker-osx:big-sur
+    dickhub/docker-osx:big-sur
 
 # type `change vnc password myvncusername` into the docker terminal and set a password
 # connect to localhost:5999 using VNC
@@ -1818,13 +1818,13 @@ docker run \
 ```
 
 ```bash
-docker pull sickcodes/docker-osx:auto
+docker pull dickhub/docker-osx:auto
 
 # boot directly into a real OS X shell with no display (Xvfb) [HEADLESS]
 docker run -it \
     --device /dev/kvm \
     -p 50922:10022 \
-    sickcodes/docker-osx:auto
+    dickhub/docker-osx:auto
 
 # username is user
 # password is alpine
@@ -1835,14 +1835,14 @@ docker run -it \
 
 ```bash
 
-docker pull sickcodes/docker-osx:latest
+docker pull dickhub/docker-osx:latest
 
 docker run -it \
     --device /dev/kvm \
     --device /dev/snd \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
     -e "DISPLAY=${DISPLAY:-:0.0}" \
-    sickcodes/docker-osx:latest
+    dickhub/docker-osx:latest
 
 # press CTRL + G if your mouse gets stuck
 # scroll down to troubleshooting if you have problems
@@ -1858,7 +1858,7 @@ docker run -it \
     -p 50922:10022 \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
     -e "DISPLAY=${DISPLAY:-:0.0}" \
-    sickcodes/docker-osx:latest
+    dickhub/docker-osx:latest
 
 # turn on SSH after you've installed OS X in the "Sharing" settings.
 ssh user@localhost -p 50922
@@ -1892,7 +1892,7 @@ sed -i -e s/OpenCore\.qcow2/OpenCore\-nopicker\.qcow2/ ./Launch-nopicker.sh
 
 ### The big-sur image starts slowly after installation. Is this expected?
 
-Automatic updates are still on in the container's settings. You may wish to turn them off. [We have future plans for development around this.](https://github.com/sickcodes/Docker-OSX/issues/227)
+Automatic updates are still on in the container's settings. You may wish to turn them off. [We have future plans for development around this.](https://github.com/dickhub/docker-osx/issues/227)
 
 ### What is `${DISPLAY:-:0.0}`?
 
@@ -1934,4 +1934,4 @@ If we let the Docker container use the same display socket as our own environmen
 You may when initialising or booting into a container see errors from the `(qemu)` console of the following form: 
 `ALSA lib blahblahblah: (function name) returned error: no such file or directory`. These are more or less expected. As long as you are able to boot into the container and everything is working, no reason to worry about these.
 
-See also: [here](https://github.com/sickcodes/Docker-OSX/issues/174).
+See also: [here](https://github.com/dickhub/docker-osx/issues/174).
