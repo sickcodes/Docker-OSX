@@ -3,7 +3,7 @@ name: Push Docker Image to Docker Hub
 on:
   push:
     branches:
-      - main
+      - master
 
 jobs:
   push_to_docker_hub:
@@ -30,10 +30,10 @@ jobs:
       - name: Build Docker image
         id: build_image
         run: |
-          docker build "$GITHUB_WORKSPACE" -t ${{ secrets.DOCKER_HUB_USER_NAME }}/docker-osx-ng:$GITHUB_SHA --label dockerfile-path="Dockerfile"
+          docker build "$GITHUB_WORKSPACE" -t ${{ secrets.DOCKER_HUB_USER_NAME }}/docker-osx:$GITHUB_SHA --label dockerfile-path="Dockerfile"
 
       - name: Push Docker image
-        run: docker push ${{ secrets.DOCKER_HUB_USER_NAME }}/docker-osx-ng:$GITHUB_SHA
+        run: docker push ${{ secrets.DOCKER_HUB_USER_NAME }}/docker-osx:$GITHUB_SHA
 
       - name: Logout from Docker Hub
         run: docker logout
