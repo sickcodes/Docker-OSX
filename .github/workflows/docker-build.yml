@@ -33,7 +33,7 @@ jobs:
           docker build "$GITHUB_WORKSPACE" -t ${{ secrets.DOCKER_HUB_USER_NAME }}/docker-osx:$GITHUB_SHA --label dockerfile-path="Dockerfile"
 
       - name: Push Docker image
-        run: docker push ${{ secrets.DOCKER_HUB_USER_NAME }}/docker-osx:latest
+        run: docker push ${{ secrets.DOCKER_HUB_USER_NAME }}/docker-osx
 
       - name: Logout from Docker Hub
         run: docker logout
