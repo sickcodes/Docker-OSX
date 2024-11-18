@@ -1,0 +1,42 @@
+name: Push Docker Image to Docker Hub
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  push_to_docker_hub:
+    name: Push Docker Image to Docker Hub
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        id: checkout_code
+        uses: actions/checkout@v3
+
+      - name: Login to Docker Hub
+        id: login_docker_hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_HUB_USER_NAME }}
+          password: ${{ secrets.DOCKER_HUB_PASSWORD }}
+      
+      - name: Echo Docker Hub Username
+        run: echo ${{ secrets.DOCKER_HUB_USER_NAME }}
+
+      - name: Echo GitHub SHA
+        run: echo $GITHUB_SHA
+
+      - name: Build Docker image
+        id: build_image
+        run: |
+          docker build "$GITHUB_WORKSPACE" -t ${{ secrets.DOCKER_HUB_USER_NAME }}/docker-osx-ng:$GITHUB_SHA --label dockerfile-path="Dockerfile"
+
+      - name: Push Docker image
+        run: docker push ${{ secrets.DOCKER_HUB_USER_NAME }}/docker-osx-ng:$GITHUB_SHA
+
+      - name: Logout from Docker Hub
+        run: docker logout
+
+      - name: End
+        run: echo "Docker image pushed to Docker Hub successfully"
