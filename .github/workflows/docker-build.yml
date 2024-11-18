@@ -30,10 +30,18 @@ jobs:
       - name: Build Docker image
         id: build_image
         run: |
-          docker build "$GITHUB_WORKSPACE" -t ${{ secrets.DOCKER_HUB_USER_NAME }}/docker-osx:$GITHUB_SHA --label dockerfile-path="Dockerfile"
+          docker build "$GITHUB_WORKSPACE" -t sickcodes/docker-osx:master --label dockerfile-path="Dockerfile"
 
-      - name: Push Docker image
-        run: docker push ${{ secrets.DOCKER_HUB_USER_NAME }}/docker-osx
+      - name: Label Master Docker Image as Latest
+        id: build_image
+        run: |
+          docker tag sickcodes/docker-osx:master sickcodes/docker-osx:latest
+
+      - name: Push Docker image master
+        run: docker push sickcodes/docker-osx:master
+
+      - name: Push Docker image latest
+        run: docker push sickcodes/docker-osx:latest
 
       - name: Logout from Docker Hub
         run: docker logout
