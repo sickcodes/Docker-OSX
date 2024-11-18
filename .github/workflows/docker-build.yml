@@ -33,14 +33,16 @@ jobs:
           docker build "$GITHUB_WORKSPACE" -t sickcodes/docker-osx:master --label dockerfile-path="Dockerfile"
 
       - name: Label Master Docker Image as Latest
-        id: build_image
+        id: label_image
         run: |
           docker tag sickcodes/docker-osx:master sickcodes/docker-osx:latest
 
       - name: Push Docker image master
+        id: push_master
         run: docker push sickcodes/docker-osx:master
 
       - name: Push Docker image latest
+        id: push_latest
         run: docker push sickcodes/docker-osx:latest
 
       - name: Logout from Docker Hub
