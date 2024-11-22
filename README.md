@@ -246,7 +246,7 @@ The easiest and most secure way is `sshfs`
 ```bash
 # on Linux/Windows
 mkdir ~/mnt/osx
-sshfs user@localhost:/ -p 50922 ~/mnt/osx
+sshfs user@localhost: -p 50922 ~/mnt/osx
 # wait a few seconds, and ~/mnt/osx will have full rootfs mounted over ssh, and in userspace
 # automated: sshpass -p <password> sshfs user@localhost:/ -p 50922 ~/mnt/osx
 ```
