@@ -356,8 +356,8 @@ VOLUME ["/tmp/.X11-unix"]
 # DMCA compliant download process
 # If BaseSystem.img does not exist, download ${SHORTNAME}
 
-# shortname default is catalina, which means :latest is catalina
-ENV SHORTNAME=sonoma
+# shortname default is below
+ENV SHORTNAME=sequoia
 
 ENV BASESYSTEM_IMAGE=BaseSystem.img
 
