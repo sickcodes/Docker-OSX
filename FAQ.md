@@ -1,6 +1,40 @@
 # Frequently Asked Questions
 
 These questions come up regularly, so here are the answers.
+| Table of Contents|
+| :------------------------------------------------ |
+| [Is this legal?](#is-this-legal)                  |
+| [What is this Project?](#what-does-docker-osx-do) |
+| [Why use Docker?](#why-docker)                    |
+
+
+|[Can I...](#can-i)|
+| :------------------------------------------------------------------------------------------------ |
+| *[...run BlueBubbles/AirMessage/Beeper on it?](#run-bluebubblesairmessagebeeper-on-it)*           |
+| *[...develop iPhone apps on it?](#develop-iphone-apps-on-it)*                                     |
+| *[...connect my iPhone or other USB device to it?](#connect-my-iphone-or-other-usb-device-to-it)* |
+| *[...run CI/CD processes with it?](#run-cicd-processes-with-it)*                                  |
+| *[...run on Linux but with Wayland?](#run-on-linux-but-with-wayland)*                             |
+| *[...run on Windows?](#run-on-windows)*                                                           |
+| *[...run on macOS?](#run-on-macos)*                                                               |
+| *[...run on cloud services?](#run-on-cloud-services)*                                             |
+
+|[Common Errors:](#common-errors)|
+| :-------------------------------------------------------------------------- |
+| *[Docker Errors](#docker-errors)*                                           |
+| *[GTK Initialization Failed](#gtk-initialization-failed)*                   |
+| *[KVM Error](#kvm-error)*                                                   |
+| *[ALSA Error](#alsa-error)*                                                 |
+| *[No Disk to Install On](#no-disk-to-install-on)*                           |
+| *[Slow Installation](#slow-installation)*                                   |
+| *[Installer After Completing Install](#installer-after-completing-install)* |
+
+|[Next Steps](#next-steps)|
+| -------------------------------------------------------- |
+| *[Slow UI](#slow-ui)*                                      |
+| *[Extract the Virtual Disk](#extract-the-virtual-disk)*    |
+| *[Disk Space](#disk-space)*                                |
+| *[Increase RAM or CPUs/cores](#increase-ram-or-cpuscores)* |
 
 ## Basics
 
@@ -8,7 +42,7 @@ These questions come up regularly, so here are the answers.
 
 The [macOS software license](https://www.apple.com/legal/sla/) allows running (some versions of) macOS in a virtual machine only on Apple hardware. The [Apple Security Bounty terms and conditions](https://security.apple.com/terms-and-conditions/) make an exception to that (and essentially anything in the macOS software license) under some specific circumstances.
 
-Therefore, yes, there is a legal use for Docker-OSX. If your use doesn't fall under the license or the security bounty terms, then you are/will be violating the macOS software license. **Note that this is not provided as legal advice, and you should consult with your own counsel for legal guidance.**
+Therefore, yes, there is a legal use for Docker-OSX. If your use doesn't fall under the license or the security bounty terms, then you are/will be violating the macOS software license. **Note that this is not provided as legal advice, and you should consult with your personal counsel for legal guidance.**
 
 You may also be interested in this [deeper dive into the subject](https://sick.codes/is-hackintosh-osx-kvm-or-docker-osx-legal/).
 
@@ -56,17 +90,18 @@ Yes, but your Wayland server must support X11 connections (or you can [use VNC i
 
 ### ...run on Windows?
 
-Yes, as long as you have a new enough version of Windows 11 and have WSL2 set up. See [this section of the README](README.md#id-like-to-run-docker-osx-on-windows) for details. No, it will not work under Windows 10. Not even if you have WSL2 set up.
+
+Yes, but you must have Windows 11 installed with build 22000+ (21H2 or higher). Please note that while WSL2 exists on Windows 10, it lacks the required functionality, such as Nested Virtualization. You must have WSL2 set up. See [this section of the README](README.md#id-like-to-run-docker-osx-on-windows) for details. 
 
 ### ...run on macOS?
 
 If you have a Mac with Apple Silicon you are better served by [UTM](https://apps.apple.com/us/app/utm-virtual-machines/id1538878817?mt=12).
 
-If you have an Intel Mac you can install and run docker (either [Docker Desktop](https://www.docker.com/products/docker-desktop/) or [colima](https://github.com/abiosoft/colima)). In either case, docker will be running under a Linux VM, which complicates things. You are likely to encounter one or more of the [common errors](#common-errors) below. Consider using qemu directly with HVF acceleration (e.g. with [libvirt](https://libvirt.org/macos.html)) instead.
+If you have an Intel Mac you can install and run Docker (either [Docker Desktop](https://www.docker.com/products/docker-desktop/) or [Colima](https://github.com/abiosoft/colima)). In either case, Docker will be running under a Linux VM, which complicates things. You are likely to encounter one or more of the [common errors](#common-errors) below. Consider using qemu directly with HVF acceleration (e.g. with [libvirt](https://libvirt.org/macos.html)) instead.
 
 ### ...run on cloud services?
 
-Cloud providers typically run their various services within virtual machines running on top of their actual hardware. These VMs typically are not set up to provide nested virtualization, which means KVM is unavailable so Docker-OSX will not work. This is _especially and specifically_ the case on CI/CD runners such as GitHub Actions, Azure DevOps Pipelines, CircleCI, GitLab CI/CD, etc. (however, see [running CI/CD](#run-cicd-processes-with-it)). Some cloud providers offer services that do allow virtualization, such as [Amazon's EC2 Bare Metal Instances](https://aws.amazon.com/about-aws/whats-new/2018/05/announcing-general-availability-of-amazon-ec2-bare-metal-instances/), but often at a significant premium.
+Cloud providers typically run their various services within virtual machines running on top of their actual hardware. These VMs are not usually set up to provide nested virtualization, which means KVM is unavailable so Docker-OSX will not work. This is _specifically_ the case on CI/CD runners such as GitHub Actions, Azure DevOps Pipelines, CircleCI, GitLab CI/CD, etc. (however, see [running CI/CD](#run-cicd-processes-with-it)). Some cloud providers offer services that do allow virtualization, such as [Amazon's EC2 Bare Metal Instances](https://aws.amazon.com/about-aws/whats-new/2018/05/announcing-general-availability-of-amazon-ec2-bare-metal-instances/), but often at a significant premium.
 
 In short, probably not.
 
@@ -82,7 +117,7 @@ If you get an error like `Cannot connect to the Docker daemon at unix://var/run/
 
 ### GTK Initialization Failed
 
-This is an X11 error and means that the arguments to qemu are telling it to connect to an X11 display that it either can't connect to at all or doesn't have permission to connect to. In the latter case, this can usually be fixed by running `xhost +` on the host running the X11 server.
+This is an X11 error which means that the arguments to qemu tell it to connect to an X11 display that it either can't connect to at all or doesn't have permission to connect to. In the latter case, this can usually be fixed by running `xhost +` on the host running the X11 server.
 
 In many cases, however, it is preferable to tell qemu to listen for a VNC connection instead of trying to connect to X11; see [this section of the README](README.md#building-a-headless-container-that-allows-insecure-vnc-on-localhost-for-local-use-only) for instructions.
 
@@ -152,7 +187,7 @@ If you have launched the installer but don't see a disk to install macOS on, it 
 
 This is not unique to virtual hardware. The macOS installation process gives apparently random and dependably incorrect time estimates, and can often appear to have completely frozen. Just be patient. It could take hours, maybe even more than a day.
 
-### Installer After Completing Install
+### Installer After Completing the Install
 
 If you wind up in the installer again after you've installed macOS it means you booted from the installer disk instead of the disk you installed macOS on. Reboot and make sure you choose the correct disk to boot.
 
@@ -175,4 +210,3 @@ Is your host machine's disk, specifically `/var` (because of `/var/lib/docker`),
 ### Increase RAM or CPUs/cores
 
 The `RAM`, `SMP`, and `CORES` options are all docker environment variables, which means it uses whatever you provide any time you start a container.
-
