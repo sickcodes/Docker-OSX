@@ -251,7 +251,7 @@ docker run -it \
     -p 50922:10022 \
     -v "${PWD}/mac_hdd_ng_auto_monterey.img:/image" \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
-    -e "DISPLAY=${DISPLAY:-:0}" \
+    -e "DISPLAY=${DISPLAY:-:0.0}" \
     -e "USERNAME=user" \
     -e "PASSWORD=alpine" \
     -e GENERATE_UNIQUE=true \
