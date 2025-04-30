@@ -160,6 +160,185 @@ If you wind up in the installer again after you've installed macOS it means you 
 
 Congratulations, you got a macOS VM up and running! Now what?
 
+# Fixing Apple ID Login Issues in macOS Virtual Machines
+
+## Problem Overview
+
+When running macOS in a virtual machine, you may encounter problems logging into Apple services including:
+- Apple ID
+- iMessage
+- iCloud
+- App Store
+
+This happens because Apple's services can detect that macOS is running in a virtual environment and block access. The solution is to apply a kernel patch that hides the VM presence from Apple's detection mechanism.
+
+NOTE as per forum post: Unfortunately, this would very possibly break qemu-guest-agent, which is necessary for the host getting VM status or taking hot snapshot while the VM is running. This is because qemu-guest-agent also checks the hv_vmm_present flag, but only works if it is true (=1).
+
+Use at your own risk. Hope it would help.
+
+## Solution: Kernel Patching
+
+This guide provides three methods to apply the necessary kernel patch. All methods implement the same fix originally described in [this forum post](https://forum.proxmox.com/threads/anyone-can-make-bluetooth-work-on-sonoma.153301/#post-697832).
+
+### Prerequisites
+
+Before proceeding with any method:
+- Make sure you can access your EFI partition
+- Locate your OpenCore `config.plist` file (typically in the `EFI/OC` folder)
+- Back up your current `config.plist` before making changes
+
+## Method 1: Using the Utility Script (Simplest Approach)
+
+This is the fastest and easiest way to apply the patch.
+
+1. Mount your EFI partition using Clover Configurator or another EFI mounting tool
+2. Download the patch script:
+   ```bash
+   wget https://raw.githubusercontent.com/sickcodes/Docker-OSX/scripts/apply_appleid_kernelpatch.py
+   ```
+3. Run the script with your `config.plist` file path:
+   ```bash
+   python3 apply_appleid_kernelpatch.py /path/to/config.plist
+   ```
+
+**Pro Tip**: You can drag and drop the `config.plist` file into your terminal after typing `python3 apply_appleid_kernelpatch.py` for an easy path insertion.
+
+**Note**: If you encounter a "permission denied" error, run the command with `sudo`:
+```bash
+sudo python3 apply_appleid_kernelpatch.py /path/to/config.plist
+```
+
+## Method 2: Using OCAT (OpenCore Auxiliary Tools) GUI
+
+If you prefer a graphical approach:
+
+1. Open OCAT and load your `config.plist`
+2. Navigate to the **Kernel** section
+3. Go to the **Patch** subsection
+4. Add two new patch entries with the following details:
+
+### Patch 1
+| Setting | Value |
+|---------|-------|
+| **Identifier** | `kernel` |
+| **Base** | *(leave empty)* |
+| **Count** | `1` |
+| **Find (Hex)** | `68696265726E61746568696472656164790068696265726E617465636F756E7400` |
+| **Limit** | `0` |
+| **Mask** | *(leave empty)* |
+| **Replace (Hex)** | `68696265726E61746568696472656164790068765F766D6D5F70726573656E7400` |
+| **Skip** | `0` |
+| **Arch** | `x86_64` |
+| **MinKernel** | `20.4.0` |
+| **MaxKernel** | *(leave empty)* |
+| **Enabled** | `True` |
+| **Comment** | `Sonoma VM BT Enabler - PART 1 of 2 - Patch kern.hv_vmm_present=0` |
+
+### Patch 2
+| Setting | Value |
+|---------|-------|
+| **Identifier** | `kernel` |
+| **Base** | *(leave empty)* |
+| **Count** | `1` |
+| **Find (Hex)** | `626F6F742073657373696F6E20555549440068765F766D6D5F70726573656E7400` |
+| **Limit** | `0` |
+| **Mask** | *(leave empty)* |
+| **Replace (Hex)** | `626F6F742073657373696F6E20555549440068696265726E617465636F756E7400` |
+| **Skip** | `0` |
+| **Arch** | `x86_64` |
+| **MinKernel** | `22.0.0` |
+| **MaxKernel** | *(leave empty)* |
+| **Enabled** | `True` |
+| **Comment** | `Sonoma VM BT Enabler - PART 2 of 2 - Patch kern.hv_vmm_present=0` |
+
+5. Save the configuration
+6. Reboot your VM
+
+## Method 3: Direct `config.plist` Editing
+
+For users who prefer to manually edit the configuration file:
+
+1. Mount your EFI partition
+2. Locate and open your `config.plist` file in a text editor
+3. Find the `<key>Kernel</key>` → `<dict>` → `<key>Patch</key>` → `<array>` section
+4. Add these two `<dict>` entries within the `<array>`:
+
+```xml
+<dict>
+    <key>Arch</key>
+    <string>x86_64</string>
+    <key>Base</key>
+    <string></string>
+    <key>Comment</key>
+    <string>Sonoma VM BT Enabler - PART 1 of 2 - Patch kern.hv_vmm_present=0</string>
+    <key>Count</key>
+    <integer>1</integer>
+    <key>Enabled</key>
+    <true/>
+    <key>Find</key>
+    <data>aGliZXJuYXRlaGlkcmVhZHkAaGliZXJuYXRlY291bnQA</data>
+    <key>Identifier</key>
+    <string>kernel</string>
+    <key>Limit</key>
+    <integer>0</integer>
+    <key>Mask</key>
+    <data></data>
+    <key>MaxKernel</key>
+    <string></string>
+    <key>MinKernel</key>
+    <string>20.4.0</string>
+    <key>Replace</key>
+    <data>aGliZXJuYXRlaGlkcmVhZHkAaHZfdm1tX3ByZXNlbnQA</data>
+    <key>ReplaceMask</key>
+    <data></data>
+    <key>Skip</key>
+    <integer>0</integer>
+</dict>
+<dict>
+    <key>Arch</key>
+    <string>x86_64</string>
+    <key>Base</key>
+    <string></string>
+    <key>Comment</key>
+    <string>Sonoma VM BT Enabler - PART 2 of 2 - Patch kern.hv_vmm_present=0</string>
+    <key>Count</key>
+    <integer>1</integer>
+    <key>Enabled</key>
+    <true/>
+    <key>Find</key>
+    <data>Ym9vdCBzZXNzaW9uIFVVSUQAaHZfdm1tX3ByZXNlbnQA</data>
+    <key>Identifier</key>
+    <string>kernel</string>
+    <key>Limit</key>
+    <integer>0</integer>
+    <key>Mask</key>
+    <data></data>
+    <key>MaxKernel</key>
+    <string></string>
+    <key>MinKernel</key>
+    <string>22.0.0</string>
+    <key>Replace</key>
+    <data>Ym9vdCBzZXNzaW9uIFVVSUQAaGliZXJuYXRlY291bnQA</data>
+    <key>ReplaceMask</key>
+    <data></data>
+    <key>Skip</key>
+    <integer>0</integer>
+</dict>
+```
+
+5. Save the file
+6. Reboot your VM
+
+## Important Notes
+
+- The `MinKernel` values (`20.4.0` and `22.0.0`) may need adjustment depending on your specific macOS version (Monterey, Ventura, Sonoma, etc.)
+- If you encounter issues, consult the [OpenCore documentation](https://dortania.github.io/docs/) for appropriate values for your setup
+- Always back up your configuration before making changes
+- After applying the patch and rebooting, try signing into Apple services again
+
+## What This Patch Does
+
+This patch tricks macOS into believing it's running on physical hardware by redirecting the `hv_vmm_present` kernel variable, which normally indicates VM presence. After applying the patch, Apple services should function normally within your virtual environment.
 ### Slow UI
 
 The macOS UI expects and relies on GPU acceleration, and there is (currently) no way to provide GPU acceleration in the virtual hardware. See [osx-optimizer](https://github.com/sickcodes/osx-optimizer) for macOS configuration to speed things up.
