@@ -194,7 +194,7 @@ This is the fastest and easiest way to apply the patch.
 1. Mount your EFI partition using Clover Configurator or another EFI mounting tool
 2. Download the patch script:
    ```bash
-   wget https://raw.githubusercontent.com/sickcodes/Docker-OSX/scripts/apply_appleid_kernelpatch.py
+   curl -o apply_appleid_kernelpatch.py https://raw.githubusercontent.com/sickcodes/Docker-OSX/scripts/apply_appleid_kernelpatch.py
    ```
 3. Run the script with your `config.plist` file path:
    ```bash
