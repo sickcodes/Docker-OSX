@@ -10,10 +10,10 @@ import json # For parsing PowerShell JSON output
 from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
     QLabel, QComboBox, QPushButton, QTextEdit, QMessageBox, QMenuBar,
-    QFileDialog, QGroupBox, QLineEdit, QProgressBar # Added QProgressBar
+    QFileDialog, QGroupBox, QLineEdit, QProgressBar, QCheckBox # Added QCheckBox
 )
 from PyQt6.QtGui import QAction
-from PyQt6.QtCore import pyqtSignal, pyqtSlot, QObject, QThread, Qt # Added Qt
+from PyQt6.QtCore import pyqtSignal, pyqtSlot, QObject, QThread, Qt
 
 # ... (Worker classes and other imports remain the same) ...
 from constants import APP_NAME, DEVELOPER_NAME, BUSINESS_NAME, MACOS_VERSIONS, DOCKER_IMAGE_BASE
@@ -96,9 +96,17 @@ class DockerCommandWorker(QObject): # ... ( 그대로 )
         except FileNotFoundError: self.signals.error.emit("Error: Docker command not found.")
         except Exception as e: self.signals.error.emit(f"An error occurred: {str(e)}")
 
-class USBWriterWorker(QObject): # ... ( 그대로 )
+class USBWriterWorker(QObject):
     signals = WorkerSignals()
-    def __init__(self, device, opencore_path, macos_path): super().__init__(); self.device, self.opencore_path, self.macos_path = device, opencore_path, macos_path; self.writer_instance = None
+    def __init__(self, device, opencore_path, macos_path, enhance_plist: bool, target_macos_version: str): # Added new args
+        super().__init__()
+        self.device = device
+        self.opencore_path = opencore_path
+        self.macos_path = macos_path
+        self.enhance_plist = enhance_plist # Store
+        self.target_macos_version = target_macos_version # Store
+        self.writer_instance = None
+
     @pyqtSlot()
     def run(self):
         current_os = platform.system()
@@ -107,11 +115,24 @@ class USBWriterWorker(QObject): # ... ( 그대로 )
             if current_os == "Linux": writer_cls = USBWriterLinux
             elif current_os == "Darwin": writer_cls = USBWriterMacOS
             elif current_os == "Windows": writer_cls = USBWriterWindows
-            if writer_cls is None: self.signals.error.emit(f"{current_os} USB writer module not available or OS not supported."); return
-            self.writer_instance = writer_cls(self.device, self.opencore_path, self.macos_path, lambda msg: self.signals.progress.emit(msg))
-            if self.writer_instance.format_and_write(): self.signals.finished.emit("USB writing process completed successfully.")
-            else: self.signals.error.emit("USB writing process failed. Check output for details.")
-        except Exception as e: self.signals.error.emit(f"USB writing preparation error: {str(e)}")
+
+            if writer_cls is None:
+                self.signals.error.emit(f"{current_os} USB writer module not available or OS not supported."); return
+
+            # Pass new args to platform writer constructor
+            self.writer_instance = writer_cls(
+                self.device, self.opencore_path, self.macos_path,
+                progress_callback=lambda msg: self.signals.progress.emit(msg), # Ensure progress_callback is named if it's a kwarg in writers
+                enhance_plist_enabled=self.enhance_plist,
+                target_macos_version=self.target_macos_version
+            )
+
+            if self.writer_instance.format_and_write():
+                self.signals.finished.emit("USB writing process completed successfully.")
+            else:
+                self.signals.error.emit("USB writing process failed. Check output for details.")
+        except Exception as e:
+            self.signals.error.emit(f"USB writing preparation error: {str(e)}")
 
 
 class MainWindow(QMainWindow):
@@ -177,6 +198,14 @@ class MainWindow(QMainWindow):
         self.usb_layout.addWidget(self.windows_usb_input_label)
         self.usb_layout.addWidget(self.windows_disk_id_input)
         # Visibility will be toggled in refresh_usb_drives based on OS
+
+        self.enhance_plist_checkbox = QCheckBox("Try to auto-enhance config.plist for this system's hardware (Experimental, Linux Host Only for detection)")
+        self.enhance_plist_checkbox.setChecked(False) # Off by default
+        self.enhance_plist_checkbox.setToolTip(
+            "If checked, attempts to modify the OpenCore config.plist based on detected host hardware (Linux only for detection part).\n"
+            "This might improve compatibility for iGPU, audio, Ethernet. Use with caution."
+        )
+        self.usb_layout.addWidget(self.enhance_plist_checkbox)
 
         warning_label = QLabel("WARNING: Selecting a drive and proceeding to write will ERASE ALL DATA on it!")
         warning_label.setStyleSheet("color: red; font-weight: bold;")
@@ -493,14 +522,18 @@ class MainWindow(QMainWindow):
             QMessageBox.warning(self, "Privileges Required", "This operation requires Administrator/root privileges."); return
 
         current_os = platform.system(); usb_writer_module = None; target_device_id_for_worker = None
+        enhance_plist_enabled = self.enhance_plist_checkbox.isChecked() # Get state
+        target_macos_ver = self.version_combo.currentText() # Get macOS version
 
         if current_os == "Windows":
             target_device_id_for_worker = self.usb_drive_combo.currentData() # Disk Index from WMI
-            if not target_device_id_for_worker: # Fallback to manual input if combo is empty or user chose to use it
-                target_device_id_for_worker = self.windows_disk_id_input.text().strip()
-                if not target_device_id_for_worker: QMessageBox.warning(self, "Input Required", "Please select a USB disk or enter its Disk Number."); return
-                if not target_device_id_for_worker.isdigit(): QMessageBox.warning(self, "Input Invalid", "Windows Disk Number must be a digit."); return
-            # USBWriterWindows expects just the disk number string (e.g., "1")
+            if not target_device_id_for_worker:
+                if self.windows_disk_id_input.isVisible():
+                    target_device_id_for_worker = self.windows_disk_id_input.text().strip()
+                    if not target_device_id_for_worker: QMessageBox.warning(self, "Input Required", "Please select a USB disk or enter its Disk Number."); return
+                    if not target_device_id_for_worker.isdigit(): QMessageBox.warning(self, "Input Invalid", "Windows Disk Number must be a digit."); return
+                else:
+                     QMessageBox.warning(self, "USB Error", "No USB disk selected for Windows."); return
             usb_writer_module = USBWriterWindows
         else: # Linux/macOS
             target_device_id_for_worker = self.usb_drive_combo.currentData()
@@ -512,16 +545,26 @@ class MainWindow(QMainWindow):
             QMessageBox.warning(self, "Missing Images", "Ensure both images are extracted."); return
         if not target_device_id_for_worker: QMessageBox.warning(self, "No USB Selected/Identified", f"Please select/identify target USB for {current_os}."); return
 
-        confirm_msg = (f"WARNING: ALL DATA ON TARGET '{target_device_id_for_worker}' WILL BE ERASED PERMANENTLY.
-Proceed?");
+        confirm_msg = (f"WARNING: ALL DATA ON TARGET '{target_device_id_for_worker}' WILL BE ERASED PERMANENTLY.\n"
+                       f"Enhance config.plist: {'Yes' if enhance_plist_enabled else 'No'}.\nProceed?")
         reply = QMessageBox.warning(self, "Confirm Write Operation", confirm_msg, QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.Cancel, QMessageBox.StandardButton.Cancel)
         if reply == QMessageBox.StandardButton.Cancel: self.output_area.append("\nUSB write cancelled."); return
 
         self.output_area.append(f"\n--- Starting USB Write for {target_device_id_for_worker} on {current_os} ---")
-        self.write_to_usb_button.setEnabled(False); self.refresh_usb_button.setEnabled(False)
-        usb_worker = USBWriterWorker(target_device_id_for_worker, self.extracted_opencore_image_path, self.extracted_main_image_path)
-        if not self._start_worker(usb_worker, self.usb_write_finished, self.usb_write_error, "usb_write_worker"):
-            self.write_to_usb_button.setEnabled(True); self.refresh_usb_button.setEnabled(True)
+        if enhance_plist_enabled: self.output_area.append("Attempting config.plist enhancement...")
+
+        usb_worker = USBWriterWorker(
+            target_device_id_for_worker,
+            self.extracted_opencore_image_path,
+            self.extracted_main_image_path,
+            enhance_plist_enabled,
+            target_macos_ver
+        )
+        self._start_worker(usb_worker,
+                           self.usb_write_finished,
+                           self.usb_write_error,
+                           "usb_write_worker",
+                           f"Writing to USB {target_device_id_for_worker}...")
 
     @pyqtSlot(str)
     def usb_write_finished(self, message): # Specific handler

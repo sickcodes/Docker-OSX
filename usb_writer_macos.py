@@ -6,11 +6,14 @@ import shutil # For checking command existence
 import plistlib # For parsing diskutil list -plist output
 
 class USBWriterMacOS:
-    def __init__(self, device: str, opencore_qcow2_path: str, macos_qcow2_path: str, progress_callback=None):
+    def __init__(self, device: str, opencore_qcow2_path: str, macos_qcow2_path: str,
+                 progress_callback=None, enhance_plist_enabled: bool = False, target_macos_version: str = ""): # New args
         self.device = device # Should be like /dev/diskX
         self.opencore_qcow2_path = opencore_qcow2_path
         self.macos_qcow2_path = macos_qcow2_path
         self.progress_callback = progress_callback
+        self.enhance_plist_enabled = enhance_plist_enabled # Store
+        self.target_macos_version = target_macos_version # Store
 
         pid = os.getpid()
         self.opencore_raw_path = f"opencore_temp_{pid}.raw"

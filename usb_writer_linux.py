@@ -5,11 +5,14 @@ import time
 import shutil # For checking command existence
 
 class USBWriterLinux:
-    def __init__(self, device: str, opencore_qcow2_path: str, macos_qcow2_path: str, progress_callback=None):
+    def __init__(self, device: str, opencore_qcow2_path: str, macos_qcow2_path: str,
+                 progress_callback=None, enhance_plist_enabled: bool = False, target_macos_version: str = ""): # New args
         self.device = device
         self.opencore_qcow2_path = opencore_qcow2_path
         self.macos_qcow2_path = macos_qcow2_path
         self.progress_callback = progress_callback
+        self.enhance_plist_enabled = enhance_plist_enabled # Store
+        self.target_macos_version = target_macos_version # Store
 
         # Define unique temporary file and mount point names
         pid = os.getpid() # Make temp names more unique if multiple instances run (though unlikely for this app)
@@ -180,6 +183,27 @@ class USBWriterLinux:
 
             self._report_progress(f"Mounting {mapped_efi_device} to {self.mount_point_opencore_efi}...")
             self._run_command(["sudo", "mount", "-o", "ro", mapped_efi_device, self.mount_point_opencore_efi])
+
+            if self.enhance_plist_enabled:
+                try:
+                    from plist_modifier import enhance_config_plist # Import here
+                    if enhance_config_plist:
+                        config_plist_on_source_efi = os.path.join(self.mount_point_opencore_efi, "EFI", "OC", "config.plist")
+                        if os.path.exists(config_plist_on_source_efi):
+                            self._report_progress("Attempting to enhance config.plist...")
+                            if enhance_config_plist(config_plist_on_source_efi, self.target_macos_version, self._report_progress):
+                                self._report_progress("config.plist enhancement successful.")
+                            else:
+                                self._report_progress("config.plist enhancement failed or had issues. Continuing with original/partially modified plist.")
+                        else:
+                            self._report_progress(f"Warning: config.plist not found at {config_plist_on_source_efi}. Cannot enhance.")
+                    else:
+                        self._report_progress("Warning: enhance_config_plist function not available. Skipping enhancement.")
+                except ImportError:
+                     self._report_progress("Warning: plist_modifier.py module not found. Skipping config.plist enhancement.")
+                except Exception as e:
+                     self._report_progress(f"Error during config.plist enhancement attempt: {e}. Continuing with original plist.")
+
             self._report_progress(f"Mounting USB ESP ({esp_partition_dev}) to {self.mount_point_usb_esp}...")
             self._run_command(["sudo", "mount", esp_partition_dev, self.mount_point_usb_esp])
 

@@ -1,6 +1,6 @@
 # Skyscope macOS on PC USB Creator Tool
 
-**Version:** 0.8.0 (Alpha)
+**Version:** 0.8.1 (Alpha)
 **Developer:** Miss Casey Jay Topojani
 **Business:** Skyscope Sentinel Intelligence
 
@@ -21,6 +21,7 @@ This tool provides a graphical user interface to automate the creation of a boot
     *   Creates an EFI System Partition (ESP) and a main HFS+ partition for macOS.
     *   Copies EFI files and writes the macOS system image.
 *   Warning prompts before destructive operations like USB writing.
+*   Experimental `config.plist` auto-enhancement based on detected host hardware (currently Linux-only for hardware detection) to potentially improve iGPU, audio, and Ethernet compatibility, and handle NVIDIA GTX 970 specifics. A backup of the original `config.plist` is created.
 
 ## Current Status & Known Issues/Limitations
 
@@ -31,6 +32,7 @@ This tool provides a graphical user interface to automate the creation of a boot
 *   **Intel iGPU Compatibility:** Relies on the generic iGPU support provided by WhateverGreen.kext within the OpenCore configuration from Docker-OSX. This works for many iGPUs but isn't guaranteed for all without specific `config.plist` tuning.
 *   **Dependency on Docker-OSX:** This tool orchestrates Docker-OSX. Changes or issues in the upstream Docker-OSX project might affect this tool.
 *   **Elevated Privileges:** For USB writing on Linux, the application currently requires being run with `sudo`. It does not yet have in-app checks or prompts for this.
+*   `config.plist` auto-enhancement is experimental. The hardware detection component for this feature is **currently only implemented for Linux hosts**. While the modification logic is called on macOS, it will not apply hardware-specific changes due to lack of macOS hardware detection in `plist_modifier.py`. Modifications are based on common configurations and may not be optimal for all hardware. Always test thoroughly. A backup of the original `config.plist` (as `config.plist.backup`) is created in the source OpenCore image's EFI directory before modification attempts.
 
 ## Prerequisites
 
@@ -56,7 +58,7 @@ This tool provides a graphical user interface to automate the creation of a boot
         sudo apt update
         sudo apt install qemu-utils parted kpartx rsync dosfstools hfsprogs util-linux
         ```
-    *   For `apfs-fuse` on Debian/Ubuntu, you may need to search for a PPA or compile it from its source (e.g., from GitHub). Ensure it's in your PATH.
+    *   For `apfs-fuse` on Debian/Ubuntu (including Debian 13 Trixie), you will likely need to compile it from its source (e.g., from the `sgan81/apfs-fuse` repository on GitHub). Typical build dependencies include `git g++ cmake libfuse3-dev libicu-dev zlib1g-dev libbz2-dev libssl-dev` (package names may vary slightly, e.g. `libfuse-dev`). Ensure the compiled `apfs-fuse` binary is in your system PATH.
 
 ## How to Run
 
@@ -91,6 +93,7 @@ This tool provides a graphical user interface to automate the creation of a boot
     *   Click "Refresh List" to scan for USB drives.
     *   Select your intended USB drive from the dropdown. **VERIFY CAREFULLY!**
     *   **WARNING:** The next step will erase all data on the selected USB drive.
+    *   Optionally, check the '\[Experimental] Auto-enhance config.plist...' box if you want the tool to attempt to modify the OpenCore configuration based on your Linux host's hardware (this feature is Linux-only for detection). This may improve compatibility but use with caution. A backup (`config.plist.backup`) is created in the source OpenCore image's EFI directory before modification.
     *   If you are on Linux and have all dependencies, and the images from Step 2 are ready, the "Write Images to USB Drive" button will be enabled.
     *   Click it and confirm the warning dialog. The application will then partition the USB and write the images. This will take a significant amount of time.
 
@@ -101,6 +104,8 @@ This tool provides a graphical user interface to automate the creation of a boot
 *   **Privilege Handling:** Add checks to see if the application is run with necessary privileges for USB writing and guide the user if not.
 *   **USB Writing for macOS and Windows:** Implement the `usb_writer_macos.py` and `usb_writer_windows.py` modules.
 *   **GUI for Advanced Options:** Potentially allow users to specify custom Docker parameters or OpenCore properties.
+*   **Expand hardware detection for `config.plist` enhancement to also support macOS and Windows hosts.**
+*   **Provide more granular user control and detailed feedback for the `config.plist` enhancement feature (e.g., preview changes, select specific patches).**
 
 ## Contributing
 
