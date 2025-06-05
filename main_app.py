@@ -10,10 +10,10 @@ import json # For parsing PowerShell JSON output
 from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
     QLabel, QComboBox, QPushButton, QTextEdit, QMessageBox, QMenuBar,
-    QFileDialog, QGroupBox, QLineEdit, QProgressBar, QCheckBox # Added QCheckBox
+    QFileDialog, QGroupBox, QLineEdit, QProgressBar
 )
 from PyQt6.QtGui import QAction
-from PyQt6.QtCore import pyqtSignal, pyqtSlot, QObject, QThread, Qt
+from PyQt6.QtCore import pyqtSignal, pyqtSlot, QObject, QThread, QTimer, Qt # Added QTimer
 
 # ... (Worker classes and other imports remain the same) ...
 from constants import APP_NAME, DEVELOPER_NAME, BUSINESS_NAME, MACOS_VERSIONS, DOCKER_IMAGE_BASE
@@ -136,15 +136,30 @@ class USBWriterWorker(QObject):
 
 
 class MainWindow(QMainWindow):
-    def __init__(self): # ... (init remains the same)
-        super().__init__(); self.setWindowTitle(APP_NAME); self.setGeometry(100, 100, 800, 850)
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle(APP_NAME)
+        self.setGeometry(100, 100, 800, 900) # Adjusted height for progress bar in status bar
+
         self.current_container_name = None; self.extracted_main_image_path = None; self.extracted_opencore_image_path = None
         self.extraction_status = {"main": False, "opencore": False}; self.active_worker_thread = None
-        self.docker_run_worker_instance = None; self.docker_pull_worker_instance = None
+        self.docker_run_worker_instance = None; self.docker_pull_worker_instance = None # Specific worker instances
         self._current_usb_selection_text = None
-        self._setup_ui(); self.refresh_usb_drives()
 
-    def _setup_ui(self): # Updated for Windows USB detection
+        self.spinner_chars = ["|", "/", "-", "\\"]
+        self.spinner_index = 0
+        self.spinner_timer = QTimer(self)
+        self.spinner_timer.timeout.connect(self._update_spinner_status)
+        self.base_status_message = "Ready." # Default status message
+
+        self._setup_ui() # Call before using self.statusBar
+        self.status_bar = self.statusBar() # Initialize status bar early
+        self.status_bar.addPermanentWidget(self.progressBar) # Add progress bar to status bar
+        self.status_bar.showMessage(self.base_status_message, 5000) # Initial ready message
+
+        self.refresh_usb_drives()
+
+    def _setup_ui(self):
         menubar = self.menuBar(); file_menu = menubar.addMenu("&File"); help_menu = menubar.addMenu("&Help")
         exit_action = QAction("&Exit", self); exit_action.triggered.connect(self.close); file_menu.addAction(exit_action)
         about_action = QAction("&About", self); about_action.triggered.connect(self.show_about_dialog); help_menu.addAction(about_action)
@@ -226,31 +241,55 @@ class MainWindow(QMainWindow):
         self.progressBar = QProgressBar(self)
         self.progressBar.setRange(0, 0) # Indeterminate
         self.progressBar.setVisible(False)
-        self.statusBar.addPermanentWidget(self.progressBar, 0)
+        self.statusBar.addPermanentWidget(self.progressBar) # Corrected addPermanentWidget call
 
 
-    def _set_ui_busy(self, is_busy: bool, status_message: str = None):
-        """Manages UI element states and progress indicators."""
+    def _set_ui_busy(self, is_busy: bool, status_message: str = "Processing..."): # Default busy message
+        """Manages UI element states and progress indicators, including spinner."""
         self.general_interactive_widgets = [
             self.run_vm_button, self.version_combo, self.extract_images_button,
             self.stop_container_button, self.remove_container_button,
             self.usb_drive_combo, self.refresh_usb_button, self.write_to_usb_button,
-            self.windows_disk_id_input
+            self.windows_disk_id_input, self.enhance_plist_checkbox
         ]
 
         if is_busy:
+            self.base_status_message = status_message # Store the core message for spinner
             for widget in self.general_interactive_widgets:
                 widget.setEnabled(False)
+            # self.stop_vm_button is handled by _start_worker
             self.progressBar.setVisible(True)
-            self.statusBar.showMessage(status_message or "Processing...", 0)
-            # stop_vm_button's state is managed specifically by the calling function if needed
+            if not self.spinner_timer.isActive(): # Start spinner if not already active
+                self.spinner_index = 0
+                self.spinner_timer.start(150)
+            self._update_spinner_status() # Show initial spinner message
         else:
-            # Re-enable based on current application state by calling a dedicated method
-            self.update_button_states_after_operation() # This will set appropriate states
+            self.spinner_timer.stop()
             self.progressBar.setVisible(False)
-            self.statusBar.showMessage(status_message or "Ready.", 5000) # Message disappears after 5s
+            self.statusBar.showMessage(status_message or "Ready.", 7000) # Show final message longer
+            self.update_all_button_states() # Centralized button state update
 
-    def update_button_states_after_operation(self):
+    def _update_spinner_status(self):
+        """Updates the status bar message with a spinner."""
+        if self.spinner_timer.isActive() and self.active_worker_thread and self.active_worker_thread.isRunning():
+            char = self.spinner_chars[self.spinner_index % len(self.spinner_chars)]
+            # Check if current worker is providing determinate progress
+            worker_name = self.active_worker_thread.objectName().replace("_thread", "")
+            worker_provides_progress = getattr(self, f"{worker_name}_provides_progress", False)
+
+            if worker_provides_progress and self.progressBar.maximum() == 100 and self.progressBar.value() > 0 : # Determinate
+                 # For determinate, status bar shows base message, progress bar shows percentage
+                 self.statusBar.showMessage(f"{char} {self.base_status_message} ({self.progressBar.value()}%)")
+            else: # Indeterminate
+                 if self.progressBar.maximum() != 0: self.progressBar.setRange(0,0) # Ensure indeterminate
+                 self.statusBar.showMessage(f"{char} {self.base_status_message}")
+
+            self.spinner_index = (self.spinner_index + 1) % len(self.spinner_chars)
+        elif not (self.active_worker_thread and self.active_worker_thread.isRunning()): # If timer is somehow active but no worker
+            self.spinner_timer.stop()
+            # self.statusBar.showMessage(self.base_status_message or "Ready.", 5000) # Show last base message or ready
+
+    def update_all_button_states(self): # Renamed from update_button_states_after_operation
         """Centralized method to update button states based on app's current state."""
         is_worker_running = self.active_worker_thread and self.active_worker_thread.isRunning()
 
@@ -276,49 +315,63 @@ class MainWindow(QMainWindow):
         self.refresh_usb_button.setEnabled(not is_worker_running)
         self.update_write_to_usb_button_state() # This handles its own complex logic
 
-    def show_about_dialog(self): # Updated version
-        QMessageBox.about(self, f"About {APP_NAME}", f"Version: 0.8.1\nDeveloper: {DEVELOPER_NAME}\nBusiness: {BUSINESS_NAME}\n\nThis tool helps create bootable macOS USB drives using Docker-OSX.")
+    def show_about_dialog(self):
+        QMessageBox.about(self, f"About {APP_NAME}", f"Version: 0.8.2\nDeveloper: {DEVELOPER_NAME}\nBusiness: {BUSINESS_NAME}\n\nThis tool helps create bootable macOS USB drives using Docker-OSX.")
 
-    def _start_worker(self, worker_instance, on_finished_slot, on_error_slot, worker_name="worker", busy_message="Processing..."):
+    def _start_worker(self, worker_instance, on_finished_slot, on_error_slot, worker_name="worker", busy_message="Processing...", provides_progress=False): # Added provides_progress
         if self.active_worker_thread and self.active_worker_thread.isRunning():
             QMessageBox.warning(self, "Busy", "Another operation is in progress."); return False
 
-        self._set_ui_busy(True, busy_message)
-        if worker_name in ["docker_pull", "docker_run"]:
-            self.stop_vm_button.setEnabled(True) # Enable stop for these specific long ops
-        else: # For other workers, the main stop button for docker ops is not relevant
-            self.stop_vm_button.setEnabled(False)
+        self._set_ui_busy(True, busy_message) # This now also starts the spinner
 
+        # Set progress bar type based on worker capability
+        if provides_progress:
+            self.progress_bar.setRange(0, 100) # Determinate
+            self.progress_bar.setValue(0)
+        else:
+            self.progress_bar.setRange(0, 0) # Indeterminate
+
+        # Store if this worker provides progress for spinner logic
+        setattr(self, f"{worker_name}_provides_progress", provides_progress)
+
+
+        if worker_name in ["docker_pull", "docker_run"]:
+            self.stop_vm_button.setEnabled(True)
+        else:
+            self.stop_vm_button.setEnabled(False)
 
         self.active_worker_thread = QThread(); self.active_worker_thread.setObjectName(worker_name + "_thread"); setattr(self, f"{worker_name}_instance", worker_instance)
         worker_instance.moveToThread(self.active_worker_thread)
 
-        # Connect to generic handlers
         worker_instance.signals.progress.connect(self.update_output)
-        worker_instance.signals.finished.connect(lambda message: self._handle_worker_finished(message, on_finished_slot, worker_name))
-        worker_instance.signals.error.connect(lambda error_message: self._handle_worker_error(error_message, on_error_slot, worker_name))
+        if provides_progress: # Connect progress_value only if worker provides it
+            worker_instance.signals.progress_value.connect(self.update_progress_bar_value)
+        worker_instance.signals.finished.connect(lambda message, wn=worker_name, slot=on_finished_slot: self._handle_worker_finished(message, wn, slot))
+        worker_instance.signals.error.connect(lambda error_message, wn=worker_name, slot=on_error_slot: self._handle_worker_error(error_message, wn, slot))
 
         self.active_worker_thread.finished.connect(self.active_worker_thread.deleteLater)
-        # No need to call _clear_worker_instance here, _handle_worker_finished/error will do it.
         self.active_worker_thread.started.connect(worker_instance.run); self.active_worker_thread.start(); return True
 
-    def _handle_worker_finished(self, message, specific_finished_slot, worker_name):
-        """Generic handler for worker finished signals."""
-        self.output_area.append(f"\n--- Worker '{worker_name}' Finished --- \n{message}") # Generic log
-        self._clear_worker_instance(worker_name) # Clear the worker instance from self
-        self.active_worker_thread = None # Mark thread as free
-        if specific_finished_slot:
-            specific_finished_slot(message) # Call the specific logic for this worker
-        self._set_ui_busy(False, "Operation completed successfully.") # Reset UI
+    @pyqtSlot(int)
+    def update_progress_bar_value(self, value):
+        if self.progress_bar.minimum() == 0 and self.progress_bar.maximum() == 0: # If it was indeterminate
+            self.progress_bar.setRange(0,100) # Switch to determinate
+        self.progress_bar.setValue(value)
+        # Spinner will update with percentage from progress_bar.value()
 
-    def _handle_worker_error(self, error_message, specific_error_slot, worker_name):
-        """Generic handler for worker error signals."""
-        self.output_area.append(f"\n--- Worker '{worker_name}' Error --- \n{error_message}") # Generic log
-        self._clear_worker_instance(worker_name) # Clear the worker instance from self
-        self.active_worker_thread = None # Mark thread as free
-        if specific_error_slot:
-            specific_error_slot(error_message) # Call the specific logic for this worker
-        self._set_ui_busy(False, "An error occurred.") # Reset UI
+    def _handle_worker_finished(self, message, worker_name, specific_finished_slot):
+        final_status_message = f"{worker_name.replace('_', ' ').capitalize()} completed."
+        self._clear_worker_instance(worker_name)
+        self.active_worker_thread = None
+        if specific_finished_slot: specific_finished_slot(message)
+        self._set_ui_busy(False, final_status_message)
+
+    def _handle_worker_error(self, error_message, worker_name, specific_error_slot):
+        final_status_message = f"{worker_name.replace('_', ' ').capitalize()} failed."
+        self._clear_worker_instance(worker_name)
+        self.active_worker_thread = None
+        if specific_error_slot: specific_error_slot(error_message)
+        self._set_ui_busy(False, final_status_message)
 
     def _clear_worker_instance(self, worker_name):
         attr_name = f"{worker_name}_instance"
@@ -326,58 +379,50 @@ class MainWindow(QMainWindow):
 
     def initiate_vm_creation_flow(self):
         self.output_area.clear(); selected_version_name = self.version_combo.currentText(); image_tag = MACOS_VERSIONS.get(selected_version_name)
-        if not image_tag: self.handle_error(f"Invalid macOS version: {selected_version_name}"); return # handle_error calls _set_ui_busy(False)
+        if not image_tag: self.handle_error(f"Invalid macOS version: {selected_version_name}"); return
         full_image_name = f"{DOCKER_IMAGE_BASE}:{image_tag}"
         pull_worker = DockerPullWorker(full_image_name)
-        # Pass busy message to _start_worker
         self._start_worker(pull_worker,
                            self.docker_pull_finished,
                            self.docker_pull_error,
-                           "docker_pull",
-                           f"Pulling image {full_image_name}...")
+                           "docker_pull",  # worker_name
+                           f"Pulling image {full_image_name}...", # busy_message
+                           provides_progress=False) # Docker pull progress is complex to parse reliably for a percentage
 
     @pyqtSlot(str)
     def docker_pull_finished(self, message): # Specific handler
-        # Generic handler (_handle_worker_finished) already logged, cleared instance, and reset UI.
-        # This slot now only handles the next step in the sequence.
         self.output_area.append(f"Step 1.2: Proceeding to run Docker container for macOS installation...")
         self.run_macos_vm()
 
     @pyqtSlot(str)
     def docker_pull_error(self, error_message): # Specific handler
-        # Generic handler (_handle_worker_error) already logged, cleared instance, and reset UI.
         QMessageBox.critical(self, "Docker Pull Error", error_message)
-        # No further specific action needed here, UI reset is handled by the generic error handler.
 
-    def run_macos_vm(self): # This is now part 2 of the flow
+    def run_macos_vm(self):
         selected_version_name = self.version_combo.currentText(); self.current_container_name = get_unique_container_name()
         try:
             command_list = build_docker_command(selected_version_name, self.current_container_name)
             run_worker = DockerRunWorker(command_list)
-            # Pass busy message to _start_worker
             self._start_worker(run_worker,
                                self.docker_run_finished,
                                self.docker_run_error,
                                "docker_run",
-                               f"Starting container {self.current_container_name}...")
-        except ValueError as e: self.handle_error(f"Failed to build command: {str(e)}") # This error is before worker start
-        except Exception as e: self.handle_error(f"An unexpected error: {str(e)}") # This error is before worker start
+                               f"Starting container {self.current_container_name}...",
+                               provides_progress=False) # Docker run output is also streamed, not easily percentage
+        except ValueError as e: self.handle_error(f"Failed to build command: {str(e)}")
+        except Exception as e: self.handle_error(f"An unexpected error: {str(e)}")
 
     @pyqtSlot(str)
     def update_output(self, text): self.output_area.append(text.strip()); QApplication.processEvents()
 
     @pyqtSlot(str)
     def docker_run_finished(self, message): # Specific handler
-        # Generic handler already took care of logging, instance clearing, and UI reset.
         QMessageBox.information(self, "VM Setup Complete", f"{message}\nYou can now proceed to extract images.")
-        # Specific logic after run finishes (e.g. enabling extraction) is now in update_button_states_after_operation
 
     @pyqtSlot(str)
     def docker_run_error(self, error_message): # Specific handler
-        # Generic handler already took care of logging, instance clearing, and UI reset.
         if "exited" in error_message.lower() and self.current_container_name:
             QMessageBox.warning(self, "VM Setup Ended", f"{error_message}\nAssuming macOS setup was attempted...")
-            # Specific logic (e.g. enabling extraction) is now in update_button_states_after_operation
         else:
             QMessageBox.critical(self, "VM Setup Error", error_message)
 

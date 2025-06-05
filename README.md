@@ -4,113 +4,137 @@
 **Developer:** Miss Casey Jay Topojani
 **Business:** Skyscope Sentinel Intelligence
 
-## Overview
+## Vision: Your Effortless Bridge to macOS on PC
 
-This tool provides a graphical user interface to automate the creation of a bootable macOS USB drive for PC (Hackintosh) using the Docker-OSX project. It guides the user through selecting a macOS version, running the Docker-OSX container for macOS installation, extracting the necessary image files, and (currently for Linux users) writing these images to a USB drive.
+Welcome to the Skyscope macOS on PC USB Creator Tool! Our vision is to provide an exceptionally user-friendly, GUI-driven application that fully automates the complex process of creating a bootable macOS USB drive for virtually any PC. This tool leverages the power of Docker-OSX and OpenCore, aiming to simplify the Hackintosh journey from start to finish.
 
-## Features
+This project is dedicated to creating a seamless experience, from selecting your desired macOS version to generating a USB drive that's ready to boot your PC into macOS, complete with efforts to auto-configure for your hardware.
 
-*   User-friendly GUI for selecting macOS versions (Sonoma, Ventura, Monterey, Big Sur, Catalina).
-*   Automated Docker command generation and execution for Docker-OSX.
-*   Streams Docker logs directly into the application.
-*   Extraction of the generated `mac_hdd_ng.img` (macOS system) and `OpenCore.qcow2` (EFI bootloader).
-*   Management of the created Docker container (stop/remove).
-*   USB drive detection.
-*   Automated USB partitioning and image writing for **Linux systems**.
-    *   Creates GPT partition table.
-    *   Creates an EFI System Partition (ESP) and a main HFS+ partition for macOS.
-    *   Copies EFI files and writes the macOS system image.
-*   Warning prompts before destructive operations like USB writing.
-*   Experimental `config.plist` auto-enhancement based on detected host hardware (currently Linux-only for hardware detection) to potentially improve iGPU, audio, and Ethernet compatibility, and handle NVIDIA GTX 970 specifics. A backup of the original `config.plist` is created.
+## Current Features & Capabilities
 
-## Current Status & Known Issues/Limitations
+*   **Intuitive Graphical User Interface (PyQt6):** Guides you through each step of the process.
+*   **macOS Version Selection:** Easily choose from popular macOS versions (Sonoma, Ventura, Monterey, Big Sur, Catalina).
+*   **Automated Docker-OSX Orchestration:**
+    *   **Intelligent Image Pulling:** Automatically pulls the required `sickcodes/docker-osx` image from Docker Hub, with progress displayed.
+    *   **VM Creation & macOS Installation:** Launches the Docker-OSX container where you can interactively install macOS within a QEMU virtual machine.
+    *   **Log Streaming:** View Docker and QEMU logs directly in the application for transparency.
+*   **VM Image Extraction:** Once macOS is installed in the VM, the tool helps you extract the essential disk images (`mac_hdd_ng.img` and `OpenCore.qcow2`).
+*   **Container Management:** Stop and remove the Docker-OSX container after use.
+*   **Cross-Platform USB Drive Preparation:**
+    *   **USB Detection:** Identifies potential USB drives on Linux, macOS, and Windows (using WMI for more accurate detection on Windows).
+    *   **Automated EFI & macOS System Write (Linux & macOS):**
+        *   Partitions the USB drive with a GUID Partition Table (GPT).
+        *   Creates and formats an EFI System Partition (FAT32) and a main macOS partition (HFS+).
+        *   Uses a robust file-level copy (`rsync`) for both EFI content and the main macOS system, ensuring compatibility with various USB sizes and only copying necessary data.
+    *   **Windows USB Writing (Partial Automation):**
+        *   Automates EFI partition creation and EFI file copying.
+        *   **Important:** Writing the main macOS system image currently requires a guided manual step using an external "dd for Windows" utility due to Windows' limitations with direct, scriptable raw partition writing of HFS+/APFS filesystems. The tool prepares the raw image and provides instructions.
+*   **Experimental `config.plist` Auto-Enhancement:**
+    *   **Linux Host Detection:** If the tool is run on a Linux system, it can gather information about your host computer's hardware (iGPU, audio, Ethernet, CPU).
+    *   **Targeted Modifications:** Optionally attempts to modify the `config.plist` (from the generated `OpenCore.qcow2`) to:
+        *   Add common `DeviceProperties` for Intel iGPUs.
+        *   Set appropriate audio `layout-id`s.
+        *   Ensure necessary Ethernet kexts are enabled.
+        *   Apply boot-args for NVIDIA GTX 970 based on target macOS version (e.g., `nv_disable=1` or `nvda_drv=1`).
+    *   A backup of the original `config.plist` is created before modifications.
+*   **Privilege Checking:** Warns if administrative/root privileges are needed for USB writing and are not detected.
+*   **UI Feedback:** Status bar messages and an indeterminate progress bar keep you informed during long operations.
 
-*   **USB Writing Platform Support:** USB writing functionality is currently **only implemented and tested for Linux**. macOS and Windows users can use the tool to generate and extract images but will need to use other methods for USB creation.
-*   **macOS Image Size for USB:** The current Linux USB writing process for the main macOS system uses `dd` to write the converted raw image. While the source `mac_hdd_ng.img` is sparse, the raw conversion makes it its full provisioned size (e.g., 200GB). This means:
-    *   The target USB drive must be large enough to hold this full raw size.
-    *   This is inefficient and needs to be changed to a file-level copy (e.g., using `rsync` after mounting the source image) to only copy actual data and better fit various USB sizes. (This is a high-priority item based on recent feedback).
-*   **Intel iGPU Compatibility:** Relies on the generic iGPU support provided by WhateverGreen.kext within the OpenCore configuration from Docker-OSX. This works for many iGPUs but isn't guaranteed for all without specific `config.plist` tuning.
-*   **Dependency on Docker-OSX:** This tool orchestrates Docker-OSX. Changes or issues in the upstream Docker-OSX project might affect this tool.
-*   **Elevated Privileges:** For USB writing on Linux, the application currently requires being run with `sudo`. It does not yet have in-app checks or prompts for this.
-*   `config.plist` auto-enhancement is experimental. The hardware detection component for this feature is **currently only implemented for Linux hosts**. While the modification logic is called on macOS, it will not apply hardware-specific changes due to lack of macOS hardware detection in `plist_modifier.py`. Modifications are based on common configurations and may not be optimal for all hardware. Always test thoroughly. A backup of the original `config.plist` (as `config.plist.backup`) is created in the source OpenCore image's EFI directory before modification attempts.
+## Current Status & Known Limitations
+
+*   **Windows Main OS USB Write:** This is the primary limitation, requiring a manual `dd` step. Future work aims to automate this if a reliable, redistributable CLI tool for raw partition writing is identified or developed.
+*   **`config.plist` Enhancement is Experimental:**
+    *   Hardware detection for this feature is **currently only implemented for Linux hosts.** On macOS/Windows, the plist modification step will run but won't apply hardware-specific changes.
+    *   The applied patches are based on common configurations and may not be optimal or work for all hardware. Always test thoroughly.
+*   **NVIDIA dGPU Support on Newer macOS:** Modern macOS (Mojave+) does not support NVIDIA Maxwell/Pascal/Turing/Ampere GPUs. The tool attempts to configure systems with these cards for basic display or to use an iGPU if available. Full acceleration is not possible on these macOS versions with these cards.
+*   **Universal Compatibility:** While the goal is broad PC compatibility, Hackintoshing can be hardware-specific. Success is not guaranteed on all possible PC configurations.
+*   **Dependency on External Projects:** Relies on Docker-OSX, OpenCore, and various community-sourced kexts and configurations.
 
 ## Prerequisites
 
-1.  **Docker:** Docker must be installed and running on your system. The current user must have permissions to run Docker commands.
+1.  **Docker:** Must be installed and running. Your user account needs permission to manage Docker.
     *   [Install Docker Engine](https://docs.docker.com/engine/install/)
-2.  **Python:** Python 3.8+
-3.  **Python Libraries:**
-    *   `PyQt6`
-    *   `psutil`
-    *   Installation: `pip install PyQt6 psutil`
-4.  **(For Linux USB Writing ONLY)**: The following command-line utilities must be installed and accessible in your PATH:
-    *   `qemu-img` (usually from `qemu-utils` package)
-    *   `parted`
-    *   `kpartx` (often part of `multipath-tools` or `kpartx` package)
-    *   `rsync`
-    *   `mkfs.vfat` (usually from `dosfstools` package)
-    *   `mkfs.hfsplus` (usually from `hfsprogs` package)
-    *   `apfs-fuse` (may require manual installation from source or a third-party repository/PPA, as it's not always in standard Debian/Ubuntu repos)
-    *   `lsblk` (usually from `util-linux` package)
-    *   `partprobe` (usually from `parted` or `util-linux` package)
-    *   You can typically install most of these on Debian/Ubuntu (including Debian 13 Trixie) with:
-        ```bash
-        sudo apt update
-        sudo apt install qemu-utils parted kpartx rsync dosfstools hfsprogs util-linux
-        ```
-    *   For `apfs-fuse` on Debian/Ubuntu (including Debian 13 Trixie), you will likely need to compile it from its source (e.g., from the `sgan81/apfs-fuse` repository on GitHub). Typical build dependencies include `git g++ cmake libfuse3-dev libicu-dev zlib1g-dev libbz2-dev libssl-dev` (package names may vary slightly, e.g. `libfuse-dev`). Ensure the compiled `apfs-fuse` binary is in your system PATH.
+2.  **Python:** Version 3.8 or newer.
+3.  **Python Libraries:** Install with `pip install PyQt6 psutil`.
+4.  **Platform-Specific CLI Tools for USB Writing:**
+
+    *   **Linux (including Debian 13 "Trixie"):**
+        *   `qemu-img` (from `qemu-utils`)
+        *   `parted`
+        *   `kpartx` (from `kpartx` or `multipath-tools`)
+        *   `rsync`
+        *   `mkfs.vfat` (from `dosfstools`)
+        *   `mkfs.hfsplus` (from `hfsprogs`)
+        *   `apfs-fuse`: Often requires manual compilation (e.g., from `sgan81/apfs-fuse` on GitHub). Typical build dependencies: `git g++ cmake libfuse3-dev libicu-dev zlib1g-dev libbz2-dev libssl-dev`. Ensure it's in your PATH.
+        *   `lsblk`, `partprobe` (from `util-linux`)
+        *   Install most via: `sudo apt update && sudo apt install qemu-utils parted kpartx rsync dosfstools hfsprogs util-linux`
+    *   **macOS:**
+        *   `qemu-img` (e.g., via Homebrew: `brew install qemu`)
+        *   `diskutil`, `hdiutil`, `rsync` (standard macOS tools).
+    *   **Windows:**
+        *   `qemu-img` (install and add to PATH).
+        *   `diskpart`, `robocopy` (standard Windows tools).
+        *   `7z.exe` (7-Zip command-line tool, install and add to PATH) - for EFI file extraction.
+        *   A "dd for Windows" utility (e.g., from SUSE, chrysocome.net, or similar). Ensure it's in your PATH and you know how to use it for writing to a physical disk's partition or offset.
 
 ## How to Run
 
-1.  Clone this repository or download the source files (`main_app.py`, `utils.py`, `constants.py`, `usb_writer_linux.py`).
-2.  Install the prerequisite Python libraries: `pip install PyQt6 psutil`.
-3.  **(Linux for USB Writing):** Ensure all command-line utilities listed under prerequisites are installed.
-4.  Run the application:
-    ```bash
-    python main_app.py
-    ```
-    **(Linux for USB Writing):** You will need to run the application with `sudo` for USB writing operations to succeed, due to the nature of disk partitioning and direct write commands:
-    ```bash
-    sudo python main_app.py
-    ```
+1.  Ensure all prerequisites for your operating system are met.
+2.  Clone this repository or download the source files.
+3.  Install Python libraries: `pip install PyQt6 psutil`.
+4.  Execute `python main_app.py`.
+5.  **Important for USB Writing:**
+    *   **Linux:** Run with `sudo python main_app.py`.
+    *   **macOS:** The script will use `sudo` internally for `rsync` to USB EFI if needed. You might be prompted for your password. Ensure the main application has Full Disk Access if issues arise with `hdiutil` or `diskutil` not having permissions (System Settings > Privacy & Security).
+    *   **Windows:** Run the application as Administrator.
 
-## Usage Steps
+## Step-by-Step Usage Guide
 
 1.  **Step 1: Create and Install macOS VM**
-    *   Select your desired macOS version from the dropdown.
+    *   Launch the "Skyscope macOS on PC USB Creator Tool".
+    *   Select your desired macOS version from the dropdown menu.
     *   Click "Create VM and Start macOS Installation".
-    *   A Docker container will be started, and a QEMU window will appear.
-    *   Follow the on-screen instructions within the QEMU window to install macOS. This is an interactive process (formatting the virtual disk, installing macOS).
-    *   Once macOS is installed and you have shut down or closed the QEMU window, the Docker process will finish.
+    *   The tool will first pull the necessary Docker image (progress shown).
+    *   Then, a QEMU window will appear. This is your virtual machine. Follow the standard macOS installation procedure within this window (use Disk Utility to erase and format the virtual hard drive, then install macOS). This part is interactive.
+    *   Once macOS is fully installed in QEMU, shut down the macOS VM from within its own interface (Apple Menu > Shut Down). Closing the QEMU window will also terminate the process.
 2.  **Step 2: Extract VM Images**
-    *   After the VM setup process is complete, the "Extract Images from Container" button will become enabled.
-    *   Click it and select a directory on your computer where the `mac_hdd_ng.img` and `OpenCore.qcow2` files will be saved.
-    *   Wait for both extraction processes to complete.
+    *   After the Docker process from Step 1 finishes (QEMU window closes), the "Extract Images from Container" button will become active.
+    *   Click it. You'll be prompted to select a directory on your computer. The `mac_hdd_ng.img` (macOS system) and `OpenCore.qcow2` (EFI bootloader) files will be copied here. This may take some time.
 3.  **Step 3: Container Management (Optional)**
-    *   After image extraction (or if the VM setup finished), you can "Stop Container" (if it's somehow still running) and then "Remove Container" to clean up the Docker container (which is no longer needed if images are extracted).
+    *   Once images are extracted, the Docker container used for installation is no longer strictly needed.
+    *   You can "Stop Container" (if it's listed as running by Docker for any reason) and then "Remove Container" to free up disk space.
 4.  **Step 4: Select Target USB Drive and Write**
-    *   Connect your target USB drive.
-    *   Click "Refresh List" to scan for USB drives.
-    *   Select your intended USB drive from the dropdown. **VERIFY CAREFULLY!**
-    *   **WARNING:** The next step will erase all data on the selected USB drive.
-    *   Optionally, check the '\[Experimental] Auto-enhance config.plist...' box if you want the tool to attempt to modify the OpenCore configuration based on your Linux host's hardware (this feature is Linux-only for detection). This may improve compatibility but use with caution. A backup (`config.plist.backup`) is created in the source OpenCore image's EFI directory before modification.
-    *   If you are on Linux and have all dependencies, and the images from Step 2 are ready, the "Write Images to USB Drive" button will be enabled.
-    *   Click it and confirm the warning dialog. The application will then partition the USB and write the images. This will take a significant amount of time.
+    *   Physically connect your USB flash drive.
+    *   Click "Refresh List".
+        *   **Linux/macOS:** Select your USB drive from the dropdown. Verify size and identifier carefully.
+        *   **Windows:** USB drives detected via WMI will appear in the dropdown. Select the correct one. Ensure it's the `Disk X` number you intend.
+    *   **(Optional, Experimental):** Check the "Try to auto-enhance config.plist..." box if you are on a Linux host and wish to attempt automatic `config.plist` modification for your hardware. A backup of the original `config.plist` will be made.
+    *   **CRITICAL WARNING:** Double-check your selection. The next action will erase the selected USB drive.
+    *   Click "Write Images to USB Drive". Confirm the data erasure warning.
+    *   The process will now:
+        *   (If enhancement enabled) Attempt to modify the `config.plist` within the source OpenCore image.
+        *   Partition and format your USB drive.
+        *   Copy EFI files to the USB's EFI partition.
+        *   Copy macOS system files to the USB's main partition. (On Windows, this step requires manual `dd` operation as guided by the application).
+    *   This is a lengthy process. Monitor the progress in the output area.
+5.  **Boot!**
+    *   Once complete, safely eject the USB drive. You can now try booting your PC from it. Remember to configure your PC's BIOS/UEFI for booting from USB and for macOS compatibility (e.g., disable Secure Boot, enable AHCI, XHCI Handoff, etc., as per standard Hackintosh guides like Dortania).
 
-## Future Enhancements (Based on Feedback)
+## Future Vision & Enhancements
 
-*   **Improve USB Writing for Image Sizing (High Priority):** Modify the USB writing process (especially for the main macOS system) to use file-level copies (e.g., `rsync` after mounting the source image) instead of `dd` for the entire raw image. This will correctly handle various USB drive sizes by only copying used data and fitting it to the partition.
-*   **Explicit Docker Image Pull:** Add a separate step/feedback for `docker pull` before `docker run`.
-*   **Privilege Handling:** Add checks to see if the application is run with necessary privileges for USB writing and guide the user if not.
-*   **USB Writing for macOS and Windows:** Implement the `usb_writer_macos.py` and `usb_writer_windows.py` modules.
-*   **GUI for Advanced Options:** Potentially allow users to specify custom Docker parameters or OpenCore properties.
-*   **Expand hardware detection for `config.plist` enhancement to also support macOS and Windows hosts.**
-*   **Provide more granular user control and detailed feedback for the `config.plist` enhancement feature (e.g., preview changes, select specific patches).**
+*   **Fully Automated Windows USB Writing:** Replace the manual `dd` step with a reliable, integrated solution.
+*   **Advanced `config.plist` Customization:**
+    *   Expand hardware detection to macOS and Windows hosts.
+    *   Provide more granular UI controls for plist enhancements (e.g., preview changes, select specific patches).
+    *   Allow users to load/save `config.plist` modification profiles.
+*   **Enhanced UI/UX for Progress:** Implement determinate progress bars with percentage completion and more dynamic status updates.
+*   **Debian 13 "Trixie" (and other distros) Validation:** Continuous compatibility checks and dependency streamlining.
+*   **"Universal" Config Strategy (Research):** Investigate advanced techniques for more adaptive OpenCore configurations, though true universality is a significant challenge.
 
 ## Contributing
 
-Contributions are welcome! Please fork the repository and submit a pull request.
+Your contributions, feedback, and bug reports are highly welcome! Please fork the repository and submit pull requests, or open issues for discussion.
 
 ## License
 
-(To be decided - likely MIT or GPLv3)
+(To be decided - e.g., MIT or GPLv3)
