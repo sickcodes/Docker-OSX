@@ -54,7 +54,9 @@ First time here? try [initial setup](#initial-setup), otherwise try the instruct
 ## Any questions, ideas, or just want to hang out?
 # [https://discord.gg/sickchat](https://discord.gg/sickchat)
 
-### Catalina [![https://img.shields.io/docker/image-size/sickcodes/docker-osx/latest?label=sickcodes%2Fdocker-osx%3Alatest](https://img.shields.io/docker/image-size/sickcodes/docker-osx/latest?label=sickcodes%2Fdocker-osx%3Alatest)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
+Release names and their version:
+
+### Catalina (10.15) [![https://img.shields.io/docker/image-size/sickcodes/docker-osx/latest?label=sickcodes%2Fdocker-osx%3Alatest](https://img.shields.io/docker/image-size/sickcodes/docker-osx/latest?label=sickcodes%2Fdocker-osx%3Alatest)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
 
 ```bash
 docker run -it \
@@ -62,11 +64,12 @@ docker run -it \
     -p 50922:10022 \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
     -e "DISPLAY=${DISPLAY:-:0.0}" \
+    -e SHORTNAME=catalina \
     sickcodes/docker-osx:latest
 
 # docker build -t docker-osx .
 ```
-### Big Sur [![https://img.shields.io/docker/image-size/sickcodes/docker-osx/big-sur?label=sickcodes%2Fdocker-osx%3Abig-sur](https://img.shields.io/docker/image-size/sickcodes/docker-osx/big-sur?label=sickcodes%2Fdocker-osx%3Abig-sur)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
+### Big Sur (11) [![https://img.shields.io/docker/image-size/sickcodes/docker-osx/latest?label=sickcodes%2Fdocker-osx%3Alatest](https://img.shields.io/docker/image-size/sickcodes/docker-osx/latest?label=sickcodes%2Fdocker-osx%3Alatest)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
 
 ```bash
 docker run -it \
@@ -74,28 +77,13 @@ docker run -it \
     -p 50922:10022 \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
     -e "DISPLAY=${DISPLAY:-:0.0}" \
-    sickcodes/docker-osx:big-sur
+    -e SHORTNAME=big-sur \
+    sickcodes/docker-osx:latest
 
-# docker build -t docker-osx --build-arg SHORTNAME=big-sur .
+# docker build -t docker-osx .
 ```
 
-### Monterey [![https://img.shields.io/docker/image-size/sickcodes/docker-osx/monterey?label=sickcodes%2Fdocker-osx%3Amonterey](https://img.shields.io/docker/image-size/sickcodes/docker-osx/monterey?label=sickcodes%2Fdocker-osx%3Amonterey)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
-
-```bash
-
-docker run -it \
-    --device /dev/kvm \
-    -p 50922:10022 \
-    -v /tmp/.X11-unix:/tmp/.X11-unix \
-    -e "DISPLAY=${DISPLAY:-:0.0}" \
-    -e GENERATE_UNIQUE=true \
-    -e MASTER_PLIST_URL='https://raw.githubusercontent.com/sickcodes/osx-serial-generator/master/config-custom.plist' \
-    sickcodes/docker-osx:monterey
-
-# docker build -t docker-osx --build-arg SHORTNAME=monterey .
-```
-
-### Ventura [![https://img.shields.io/docker/image-size/sickcodes/docker-osx/ventura?label=sickcodes%2Fdocker-osx%3Aventura](https://img.shields.io/docker/image-size/sickcodes/docker-osx/ventura?label=sickcodes%2Fdocker-osx%3Aventura)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
+### Monterey (12) [![https://img.shields.io/docker/image-size/sickcodes/docker-osx/latest?label=sickcodes%2Fdocker-osx%3Alatest](https://img.shields.io/docker/image-size/sickcodes/docker-osx/latest?label=sickcodes%2Fdocker-osx%3Alatest)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
 
 ```bash
 
@@ -106,12 +94,30 @@ docker run -it \
     -e "DISPLAY=${DISPLAY:-:0.0}" \
     -e GENERATE_UNIQUE=true \
     -e MASTER_PLIST_URL='https://raw.githubusercontent.com/sickcodes/osx-serial-generator/master/config-custom.plist' \
-    sickcodes/docker-osx:ventura
+    -e SHORTNAME=monterey \
+    sickcodes/docker-osx:latest
 
-# docker build -t docker-osx --build-arg SHORTNAME=ventura .
+# docker build -t docker-osx .
 ```
 
-### Sonoma [![https://img.shields.io/docker/image-size/sickcodes/docker-osx/sonoma?label=sickcodes%2Fdocker-osx%3Asonoma](https://img.shields.io/docker/image-size/sickcodes/docker-osx/sonoma?label=sickcodes%2Fdocker-osx%3Asonoma)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
+### Ventura (13) [![https://img.shields.io/docker/image-size/sickcodes/docker-osx/latest?label=sickcodes%2Fdocker-osx%3Alatest](https://img.shields.io/docker/image-size/sickcodes/docker-osx/latest?label=sickcodes%2Fdocker-osx%3Alatest)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
+
+```bash
+
+docker run -it \
+    --device /dev/kvm \
+    -p 50922:10022 \
+    -v /tmp/.X11-unix:/tmp/.X11-unix \
+    -e "DISPLAY=${DISPLAY:-:0.0}" \
+    -e GENERATE_UNIQUE=true \
+    -e MASTER_PLIST_URL='https://raw.githubusercontent.com/sickcodes/osx-serial-generator/master/config-custom.plist' \
+    -e SHORTNAME=ventura \
+    sickcodes/docker-osx:latest
+
+# docker build -t docker-osx .
+```
+
+### Sonoma (14) [![https://img.shields.io/docker/image-size/sickcodes/docker-osx/latest?label=sickcodes%2Fdocker-osx%3Alatest](https://img.shields.io/docker/image-size/sickcodes/docker-osx/latest?label=sickcodes%2Fdocker-osx%3Alatest)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
 
 ```bash
 
@@ -124,12 +130,32 @@ docker run -it \
     -e CPU='Haswell-noTSX' \
     -e CPUID_FLAGS='kvm=on,vendor=GenuineIntel,+invtsc,vmware-cpuid-freq=on' \
     -e MASTER_PLIST_URL='https://raw.githubusercontent.com/sickcodes/osx-serial-generator/master/config-custom-sonoma.plist' \
-    sickcodes/docker-osx:sonoma
+    -e SHORTNAME=sonoma \
+    sickcodes/docker-osx:latest
 
-# docker build -t docker-osx --build-arg SHORTNAME=sonoma .
+# docker build -t docker-osx .
 ```
 
-#### Run Catalina Pre-Installed [![https://img.shields.io/docker/image-size/sickcodes/docker-osx/auto?label=sickcodes%2Fdocker-osx%3Aauto](https://img.shields.io/docker/image-size/sickcodes/docker-osx/auto?label=sickcodes%2Fdocker-osx%3Aauto)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
+### Sequoia (15) [![https://img.shields.io/docker/image-size/sickcodes/docker-osx/latest?label=sickcodes%2Fdocker-osx%3Alatest](https://img.shields.io/docker/image-size/sickcodes/docker-osx/latest?label=sickcodes%2Fdocker-osx%3Alatest)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
+
+```bash
+
+docker run -it \
+    --device /dev/kvm \
+    -p 50922:10022 \
+    -v /tmp/.X11-unix:/tmp/.X11-unix \
+    -e "DISPLAY=${DISPLAY:-:0.0}" \
+    -e GENERATE_UNIQUE=true \
+    -e CPU='Haswell-noTSX' \
+    -e CPUID_FLAGS='kvm=on,vendor=GenuineIntel,+invtsc,vmware-cpuid-freq=on' \
+    -e MASTER_PLIST_URL='https://raw.githubusercontent.com/sickcodes/osx-serial-generator/master/config-custom-sonoma.plist' \
+    -e SHORTNAME=sequoia \
+    sickcodes/docker-osx:latest
+
+# docker build -t docker-osx .
+```
+
+<!-- #### Run Catalina Pre-Installed [![https://img.shields.io/docker/image-size/sickcodes/docker-osx/auto?label=sickcodes%2Fdocker-osx%3Aauto](https://img.shields.io/docker/image-size/sickcodes/docker-osx/auto?label=sickcodes%2Fdocker-osx%3Aauto)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
 
 ```bash
 # 40GB disk space required: 20GB original image 20GB your container.
@@ -145,12 +171,12 @@ docker run -it \
     sickcodes/docker-osx:auto
 
 # username is user
-# passsword is alpine
-```
+# password is alpine
+``` -->
 
 ### Older Systems
 
-### High Sierra [![https://img.shields.io/docker/image-size/sickcodes/docker-osx/high-sierra?label=sickcodes%2Fdocker-osx%3Ahigh-sierra](https://img.shields.io/docker/image-size/sickcodes/docker-osx/high-sierra?label=sickcodes%2Fdocker-osx%3Ahigh-sierra)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
+### High Sierra [![https://img.shields.io/docker/image-size/sickcodes/docker-osx/latest?label=sickcodes%2Fdocker-osx%3Alatest](https://img.shields.io/docker/image-size/sickcodes/docker-osx/latest?label=sickcodes%2Fdocker-osx%3Alatest)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
 
 ```bash
 
@@ -159,12 +185,13 @@ docker run -it \
     -p 50922:10022 \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
     -e "DISPLAY=${DISPLAY:-:0.0}" \
-    sickcodes/docker-osx:high-sierra
+    -e SHORTNAME=high-sierra \
+    sickcodes/docker-osx:latest
 
-# docker build -t docker-osx --build-arg SHORTNAME=high-sierra .
+# docker build -t docker-osx .
 ```
 
-### Mojave [![https://img.shields.io/docker/image-size/sickcodes/docker-osx/mojave?label=sickcodes%2Fdocker-osx%3Amojave](https://img.shields.io/docker/image-size/sickcodes/docker-osx/mojave?label=sickcodes%2Fdocker-osx%3Amojave)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
+### Mojave [![https://img.shields.io/docker/image-size/sickcodes/docker-osx/latest?label=sickcodes%2Fdocker-osx%3Alatest](https://img.shields.io/docker/image-size/sickcodes/docker-osx/latest?label=sickcodes%2Fdocker-osx%3Alatest)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
 
 ```bash
 
@@ -173,9 +200,10 @@ docker run -it \
     -p 50922:10022 \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
     -e "DISPLAY=${DISPLAY:-:0.0}" \
-    sickcodes/docker-osx:mojave
+    -e SHORTNAME=mojave \
+    sickcodes/docker-osx:latest
 
-# docker build -t docker-osx --build-arg SHORTNAME=mojave .
+# docker build -t docker-osx .
 ```
 
 
@@ -198,11 +226,12 @@ docker run -it \
     -e "DISPLAY=${DISPLAY:-:0.0}" \
     -e GENERATE_UNIQUE=true \
     -e MASTER_PLIST_URL=https://raw.githubusercontent.com/sickcodes/Docker-OSX/master/custom/config-nopicker-custom.plist \
+    -e SHORTNAME=catalina \
     sickcodes/docker-osx:naked
 ```
 
 
-#### Use your own image and manually and automatically log into a shell
+<!-- #### Use your own image and manually and automatically log into a shell
 
 [![https://img.shields.io/docker/image-size/sickcodes/docker-osx/naked-auto?label=sickcodes%2Fdocker-osx%3Anaked-auto](https://img.shields.io/docker/image-size/sickcodes/docker-osx/naked-auto?label=sickcodes%2Fdocker-osx%3Anaked-auto)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
 
@@ -227,8 +256,9 @@ docker run -it \
     -e "PASSWORD=alpine" \
     -e GENERATE_UNIQUE=true \
     -e MASTER_PLIST_URL=https://raw.githubusercontent.com/sickcodes/Docker-OSX/master/custom/config-nopicker-custom.plist \
+    -e SHORTNAME=monterey \
     sickcodes/docker-osx:naked-auto
-```
+``` -->
 
 # Share directories, sharing files, shared folder, mount folder
 The easiest and most secure way is `sshfs`
@@ -399,13 +429,13 @@ Pick one of these while **building**, irrelevant when using docker pull:
 
 There are currently multiple images, each with different use cases (explained [below](#container-images)):
 
-- High Sierra
-- Mojave
-- Catalina
-- Big Sur
-- Monterey
-- Ventura
-- Sonoma
+- High Sierra (10.13)
+- Mojave (10.14)
+- Catalina (10.15)
+- Big Sur (11)
+- Monterey (12)
+- Ventura (13)
+- Sonoma (14)
 - Auto (pre-made Catalina)
 - Naked (use your own .img)
 - Naked-Auto (user your own .img and SSH in)
@@ -1816,7 +1846,7 @@ docker run -it \
     sickcodes/docker-osx:auto
 
 # username is user
-# passsword is alpine
+# password is alpine
 # Wait 2-3 minutes until you drop into the shell.
 ```
 
