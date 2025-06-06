@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>ACPI</key>
+    <dict>
+        <key>Add</key> <array/>
+        <key>Delete</key> <array/>
+        <key>Patch</key> <array/>
+        <key>Quirks</key>
+        <dict>
+            <key>FadtEnableReset</key> <false/>
+            <key>NormalizeHeaders</key> <false/>
+            <key>RebaseRegions</key> <false/>
+            <key>ResetHwSig</key> <false/>
+            <key>ResetLogoStatus</key> <true/>
+            <key>SyncTableIds</key> <false/>
+        </dict>
+    </dict>
+    <key>Booter</key>
+    <dict>
+        <key>MmioWhitelist</key> <array/>
+        <key>Patch</key> <array/>
+        <key>Quirks</key>
+        <dict>
+            <key>AllowRelocationBlock</key> <false/>
+            <key>AvoidRuntimeDefrag</key> <true/>
+            <key>DevirtualiseMmio</key> <false/> <!-- Change to true for Alder Lake B660/Z690 if needed -->
+            <key>DisableSingleUser</key> <false/>
+            <key>DisableVariableWrite</key> <false/>
+            <key>DiscardHibernateMap</key> <false/>
+            <key>EnableSafeModeSlide</key> <true/>
+            <key>EnableWriteUnprotector</key> <false/> <!-- Keep false, OpenRuntime handles this -->
+            <key>ForceBooterSignature</key> <false/>
+            <key>ForceExitBootServices</key> <false/>
+            <key>ProtectMemoryRegions</key> <false/>
+            <key>ProtectSecureBoot</key> <false/>
+            <key>ProtectUefiServices</key> <false/>
+            <key>ProvideCustomSlide</key> <true/>
+            <key>ProvideMaxSlide</key> <integer>0</integer>
+            <key>RebuildAppleMemoryMap</key> <false/> <!-- Change to true for Alder Lake if needed -->
+            <key>ResizeAppleGpuBars</key> <integer>-1</integer>
+            <key>SetupVirtualMap</key> <true/>
+            <key>SignalAppleOS</key> <false/>
+            <key>SyncRuntimePermissions</key> <false/> <!-- Change to true for Alder Lake if needed -->
+        </dict>
+    </dict>
+    <key>DeviceProperties</key> <dict><key>Add</key><dict/><key>Delete</key><dict/></dict>
+    <key>Kernel</key>
+    <dict>
+        <key>Add</key> <array>
+            <!-- Lilu -->
+            <dict><key>Arch</key><string>Any</string><key>BundlePath</key><string>Lilu.kext</string><key>Comment</key><string>Patch engine</string><key>Enabled</key><true/><key>ExecutablePath</key><string>Contents/MacOS/Lilu</string><key>MaxKernel</key><string></string><key>MinKernel</key><string></string><key>PlistPath</key><string>Contents/Info.plist</string></dict>
+            <!-- VirtualSMC -->
+            <dict><key>Arch</key><string>Any</string><key>BundlePath</key><string>VirtualSMC.kext</string><key>Comment</key><string>SMC emulator</string><key>Enabled</key><true/><key>ExecutablePath</key><string>Contents/MacOS/VirtualSMC</string><key>MaxKernel</key><string></string><key>MinKernel</key><string></string><key>PlistPath</key><string>Contents/Info.plist</string></dict>
+            <!-- WhateverGreen -->
+            <dict><key>Arch</key><string>Any</string><key>BundlePath</key><string>WhateverGreen.kext</string><key>Comment</key><string>Video patches</string><key>Enabled</key><true/><key>ExecutablePath</key><string>Contents/MacOS/WhateverGreen</string><key>MaxKernel</key><string></string><key>MinKernel</key><string></string><key>PlistPath</key><string>Contents/Info.plist</string></dict>
+            <!-- AppleALC -->
+            <dict><key>Arch</key><string>Any</string><key>BundlePath</key><string>AppleALC.kext</string><key>Comment</key><string>Audio patches</string><key>Enabled</key><false/><key>ExecutablePath</key><string>Contents/MacOS/AppleALC</string><key>MaxKernel</key><string></string><key>MinKernel</key><string></string><key>PlistPath</key><string>Contents/Info.plist</string></dict>
+            <!-- Ethernet Kexts (disabled by default, enabled by plist_modifier) -->
+            <dict><key>Arch</key><string>Any</string><key>BundlePath</key><string>IntelMausi.kext</string><key>Comment</key><string>Intel Ethernet</string><key>Enabled</key><false/><key>ExecutablePath</key><string>Contents/MacOS/IntelMausi</string><key>MaxKernel</key><string></string><key>MinKernel</key><string></string><key>PlistPath</key><string>Contents/Info.plist</string></dict>
+            <dict><key>Arch</key><string>Any</string><key>BundlePath</key><string>RealtekRTL8111.kext</string><key>Comment</key><string>Realtek RTL8111</string><key>Enabled</key><false/><key>ExecutablePath</key><string>Contents/MacOS/RealtekRTL8111</string><key>MaxKernel</key><string></string><key>MinKernel</key><string></string><key>PlistPath</key><string>Contents/Info.plist</string></dict>
+            <dict><key>Arch</key><string>Any</string><key>BundlePath</key><string>LucyRTL8125Ethernet.kext</string><key>Comment</key><string>Realtek RTL8125</string><key>Enabled</key><false/><key>ExecutablePath</key><string>Contents/MacOS/LucyRTL8125Ethernet</string><key>MaxKernel</key><string></string><key>MinKernel</key><string></string><key>PlistPath</key><string>Contents/Info.plist</string></dict>
+        </array>
+        <key>Block</key> <array/> <key>Emulate</key> <dict/> <key>Force</key> <array/> <key>Patch</key> <array/>
+        <key>Quirks</key>
+        <dict>
+            <key>AppleCpuPmCfgLock</key> <false/> <key>AppleXcpmCfgLock</key> <true/> <key>AppleXcpmExtraMsrs</key> <false/>
+            <key>AppleXcpmForceBoost</key> <false/> <key>CustomPciSerialDevice</key> <false/> <key>CustomSMBIOSGuid</key> <false/>
+            <key>DisableIoMapper</key> <true/> <key>DisableLinkeditJettison</key> <true/> <key>DisableRtcChecksum</key> <false/>
+            <key>ExtendBTFeatureFlags</key> <false/> <key>ExternalDiskIcons</key> <false/> <key>ForceAquantiaEthernet</key> <false/>
+            <key>ForceSecureBootScheme</key> <false/> <key>IncreasePciBarSize</key> <false/> <key>LapicKernelPanic</key> <false/>
+            <key>LegacyCommpage</key> <false/> <key>PanicNoKextDump</key> <true/> <key>PowerTimeoutKernelPanic</key> <true/>
+            <key>ProvideCurrentCpuInfo</key> <false/> <key>SetApfsTrimTimeout</key> <integer>-1</integer>
+            <key>ThirdPartyDrives</key> <false/> <key>XhciPortLimit</key> <false/>
+        </dict>
+        <key>Scheme</key> <dict><key>CustomKernel</key><false/><key>FuzzyMatch</key><true/><key>KernelArch</key><string>Auto</string><key>KernelCache</key><string>Auto</string></dict>
+    </dict>
+    <key>Misc</key> <dict> <key>BlessOverride</key><array/><key>Boot</key><dict><key>ConsoleAttributes</key><integer>0</integer><key>HibernateMode</key><string>None</string><key>HibernateSkipsPicker</key><false/><key>HideAuxiliary</key><false/><key>LauncherOption</key><string>Disabled</string><key>LauncherPath</key><string>Default</string><key>PickerAttributes</key><integer>17</integer><key>PickerAudioAssist</key><false/><key>PickerMode</key><string>External</string><key>PickerVariant</key><string>Auto</string><key>PollAppleHotKeys</key><true/><key>ShowPicker</key><true/><key>TakeoffDelay</key><integer>0</integer><key>Timeout</key><integer>5</integer></dict><key>Debug</key><dict><key>AppleDebug</key><false/><key>ApplePanic</key><false/><key>DisableWatchDog</key><true/><key>DisplayDelay</key><integer>0</integer><key>DisplayLevel</key><integer>2147483650</integer><key>LogModules</key><string>*</string><key>SysReport</key><false/><key>Target</key><integer>3</integer></dict><key>Entries</key><array/><key>Security</key><dict><key>AllowSetDefault</key><true/><key>ApECID</key><integer>0</integer><key>AuthRestart</key><false/><key>BlacklistAppleUpdate</key><true/><key>DmgLoading</key><string>Signed</string><key>EnablePassword</key><false/><key>ExposeSensitiveData</key><integer>6</integer><key>HaltLevel</key><integer>2147483648</integer><key>PasswordHash</key><data></data><key>PasswordSalt</key><data></data><key>ScanPolicy</key><integer>0</integer><key>SecureBootModel</key><string>Disabled</string><key>Vault</key><string>Optional</string></dict><key>Serial</key><dict><key>Init</key><false/><key>Override</key><false/></dict><key>Tools</key><array/></dict>
+    <key>NVRAM</key> <dict><key>Add</key><dict><key>4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14</key><dict><key>DefaultBackgroundColor</key><data>AAAAAA==</data><key>UIScale</key><data>AQ==</data></dict><key>7C436110-AB2A-4BBB-A880-FE41995C9F82</key><dict><key>SystemAudioVolume</key><data>Rg==</data><key>boot-args</key><string>-v keepsyms=1 debug=0x100</string><key>csr-active-config</key><data>AAAAAA==</data><key>prev-lang:kbd</key><data>ZW4tVVM6MA==</data><key>run-efi-updater</key><string>No</string></dict></dict><key>Delete</key><dict><key>4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14</key><array><string>UIScale</string><string>DefaultBackgroundColor</string></array><key>7C436110-AB2A-4BBB-A880-FE41995C9F82</key><array><string>boot-args</string></dict></dict><key>LegacySchema</key><dict/><key>WriteFlash</key><true/></dict>
+    <key>PlatformInfo</key> <dict><key>Automatic</key><true/><key>CustomMemory</key><false/><key>Generic</key><dict><key>AdviseFeatures</key><false/><key>MLB</key><string>PLEASE_REPLACE_MLB</string><key>MaxBIOSVersion</key><false/><key>ProcessorType</key><integer>0</integer><key>ROM</key><data>AAAAAA==</data><key>SpoofVendor</key><true/><key>SystemMemoryStatus</key><string>Auto</string><key>SystemProductName</key><string>iMacPro1,1</string><key>SystemSerialNumber</key><string>PLEASE_REPLACE_SERIAL</string><key>SystemUUID</key><string>PLEASE_REPLACE_UUID</string></dict><key>UpdateDataHub</key><true/><key>UpdateNVRAM</key><true/><key>UpdateSMBIOS</key><true/><key>UpdateSMBIOSMode</key><string>Create</string><key>UseRawUuidEncoding</key><false/></dict>
+    <key>UEFI</key> <dict><key>APFS</key><dict><key>EnableJumpstart</key><true/><key>GlobalConnect</key><false/><key>HideVerbose</key><true/><key>JumpstartHotPlug</key><false/><key>MinDate</key><integer>0</integer><key>MinVersion</key><integer>0</integer></dict><key>AppleInput</key><dict><key>AppleEvent</key><string>Builtin</string><key>CustomDelays</key><false/><key>GraphicsInputMirroring</key><true/><key>KeyInitialDelay</key><integer>50</integer><key>KeySubsequentDelay</key><integer>5</integer><key>PointerSpeedDiv</key><integer>1</integer><key>PointerSpeedMul</key><integer>1</integer></dict><key>Audio</key><dict><key>AudioCodec</key><integer>0</integer><key>AudioDevice</key><string></string><key>AudioOutMask</key><integer>-1</integer><key>AudioSupport</key><false/><key>DisconnectHda</key><false/><key>MaximumGain</key><integer>-15</integer><key>MinimumAssistGain</key><integer>-30</integer><key>MinimumAudibleGain</key><integer>-55</integer><key>PlayChime</key><string>Auto</string><key>ResetTrafficClass</key><false/><key>SetupDelay</key><integer>0</integer></dict><key>ConnectDrivers</key><true/><key>Drivers</key><array><string>HfsPlus.efi</string><string>OpenRuntime.efi</string><string>OpenCanopy.efi</string></array><key>Input</key><dict><key>KeyFiltering</key><false/><key>KeyForgetThreshold</key><integer>5</integer><key>KeySupport</key><true/><key>KeySupportMode</key><string>Auto</string><key>KeySwap</key><false/><key>PointerSupport</key><false/><key>PointerSupportMode</key><string>ASUS</string><key>TimerResolution</key><integer>50000</integer></dict><key>Output</key><dict><key>ClearScreenOnModeSwitch</key><false/><key>ConsoleMode</key><string></string><key>DirectGopRendering</key><false/><key>ForceResolution</key><false/><key>GopPassThrough</key><string>Disabled</string><key>IgnoreTextInGraphics</key><false/><key>ProvideConsoleGop</key><true/><key>ReconnectGraphicsOnConnect</key><false/><key>ReconnectOnResChange</key><false/><key>ReplaceTabWithSpace</key><false/><key>Resolution</key><string>Max</string><key>SanitiseClearScreen</key><false/><key>TextRenderer</key><string>BuiltinGraphics</string><key>UIScale</key><integer>-1</integer><key>UgaPassThrough</key><false/></dict><key>ProtocolOverrides</key><dict/><key>Quirks</key><dict><key>ActivateHpetSupport</key><false/><key>DisableSecurityPolicy</key><false/><key>EnableVectorAcceleration</key><true/><key>EnableVmx</key><false/><key>ExitBootServicesDelay</key><integer>0</integer><key>ForceOcWriteFlash</key><false/><key>ForgeUefiSupport</key><false/><key>IgnoreInvalidFlexRatio</key><false/><key>ReleaseUsbOwnership</key><false/><key>ReloadOptionRoms</key><false/><key>RequestBootVarRouting</key><true/><key>ResizeGpuBars</key><integer>-1</integer><key>TscSyncTimeout</key><integer>0</integer><key>UnblockFsConnect</key><false/></dict><key>ReservedMemory</key><array/></dict>
+</dict>
+</plist>
