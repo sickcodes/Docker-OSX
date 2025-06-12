@@ -1,130 +1,130 @@
 # Skyscope macOS on PC USB Creator Tool
 
-**Version:** 0.8.1 (Alpha)
+**Version:** 1.0.0 (Dev - New Workflow)
 **Developer:** Miss Casey Jay Topojani
 **Business:** Skyscope Sentinel Intelligence
 
 ## Vision: Your Effortless Bridge to macOS on PC
 
-Welcome to the Skyscope macOS on PC USB Creator Tool! Our vision is to provide an exceptionally user-friendly, GUI-driven application that fully automates the complex process of creating a bootable macOS USB drive for virtually any PC. This tool leverages the power of Docker-OSX and OpenCore, aiming to simplify the Hackintosh journey from start to finish.
+Welcome to the Skyscope macOS on PC USB Creator Tool! Our vision is to provide an exceptionally user-friendly, GUI-driven application that fully automates the complex process of creating a bootable macOS USB *Installer* for virtually any PC. This tool aims to be your comprehensive solution, simplifying the Hackintosh journey from start to finish by leveraging direct macOS downloads and intelligent OpenCore EFI configuration.
 
-This project is dedicated to creating a seamless experience, from selecting your desired macOS version to generating a USB drive that's ready to boot your PC into macOS, complete with efforts to auto-configure for your hardware.
+This project is dedicated to creating a seamless experience, from selecting your desired macOS version (defaulting to the latest like Sequoia where possible) to generating a USB drive that's ready to boot your PC and install macOS. We strive to incorporate advanced options for tech-savvy users while maintaining an intuitive interface for all.
 
-## Current Features & Capabilities
+## Core Features
 
-*   **Intuitive Graphical User Interface (PyQt6):** Guides you through each step of the process.
-*   **macOS Version Selection:** Easily choose from popular macOS versions (Sonoma, Ventura, Monterey, Big Sur, Catalina).
-*   **Automated Docker-OSX Orchestration:**
-    *   **Intelligent Image Pulling:** Automatically pulls the required `sickcodes/docker-osx` image from Docker Hub, with progress displayed.
-    *   **VM Creation & macOS Installation:** Launches the Docker-OSX container where you can interactively install macOS within a QEMU virtual machine.
-    *   **Log Streaming:** View Docker and QEMU logs directly in the application for transparency.
-*   **VM Image Extraction:** Once macOS is installed in the VM, the tool helps you extract the essential disk images (`mac_hdd_ng.img` and `OpenCore.qcow2`).
-*   **Container Management:** Stop and remove the Docker-OSX container after use.
-*   **Cross-Platform USB Drive Preparation:**
-    *   **USB Detection:** Identifies potential USB drives on Linux, macOS, and Windows (using WMI for more accurate detection on Windows).
-    *   **Automated EFI & macOS System Write (Linux & macOS):**
-        *   Partitions the USB drive with a GUID Partition Table (GPT).
-        *   Creates and formats an EFI System Partition (FAT32) and a main macOS partition (HFS+).
-        *   Uses a robust file-level copy (`rsync`) for both EFI content and the main macOS system, ensuring compatibility with various USB sizes and only copying necessary data.
-    *   **Windows USB Writing (Partial Automation):**
-        *   Automates EFI partition creation and EFI file copying.
-        *   **Important:** Writing the main macOS system image currently requires a guided manual step using an external "dd for Windows" utility due to Windows' limitations with direct, scriptable raw partition writing of HFS+/APFS filesystems. The tool prepares the raw image and provides instructions.
-*   **Experimental `config.plist` Auto-Enhancement:**
-    *   **Linux Host Detection:** If the tool is run on a Linux system, it can gather information about your host computer's hardware (iGPU, audio, Ethernet, CPU).
-    *   **Targeted Modifications:** Optionally attempts to modify the `config.plist` (from the generated `OpenCore.qcow2`) to:
-        *   Add common `DeviceProperties` for Intel iGPUs.
-        *   Set appropriate audio `layout-id`s.
-        *   Ensure necessary Ethernet kexts are enabled.
-        *   Apply boot-args for NVIDIA GTX 970 based on target macOS version (e.g., `nv_disable=1` or `nvda_drv=1`).
-    *   A backup of the original `config.plist` is created before modifications.
-*   **Privilege Checking:** Warns if administrative/root privileges are needed for USB writing and are not detected.
-*   **UI Feedback:** Status bar messages and an indeterminate progress bar keep you informed during long operations.
+*   **Intuitive Graphical User Interface (PyQt6):**
+    *   Dark-themed by default (planned).
+    *   Rounded window design (platform permitting).
+    *   Clear, step-by-step workflow.
+    *   Enhanced progress indicators (filling bars, spinners, percentage updates - planned).
+*   **Automated macOS Installer Acquisition:**
+    *   Directly downloads official macOS installer assets from Apple's servers using `gibMacOS` principles.
+    *   Supports user selection of macOS versions (aiming for Sequoia, Sonoma, Ventura, Monterey, Big Sur, etc.).
+*   **Automated USB Installer Creation:**
+    *   **Cross-Platform USB Detection:** Identifies suitable USB drives on Linux, macOS, and Windows (using WMI for more accurate detection on Windows).
+    *   **Automated Partitioning:** Creates GUID Partition Table (GPT), an EFI System Partition (FAT32, ~300-550MB), and a main macOS Installer partition (HFS+).
+    *   **macOS Installer Layout:** Automatically extracts and lays out downloaded macOS assets (BaseSystem, installer packages, etc.) onto the USB to create a bootable macOS installer volume.
+*   **Intelligent OpenCore EFI Setup:**
+    *   Assembles a complete OpenCore EFI folder on the USB's EFI partition.
+    *   Includes essential drivers, kexts, and ACPI SSDTs for broad compatibility.
+    *   **Experimental `config.plist` Auto-Enhancement:**
+        *   If enabled by the user (and running the tool on a Linux host for hardware detection):
+            *   Gathers host hardware information (iGPU, dGPU, Audio, Ethernet, CPU).
+            *   Applies targeted modifications to the `config.plist` to improve compatibility (e.g., Intel iGPU `DeviceProperties`, audio `layout-id`s, enabling Ethernet kexts).
+            *   Specific handling for NVIDIA GPUs (e.g., GTX 970) based on target macOS version to allow booting (e.g., `nv_disable=1` for newer macOS if iGPU is primary, or boot-args for OCLP compatibility).
+        *   Creates a backup of the original `config.plist` before modification.
+*   **Privilege Handling:** Checks for and advises on necessary admin/root privileges for USB writing.
+*   **User Guidance:** Provides clear instructions and warnings throughout the process.
+
+## NVIDIA GPU Support Strategy (e.g., GTX 970 on newer macOS)
+
+*   **Installer Phase:** This tool will configure the OpenCore EFI on the USB installer to allow your system to boot with your NVIDIA card.
+    *   For macOS High Sierra (or older, if supported by download method): The `config.plist` can be set to enable NVIDIA Web Drivers (e.g., `nvda_drv=1`), assuming you would install them into macOS later.
+    *   For macOS Mojave and newer (Sonoma, Sequoia, etc.) where native NVIDIA drivers are absent:
+        *   If your system has an Intel iGPU, this tool will aim to configure the iGPU as primary and add `nv_disable=1` to `boot-args` for the NVIDIA card.
+        *   If the NVIDIA card is your only graphics output, `nv_disable=1` will not be set, allowing macOS to boot with basic display (no acceleration) from your NVIDIA card.
+        *   The `config.plist` will include boot arguments like `amfi_get_out_of_my_way=0x1` to prepare the system for potential use with OpenCore Legacy Patcher.
+*   **Post-macOS Installation (User Action for Acceleration):**
+    *   To achieve graphics acceleration for unsupported NVIDIA cards (like Maxwell GTX 970 or Pascal GTX 10xx) on macOS Mojave and newer, you will need to run the **OpenCore Legacy Patcher (OCLP)** application on your installed macOS system. OCLP applies necessary system patches to re-enable these drivers.
+    *   This tool prepares the USB installer to be compatible with an OCLP workflow but **does not perform the root volume patching itself.**
+*   **CUDA Support:** CUDA is dependent on NVIDIA's official driver stack, which is not available for newer macOS versions. Therefore, CUDA support is generally not achievable on macOS Mojave+ for NVIDIA cards.
 
 ## Current Status & Known Limitations
 
-*   **Windows Main OS USB Write:** This is the primary limitation, requiring a manual `dd` step. Future work aims to automate this if a reliable, redistributable CLI tool for raw partition writing is identified or developed.
-*   **`config.plist` Enhancement is Experimental:**
-    *   Hardware detection for this feature is **currently only implemented for Linux hosts.** On macOS/Windows, the plist modification step will run but won't apply hardware-specific changes.
-    *   The applied patches are based on common configurations and may not be optimal or work for all hardware. Always test thoroughly.
-*   **NVIDIA dGPU Support on Newer macOS:** Modern macOS (Mojave+) does not support NVIDIA Maxwell/Pascal/Turing/Ampere GPUs. The tool attempts to configure systems with these cards for basic display or to use an iGPU if available. Full acceleration is not possible on these macOS versions with these cards.
-*   **Universal Compatibility:** While the goal is broad PC compatibility, Hackintoshing can be hardware-specific. Success is not guaranteed on all possible PC configurations.
-*   **Dependency on External Projects:** Relies on Docker-OSX, OpenCore, and various community-sourced kexts and configurations.
+*   **Workflow Transition:** The project is currently transitioning from a Docker-OSX based method to a `gibMacOS`-based installer creation method. Not all platform-specific USB writers are fully refactored for this new approach yet.
+*   **Windows USB Writing:** Creating the HFS+ macOS installer partition and copying files to it from Windows is complex without native HFS+ write support. The EFI part is automated; the main partition might initially require manual steps or use of `dd` for BaseSystem, with file copying being a challenge.
+*   **`config.plist` Enhancement is Experimental:** Hardware detection for this feature is currently Linux-host only. The range of hardware automatically configured is limited to common setups.
+*   **Universal Compatibility:** Hackintoshing is inherently hardware-dependent. While this tool aims for broad compatibility, success on every PC configuration cannot be guaranteed.
+*   **Dependency on External Projects:** Relies on OpenCore and various community-sourced kexts and configurations. The `gibMacOS.py` script (or its underlying principles) is key for downloading assets.
 
 ## Prerequisites
 
-1.  **Docker:** Must be installed and running. Your user account needs permission to manage Docker.
-    *   [Install Docker Engine](https://docs.docker.com/engine/install/)
-2.  **Python:** Version 3.8 or newer.
-3.  **Python Libraries:** Install with `pip install PyQt6 psutil`.
+1.  **Python:** Version 3.8 or newer.
+2.  **Python Libraries:** `PyQt6`, `psutil`. Install via `pip install PyQt6 psutil`.
+3.  **Core Utilities (all platforms, must be in PATH):**
+    *   `git` (used by `gibMacOS.py` and potentially for cloning other resources).
+    *   `7z` or `7za` (7-Zip command-line tool for archive extraction).
 4.  **Platform-Specific CLI Tools for USB Writing:**
-
-    *   **Linux (including Debian 13 "Trixie"):**
-        *   `qemu-img` (from `qemu-utils`)
-        *   `parted`
-        *   `kpartx` (from `kpartx` or `multipath-tools`)
-        *   `rsync`
+    *   **Linux (e.g., Debian 13 "Trixie"):**
+        *   `sgdisk`, `parted`, `partprobe` (from `gdisk`, `parted`, `util-linux`)
         *   `mkfs.vfat` (from `dosfstools`)
         *   `mkfs.hfsplus` (from `hfsprogs`)
+        *   `rsync`
+        *   `dd` (core utility)
         *   `apfs-fuse`: Often requires manual compilation (e.g., from `sgan81/apfs-fuse` on GitHub). Typical build dependencies: `git g++ cmake libfuse3-dev libicu-dev zlib1g-dev libbz2-dev libssl-dev`. Ensure it's in your PATH.
-        *   `lsblk`, `partprobe` (from `util-linux`)
-        *   Install most via: `sudo apt update && sudo apt install qemu-utils parted kpartx rsync dosfstools hfsprogs util-linux`
+        *   Install most via: `sudo apt update && sudo apt install gdisk parted dosfstools hfsprogs rsync util-linux p7zip-full` (or `p7zip`)
     *   **macOS:**
-        *   `qemu-img` (e.g., via Homebrew: `brew install qemu`)
-        *   `diskutil`, `hdiutil`, `rsync` (standard macOS tools).
+        *   `diskutil`, `hdiutil`, `rsync`, `cp`, `bless` (standard system tools).
+        *   `7z` (e.g., via Homebrew: `brew install p7zip`).
     *   **Windows:**
-        *   `qemu-img` (install and add to PATH).
-        *   `diskpart`, `robocopy` (standard Windows tools).
-        *   `7z.exe` (7-Zip command-line tool, install and add to PATH) - for EFI file extraction.
-        *   A "dd for Windows" utility (e.g., from SUSE, chrysocome.net, or similar). Ensure it's in your PATH and you know how to use it for writing to a physical disk's partition or offset.
+        *   `diskpart`, `robocopy` (standard system tools).
+        *   `7z.exe` (install and add to PATH).
+        *   A "dd for Windows" utility (user must install and ensure it's in PATH).
 
-## How to Run
+## How to Run (Development Phase)
 
-1.  Ensure all prerequisites for your operating system are met.
-2.  Clone this repository or download the source files.
-3.  Install Python libraries: `pip install PyQt6 psutil`.
-4.  Execute `python main_app.py`.
-5.  **Important for USB Writing:**
+1.  Ensure all prerequisites for your OS are met.
+2.  Clone this repository.
+3.  **Crucial:** Clone `corpnewt/gibMacOS` into a `./scripts/gibMacOS/` subdirectory within this project, or ensure `gibMacOS.py` is in the project root or your system PATH and update `GIBMACOS_SCRIPT_PATH` in `main_app.py` if necessary.
+4.  Install Python libraries: `pip install PyQt6 psutil`.
+5.  Execute `python main_app.py`.
+6.  **For USB Writing Operations:**
     *   **Linux:** Run with `sudo python main_app.py`.
-    *   **macOS:** The script will use `sudo` internally for `rsync` to USB EFI if needed. You might be prompted for your password. Ensure the main application has Full Disk Access if issues arise with `hdiutil` or `diskutil` not having permissions (System Settings > Privacy & Security).
-    *   **Windows:** Run the application as Administrator.
+    *   **macOS:** Run normally. You may be prompted for your password by system commands like `diskutil` or `sudo rsync`. Ensure the app has Full Disk Access if needed.
+    *   **Windows:** Run as Administrator.
 
-## Step-by-Step Usage Guide
+## Step-by-Step Usage Guide (New Workflow)
 
-1.  **Step 1: Create and Install macOS VM**
+1.  **Step 1: Download macOS Installer Assets**
     *   Launch the "Skyscope macOS on PC USB Creator Tool".
-    *   Select your desired macOS version from the dropdown menu.
-    *   Click "Create VM and Start macOS Installation".
-    *   The tool will first pull the necessary Docker image (progress shown).
-    *   Then, a QEMU window will appear. This is your virtual machine. Follow the standard macOS installation procedure within this window (use Disk Utility to erase and format the virtual hard drive, then install macOS). This part is interactive.
-    *   Once macOS is fully installed in QEMU, shut down the macOS VM from within its own interface (Apple Menu > Shut Down). Closing the QEMU window will also terminate the process.
-2.  **Step 2: Extract VM Images**
-    *   After the Docker process from Step 1 finishes (QEMU window closes), the "Extract Images from Container" button will become active.
-    *   Click it. You'll be prompted to select a directory on your computer. The `mac_hdd_ng.img` (macOS system) and `OpenCore.qcow2` (EFI bootloader) files will be copied here. This may take some time.
-3.  **Step 3: Container Management (Optional)**
-    *   Once images are extracted, the Docker container used for installation is no longer strictly needed.
-    *   You can "Stop Container" (if it's listed as running by Docker for any reason) and then "Remove Container" to free up disk space.
-4.  **Step 4: Select Target USB Drive and Write**
-    *   Physically connect your USB flash drive.
-    *   Click "Refresh List".
+    *   Select your desired macOS version (e.g., Sequoia, Sonoma).
+    *   Choose a directory on your computer to save the downloaded assets.
+    *   Click "Download macOS Installer Assets". The tool will use `gibMacOS` to fetch the official installer files from Apple. This may take time. Progress will be shown.
+2.  **Step 2: Create Bootable USB Installer**
+    *   Once downloads are complete, connect your target USB flash drive (16GB+ recommended).
+    *   Click "Refresh List" to detect USB drives.
         *   **Linux/macOS:** Select your USB drive from the dropdown. Verify size and identifier carefully.
         *   **Windows:** USB drives detected via WMI will appear in the dropdown. Select the correct one. Ensure it's the `Disk X` number you intend.
-    *   **(Optional, Experimental):** Check the "Try to auto-enhance config.plist..." box if you are on a Linux host and wish to attempt automatic `config.plist` modification for your hardware. A backup of the original `config.plist` will be made.
-    *   **CRITICAL WARNING:** Double-check your selection. The next action will erase the selected USB drive.
-    *   Click "Write Images to USB Drive". Confirm the data erasure warning.
-    *   The process will now:
-        *   (If enhancement enabled) Attempt to modify the `config.plist` within the source OpenCore image.
-        *   Partition and format your USB drive.
-        *   Copy EFI files to the USB's EFI partition.
-        *   Copy macOS system files to the USB's main partition. (On Windows, this step requires manual `dd` operation as guided by the application).
-    *   This is a lengthy process. Monitor the progress in the output area.
-5.  **Boot!**
-    *   Once complete, safely eject the USB drive. You can now try booting your PC from it. Remember to configure your PC's BIOS/UEFI for booting from USB and for macOS compatibility (e.g., disable Secure Boot, enable AHCI, XHCI Handoff, etc., as per standard Hackintosh guides like Dortania).
+    *   **(Optional, Experimental):** Check the "Try to auto-enhance config.plist..." box if you are on a Linux host and wish the tool to attempt automatic `config.plist` modification for your hardware. A backup of the original `config.plist` will be made.
+    *   **CRITICAL WARNING:** Double-check your USB selection. The next action will erase the entire USB drive.
+    *   Click "Create macOS Installer USB". Confirm the data erasure warning.
+    *   The tool will:
+        *   Partition and format the USB drive.
+        *   Extract and write the macOS BaseSystem to make the USB bootable.
+        *   Copy necessary macOS installer packages and files to the USB.
+        *   Assemble an OpenCore EFI folder (potentially with your hardware-specific enhancements if enabled) onto the USB's EFI partition.
+    *   This is a lengthy process. Monitor progress in the output area and status bar.
+3.  **Boot Your PC from the USB!**
+    *   Safely eject the USB. Configure your PC's BIOS/UEFI for macOS booting (disable Secure Boot, enable AHCI, XHCI Handoff, etc. - see Dortania guides).
+    *   Boot from the USB and proceed with macOS installation onto your PC's internal drive.
+4.  **(For Unsupported NVIDIA on newer macOS): Post-Install Patching**
+    *   After installing macOS, if you have an unsupported NVIDIA card (like GTX 970 on Sonoma/Sequoia) and want graphics acceleration, you will need to run the **OpenCore Legacy Patcher (OCLP)** application from within your new macOS installation. This tool has prepared the EFI to be generally compatible with OCLP.
 
-## Future Vision & Enhancements
+## Future Vision & Advanced Capabilities
 
 *   **Fully Automated Windows USB Writing:** Replace the manual `dd` step with a reliable, integrated solution.
 *   **Advanced `config.plist` Customization:**
-    *   Expand hardware detection to macOS and Windows hosts.
+    *   Expand hardware detection for plist enhancement to macOS and Windows hosts.
     *   Provide more granular UI controls for plist enhancements (e.g., preview changes, select specific patches).
     *   Allow users to load/save `config.plist` modification profiles.
 *   **Enhanced UI/UX for Progress:** Implement determinate progress bars with percentage completion and more dynamic status updates.
@@ -133,7 +133,7 @@ This project is dedicated to creating a seamless experience, from selecting your
 
 ## Contributing
 
-Your contributions, feedback, and bug reports are highly welcome! Please fork the repository and submit pull requests, or open issues for discussion.
+We are passionate about making Hackintoshing more accessible! Contributions, feedback, and bug reports are highly encouraged.
 
 ## License
 

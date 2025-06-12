@@ -1,316 +1,312 @@
-# usb_writer_macos.py
+# usb_writer_macos.py (Refactoring for Installer Workflow)
 import subprocess
 import os
 import time
-import shutil # For checking command existence
-import plistlib # For parsing diskutil list -plist output
+import shutil
+import glob
+import plistlib
+import traceback
+
+try:
+    from plist_modifier import enhance_config_plist
+except ImportError:
+    enhance_config_plist = None
+    print("Warning: plist_modifier.py not found. Plist enhancement feature will be disabled.")
+
+OC_TEMPLATE_DIR = os.path.join(os.path.dirname(__file__), "EFI_template_installer")
 
 class USBWriterMacOS:
-    def __init__(self, device: str, opencore_qcow2_path: str, macos_qcow2_path: str,
-                 progress_callback=None, enhance_plist_enabled: bool = False, target_macos_version: str = ""): # New args
-        self.device = device # Should be like /dev/diskX
-        self.opencore_qcow2_path = opencore_qcow2_path
-        self.macos_qcow2_path = macos_qcow2_path
+    def __init__(self, device: str, macos_download_path: str,
+                 progress_callback=None, enhance_plist_enabled: bool = False,
+                 target_macos_version: str = ""):
+        self.device = device # e.g., /dev/diskX
+        self.macos_download_path = macos_download_path
         self.progress_callback = progress_callback
-        self.enhance_plist_enabled = enhance_plist_enabled # Store
-        self.target_macos_version = target_macos_version # Store
+        self.enhance_plist_enabled = enhance_plist_enabled
+        self.target_macos_version = target_macos_version
 
         pid = os.getpid()
-        self.opencore_raw_path = f"opencore_temp_{pid}.raw"
-        self.macos_raw_path = f"macos_main_temp_{pid}.raw"
-        self.temp_opencore_mount = f"/tmp/opencore_efi_temp_skyscope_{pid}"
+        self.temp_basesystem_hfs_path = f"/tmp/temp_basesystem_{pid}.hfs" # Use /tmp for macOS
+        self.temp_efi_build_dir = f"/tmp/temp_efi_build_{pid}"
+        self.temp_opencore_mount = f"/tmp/opencore_efi_temp_skyscope_{pid}" # For source BaseSystem.dmg's EFI (if needed)
         self.temp_usb_esp_mount = f"/tmp/usb_esp_temp_skyscope_{pid}"
-        self.temp_macos_source_mount = f"/tmp/macos_source_temp_skyscope_{pid}"
+        self.temp_macos_source_mount = f"/tmp/macos_source_temp_skyscope_{pid}" # Not used in this flow
         self.temp_usb_macos_target_mount = f"/tmp/usb_macos_target_temp_skyscope_{pid}"
+        self.temp_dmg_extract_dir = f"/tmp/temp_dmg_extract_{pid}" # For 7z extractions
 
-        self.temp_files_to_clean = [self.opencore_raw_path, self.macos_raw_path]
-        self.temp_mount_points_to_clean = [
-            self.temp_opencore_mount, self.temp_usb_esp_mount,
-            self.temp_macos_source_mount, self.temp_usb_macos_target_mount
+        self.temp_files_to_clean = [self.temp_basesystem_hfs_path]
+        self.temp_dirs_to_clean = [
+            self.temp_efi_build_dir, self.temp_opencore_mount,
+            self.temp_usb_esp_mount, self.temp_macos_source_mount,
+            self.temp_usb_macos_target_mount, self.temp_dmg_extract_dir
         ]
-        self.attached_raw_images_devices = [] # Store devices from hdiutil attach
+        self.attached_dmg_devices = [] # Store devices from hdiutil attach
 
-    def _report_progress(self, message: str):
-        print(message) # For standalone testing
-        if self.progress_callback:
-            self.progress_callback(message)
+    def _report_progress(self, message: str): # ... (same)
+        if self.progress_callback: self.progress_callback(message)
+        else: print(message)
 
-    def _run_command(self, command: list[str], check=True, capture_output=False, timeout=None):
+    def _run_command(self, command: list[str], check=True, capture_output=False, timeout=None, shell=False): # ... (same)
         self._report_progress(f"Executing: {' '.join(command)}")
         try:
-            process = subprocess.run(
-                command, check=check, capture_output=capture_output, text=True, timeout=timeout
-            )
+            process = subprocess.run(command, check=check, capture_output=capture_output, text=True, timeout=timeout, shell=shell)
             if capture_output:
-                if process.stdout and process.stdout.strip():
-                    self._report_progress(f"STDOUT: {process.stdout.strip()}")
-                if process.stderr and process.stderr.strip():
-                    self._report_progress(f"STDERR: {process.stderr.strip()}")
+                if process.stdout and process.stdout.strip(): self._report_progress(f"STDOUT: {process.stdout.strip()}")
+                if process.stderr and process.stderr.strip(): self._report_progress(f"STDERR: {process.stderr.strip()}")
             return process
-        except subprocess.TimeoutExpired:
-            self._report_progress(f"Command {' '.join(command)} timed out after {timeout} seconds.")
-            raise
-        except subprocess.CalledProcessError as e:
-            self._report_progress(f"Error executing {' '.join(command)} (code {e.returncode}): {e.stderr or e.stdout or str(e)}")
-            raise
-        except FileNotFoundError:
-            self._report_progress(f"Error: Command '{command[0]}' not found. Is it installed and in PATH?")
-            raise
+        except subprocess.TimeoutExpired: self._report_progress(f"Command timed out after {timeout} seconds."); raise
+        except subprocess.CalledProcessError as e: self._report_progress(f"Error executing (code {e.returncode}): {e.stderr or e.stdout or str(e)}"); raise
+        except FileNotFoundError: self._report_progress(f"Error: Command '{command[0]}' not found."); raise
 
-    def _cleanup_temp_files(self):
-        self._report_progress("Cleaning up temporary image files...")
+    def _cleanup_temp_files_and_dirs(self): # Updated for macOS
+        self._report_progress("Cleaning up temporary files and directories...")
         for f_path in self.temp_files_to_clean:
             if os.path.exists(f_path):
-                try:
-                    os.remove(f_path)
-                    self._report_progress(f"Removed {f_path}")
-                except OSError as e:
-                    self._report_progress(f"Error removing {f_path}: {e}")
+                try: os.remove(f_path) # No sudo needed for /tmp files usually
+                except OSError as e: self._report_progress(f"Error removing temp file {f_path}: {e}")
 
-    def _unmount_path(self, mount_path_or_device, is_device=False, force=False):
-        target = mount_path_or_device
-        cmd_base = ["diskutil"]
-        action = "unmountDisk" if is_device else "unmount"
+        # Detach DMGs first
+        for dev_path in list(self.attached_dmg_devices): # Iterate copy
+            self._detach_dmg(dev_path)
+        self.attached_dmg_devices = []
 
-        if force:
-            cmd = cmd_base + [action, "force", target]
-        else:
-            cmd = cmd_base + [action, target]
+        for d_path in self.temp_dirs_to_clean:
+            if os.path.ismount(d_path):
+                try: self._run_command(["diskutil", "unmount", "force", d_path], check=False, timeout=30)
+                except Exception: pass # Ignore if already unmounted or error
+            if os.path.exists(d_path):
+                try: shutil.rmtree(d_path, ignore_errors=True)
+                except OSError as e: self._report_progress(f"Error removing temp dir {d_path}: {e}")
 
-        is_target_valid_for_unmount = (os.path.ismount(mount_path_or_device) and not is_device) or \
-                                     (is_device and os.path.exists(target))
+    def _detach_dmg(self, device_path_or_mount_point):
+        if not device_path_or_mount_point: return
+        self._report_progress(f"Attempting to detach DMG associated with {device_path_or_mount_point}...")
+        try:
+            # hdiutil detach can take a device path or sometimes a mount path if it's unique enough
+            # Using -force to ensure it detaches even if volumes are "busy" (after unmount attempts)
+            self._run_command(["hdiutil", "detach", device_path_or_mount_point, "-force"], check=False, timeout=30)
+            if device_path_or_mount_point in self.attached_dmg_devices: # Check if it was in our list
+                self.attached_dmg_devices.remove(device_path_or_mount_point)
+            # Also try to remove if it's a /dev/diskX path that got added
+            if device_path_or_mount_point.startswith("/dev/") and device_path_or_mount_point in self.attached_dmg_devices:
+                self.attached_dmg_devices.remove(device_path_or_mount_point)
 
-        if is_target_valid_for_unmount:
-            self._report_progress(f"Attempting to unmount {target} (Action: {action}, Force: {force})...")
-            self._run_command(cmd, check=False, timeout=30)
-
-    def _detach_raw_image_device(self, device_path):
-        if device_path and os.path.exists(device_path):
-            self._report_progress(f"Detaching raw image device {device_path}...")
-            try:
-                info_check = subprocess.run(["diskutil", "info", device_path], capture_output=True, text=True, check=False)
-                if info_check.returncode == 0:
-                    self._run_command(["hdiutil", "detach", device_path, "-force"], check=False, timeout=30)
-                else:
-                    self._report_progress(f"Device {device_path} appears invalid or already detached.")
-            except Exception as e:
-                 self._report_progress(f"Exception while checking/detaching {device_path}: {e}")
-
-    def _cleanup_all_mounts_and_mappings(self):
-        self._report_progress("Cleaning up all temporary mounts and attached raw images...")
-        for mp in reversed(self.temp_mount_points_to_clean):
-            self._unmount_path(mp, force=True)
-            if os.path.exists(mp):
-                try: os.rmdir(mp)
-                except OSError as e: self._report_progress(f"Could not rmdir {mp}: {e}")
-
-        devices_to_detach = list(self.attached_raw_images_devices)
-        for dev_path in devices_to_detach:
-            self._detach_raw_image_device(dev_path)
-        self.attached_raw_images_devices = []
+        except Exception as e:
+            self._report_progress(f"Could not detach {device_path_or_mount_point}: {e}")
 
 
     def check_dependencies(self):
-        self._report_progress("Checking dependencies (qemu-img, diskutil, hdiutil, rsync)...")
-        dependencies = ["qemu-img", "diskutil", "hdiutil", "rsync"]
-        missing_deps = []
-        for dep in dependencies:
-            if not shutil.which(dep):
-                missing_deps.append(dep)
-
+        self._report_progress("Checking dependencies (diskutil, hdiutil, 7z, rsync, dd)...")
+        dependencies = ["diskutil", "hdiutil", "7z", "rsync", "dd"]
+        missing_deps = [dep for dep in dependencies if not shutil.which(dep)]
         if missing_deps:
-            msg = f"Missing dependencies: {', '.join(missing_deps)}. `qemu-img` might need to be installed (e.g., via Homebrew: `brew install qemu`). `diskutil`, `hdiutil`, `rsync` are usually standard on macOS."
-            self._report_progress(msg)
-            raise RuntimeError(msg)
-
-        self._report_progress("All critical dependencies found.")
+            msg = f"Missing dependencies: {', '.join(missing_deps)}. `7z` (p7zip) might need to be installed (e.g., via Homebrew: `brew install p7zip`)."
+            self._report_progress(msg); raise RuntimeError(msg)
+        self._report_progress("All critical dependencies for macOS USB installer creation found.")
         return True
 
-    def _get_partition_device_id(self, parent_disk_id_str: str, partition_label_or_type: str) -> str | None:
-        """Finds partition device ID by Volume Name or Content Hint."""
-        target_disk_id = parent_disk_id_str.replace("/dev/", "")
-        self._report_progress(f"Searching for partition '{partition_label_or_type}' on disk '{target_disk_id}'")
+    def _get_gibmacos_product_folder(self) -> str | None:
+        base_path = os.path.join(self.macos_download_path, "macOS Downloads", "publicrelease")
+        if not os.path.isdir(base_path): base_path = self.macos_download_path
+        if os.path.isdir(base_path):
+            for item in os.listdir(base_path):
+                item_path = os.path.join(base_path, item)
+                if os.path.isdir(item_path) and (self.target_macos_version.lower() in item.lower() or MACOS_VERSIONS.get(self.target_macos_version, "").lower() in item.lower()): # MACOS_VERSIONS needs to be accessible or passed if not global
+                    self._report_progress(f"Identified gibMacOS product folder: {item_path}"); return item_path
+        self._report_progress(f"Could not identify a specific product folder for '{self.target_macos_version}' in {base_path}. Using base download path."); return self.macos_download_path
+
+    def _find_gibmacos_asset(self, asset_patterns: list[str] | str, product_folder_path: str | None = None) -> str | None:
+        if isinstance(asset_patterns, str): asset_patterns = [asset_patterns]
+        search_base = product_folder_path or self.macos_download_path
+        self._report_progress(f"Searching for {asset_patterns} in {search_base} and subdirectories...")
+        for pattern in asset_patterns:
+            # Using iglob for efficiency if many files, but glob is fine for fewer expected matches
+            found_files = glob.glob(os.path.join(search_base, "**", pattern), recursive=True)
+            if found_files:
+                found_files.sort(key=lambda x: (x.count(os.sep), len(x)))
+                self._report_progress(f"Found {pattern}: {found_files[0]}")
+                return found_files[0]
+        self._report_progress(f"Warning: Asset pattern(s) {asset_patterns} not found in {search_base}.")
+        return None
+
+    def _extract_hfs_from_dmg_or_pkg(self, dmg_or_pkg_path: str, output_hfs_path: str) -> bool:
+        os.makedirs(self.temp_dmg_extract_dir, exist_ok=True); current_target = dmg_or_pkg_path
         try:
-            result = self._run_command(["diskutil", "list", "-plist", target_disk_id], capture_output=True)
-            if not result.stdout:
-                self._report_progress(f"No stdout from diskutil list for {target_disk_id}")
-                return None
+            if dmg_or_pkg_path.endswith(".pkg"):
+                self._report_progress(f"Extracting DMG from PKG {current_target}..."); self._run_command(["7z", "e", "-txar", current_target, "*.dmg", f"-o{self.temp_dmg_extract_dir}"], check=True)
+                dmgs_in_pkg = glob.glob(os.path.join(self.temp_dmg_extract_dir, "*.dmg"));
+                if not dmgs_in_pkg: raise RuntimeError("No DMG found in PKG.")
+                current_target = max(dmgs_in_pkg, key=os.path.getsize, default=None) or dmgs_in_pkg[0]
+                if not current_target: raise RuntimeError("Could not determine primary DMG in PKG.")
+                self._report_progress(f"Using DMG from PKG: {current_target}")
+            if not current_target or not current_target.endswith(".dmg"): raise RuntimeError(f"Not a valid DMG: {current_target}")
 
-            plist_data = plistlib.loads(result.stdout.encode('utf-8'))
+            basesystem_dmg_to_process = current_target
+            # If current_target is InstallESD.dmg or SharedSupport.dmg, it contains BaseSystem.dmg
+            if "basesystem.dmg" not in os.path.basename(current_target).lower():
+                self._report_progress(f"Extracting BaseSystem.dmg from {current_target}...")
+                self._run_command(["7z", "e", current_target, "*/BaseSystem.dmg", f"-o{self.temp_dmg_extract_dir}"], check=True)
+                found_bs_dmg = glob.glob(os.path.join(self.temp_dmg_extract_dir, "*BaseSystem.dmg"), recursive=True)
+                if not found_bs_dmg: raise RuntimeError(f"Could not extract BaseSystem.dmg from {current_target}")
+                basesystem_dmg_to_process = found_bs_dmg[0]
 
-            all_disks_and_partitions = plist_data.get("AllDisksAndPartitions", [])
-            if not isinstance(all_disks_and_partitions, list):
-                if plist_data.get("DeviceIdentifier") == target_disk_id:
-                    all_disks_and_partitions = [plist_data]
-                else:
-                    all_disks_and_partitions = []
+            self._report_progress(f"Extracting HFS+ partition image from {basesystem_dmg_to_process}...")
+            self._run_command(["7z", "e", "-tdmg", basesystem_dmg_to_process, "*.hfs", f"-o{self.temp_dmg_extract_dir}"], check=True)
+            hfs_files = glob.glob(os.path.join(self.temp_dmg_extract_dir, "*.hfs"));
+            if not hfs_files: raise RuntimeError(f"No .hfs file found from {basesystem_dmg_to_process}")
+            final_hfs_file = max(hfs_files, key=os.path.getsize); self._report_progress(f"Found HFS+ image: {final_hfs_file}. Moving to {output_hfs_path}"); shutil.move(final_hfs_file, output_hfs_path); return True
+        except Exception as e: self._report_progress(f"Error during HFS extraction: {e}\n{traceback.format_exc()}"); return False
+        finally:
+            if os.path.exists(self.temp_dmg_extract_dir): shutil.rmtree(self.temp_dmg_extract_dir, ignore_errors=True)
 
-            for disk_info_entry in all_disks_and_partitions:
-                current_disk_id_in_plist = disk_info_entry.get("DeviceIdentifier")
-                if current_disk_id_in_plist == target_disk_id:
-                    for part_info in disk_info_entry.get("Partitions", []):
-                        vol_name = part_info.get("VolumeName")
-                        content_hint = part_info.get("Content")
-                        device_id = part_info.get("DeviceIdentifier")
 
-                        if device_id:
-                            if vol_name and vol_name.strip().lower() == partition_label_or_type.strip().lower():
-                                self._report_progress(f"Found partition by VolumeName: {vol_name} -> /dev/{device_id}")
-                                return f"/dev/{device_id}"
-                            if content_hint and content_hint.strip().lower() == partition_label_or_type.strip().lower():
-                                self._report_progress(f"Found partition by Content type: {content_hint} -> /dev/{device_id}")
-                                return f"/dev/{device_id}"
+    def _create_minimal_efi_template(self, efi_dir_path): # Same as linux version
+        self._report_progress(f"Minimal EFI template directory not found or empty. Creating basic structure at {efi_dir_path}")
+        oc_dir = os.path.join(efi_dir_path, "EFI", "OC"); os.makedirs(os.path.join(efi_dir_path, "EFI", "BOOT"), exist_ok=True); os.makedirs(oc_dir, exist_ok=True)
+        for sub_dir in ["Drivers", "Kexts", "ACPI", "Tools", "Resources"]: os.makedirs(os.path.join(oc_dir, sub_dir), exist_ok=True)
+        with open(os.path.join(efi_dir_path, "EFI", "BOOT", "BOOTx64.efi"), "w") as f: f.write("")
+        with open(os.path.join(oc_dir, "OpenCore.efi"), "w") as f: f.write("")
+        basic_config_content = {"#Comment": "Basic config template by Skyscope", "Misc": {"Security": {"ScanPolicy": 0, "SecureBootModel": "Disabled"}}, "PlatformInfo": {"Generic":{"MLB":"CHANGE_ME_MLB", "SystemSerialNumber":"CHANGE_ME_SERIAL", "SystemUUID":"CHANGE_ME_UUID", "ROM": b"\x00\x00\x00\x00\x00\x00"}}}
+        try:
+            with open(os.path.join(oc_dir, "config.plist"), 'wb') as f: plistlib.dump(basic_config_content, f, fmt=plistlib.PlistFormat.XML)
+            self._report_progress("Created basic placeholder config.plist.")
+        except Exception as e: self._report_progress(f"Could not create basic config.plist: {e}")
 
-            self._report_progress(f"Partition '{partition_label_or_type}' not found on disk '{target_disk_id}'.")
-            return None
-        except Exception as e:
-            self._report_progress(f"Error parsing 'diskutil list -plist {target_disk_id}': {e}")
-            return None
 
     def format_and_write(self) -> bool:
         try:
             self.check_dependencies()
-            self._cleanup_all_mounts_and_mappings()
-
-            for mp in self.temp_mount_points_to_clean:
-                os.makedirs(mp, exist_ok=True)
+            self._cleanup_temp_files_and_dirs()
+            for mp_dir in self.temp_dirs_to_clean: # Use full list from constructor
+                 os.makedirs(mp_dir, exist_ok=True)
 
             self._report_progress(f"WARNING: ALL DATA ON {self.device} WILL BE ERASED!")
-            self._report_progress(f"Unmounting disk {self.device} (force)...")
-            self._unmount_path(self.device, is_device=True, force=True)
-            time.sleep(2)
+            self._run_command(["diskutil", "unmountDisk", "force", self.device], check=False, timeout=60); time.sleep(2)
 
-            self._report_progress(f"Partitioning {self.device} with GPT scheme...")
-            self._run_command([
-                "diskutil", "partitionDisk", self.device, "GPT",
-                "MS-DOS FAT32", "EFI", "551MiB",
-                "JHFS+", "macOS_USB", "0b"
-            ], timeout=180)
-            time.sleep(3)
+            installer_vol_name = f"Install macOS {self.target_macos_version}"
+            self._report_progress(f"Partitioning {self.device} as GPT: EFI (FAT32, 551MB), '{installer_vol_name}' (HFS+)...")
+            self._run_command(["diskutil", "partitionDisk", self.device, "GPT", "FAT32", "EFI", "551MiB", "JHFS+", installer_vol_name, "0b"], timeout=180); time.sleep(3)
 
-            esp_partition_dev = self._get_partition_device_id(self.device, "EFI")
-            macos_partition_dev = self._get_partition_device_id(self.device, "macOS_USB")
+            # Get actual partition identifiers
+            disk_info_plist = self._run_command(["diskutil", "list", "-plist", self.device], capture_output=True).stdout
+            if not disk_info_plist: raise RuntimeError("Failed to get disk info after partitioning.")
+            disk_info = plistlib.loads(disk_info_plist.encode('utf-8'))
 
-            if not (esp_partition_dev and os.path.exists(esp_partition_dev)):
-                esp_partition_dev = f"{self.device}s1"
-            if not (macos_partition_dev and os.path.exists(macos_partition_dev)):
-                macos_partition_dev = f"{self.device}s2"
-
-            if not (os.path.exists(esp_partition_dev) and os.path.exists(macos_partition_dev)):
-                 raise RuntimeError(f"Could not identify partitions on {self.device}. ESP: {esp_partition_dev}, macOS: {macos_partition_dev}")
-
+            esp_partition_dev = None; macos_partition_dev = None
+            for disk_entry in disk_info.get("AllDisksAndPartitions", []):
+                if disk_entry.get("DeviceIdentifier") == self.device.replace("/dev/", ""):
+                    for part in disk_entry.get("Partitions", []):
+                        if part.get("VolumeName") == "EFI": esp_partition_dev = f"/dev/{part.get('DeviceIdentifier')}"
+                        elif part.get("VolumeName") == installer_vol_name: macos_partition_dev = f"/dev/{part.get('DeviceIdentifier')}"
+            if not (esp_partition_dev and macos_partition_dev): raise RuntimeError(f"Could not identify partitions on {self.device} (EFI: {esp_partition_dev}, macOS: {macos_partition_dev}).")
             self._report_progress(f"Identified ESP: {esp_partition_dev}, macOS Partition: {macos_partition_dev}")
 
-            # --- Write EFI content ---
-            self._report_progress(f"Converting OpenCore QCOW2 ({self.opencore_qcow2_path}) to RAW ({self.opencore_raw_path})...")
-            self._run_command(["qemu-img", "convert", "-O", "raw", self.opencore_qcow2_path, self.opencore_raw_path])
+            # --- Prepare macOS Installer Content ---
+            product_folder = self._get_gibmacos_product_folder()
+            source_for_hfs_extraction = self._find_gibmacos_asset(["BaseSystem.dmg", "InstallESD.dmg", "SharedSupport.dmg"], product_folder, "BaseSystem.dmg (or source like InstallESD.dmg/SharedSupport.dmg)")
+            if not source_for_hfs_extraction: raise RuntimeError("Essential macOS DMG for BaseSystem extraction not found in download path.")
 
-            self._report_progress(f"Attaching RAW OpenCore image ({self.opencore_raw_path})...")
-            attach_cmd_efi = ["hdiutil", "attach", "-nomount", "-imagekey", "diskimage-class=CRawDiskImage", self.opencore_raw_path]
-            efi_attach_output = self._run_command(attach_cmd_efi, capture_output=True).stdout.strip()
-            raw_efi_disk_id = efi_attach_output.splitlines()[-1].strip().split()[0]
-            if not raw_efi_disk_id.startswith("/dev/disk"):
-                raise RuntimeError(f"Failed to attach raw EFI image: {efi_attach_output}")
-            self.attached_raw_images_devices.append(raw_efi_disk_id)
-            self._report_progress(f"Attached raw OpenCore image as {raw_efi_disk_id}")
-            time.sleep(2)
+            if not self._extract_hfs_from_dmg_or_pkg(source_for_hfs_extraction, self.temp_basesystem_hfs_path):
+                raise RuntimeError("Failed to extract HFS+ image from BaseSystem assets.")
 
-            source_efi_partition_dev = self._get_partition_device_id(raw_efi_disk_id, "EFI") or f"{raw_efi_disk_id}s1"
+            raw_macos_partition_dev = macos_partition_dev.replace("/dev/disk", "/dev/rdisk") # Use raw device for dd
+            self._report_progress(f"Writing BaseSystem HFS+ image to {raw_macos_partition_dev} using dd...")
+            self._run_command(["sudo", "dd", f"if={self.temp_basesystem_hfs_path}", f"of={raw_macos_partition_dev}", "bs=1m"], timeout=1800)
 
-            self._report_progress(f"Mounting source EFI partition ({source_efi_partition_dev}) to {self.temp_opencore_mount}...")
-            self._run_command(["diskutil", "mount", "readOnly", "-mountPoint", self.temp_opencore_mount, source_efi_partition_dev], timeout=30)
+            self._report_progress(f"Mounting macOS Install partition ({macos_partition_dev}) on USB...")
+            self._run_command(["diskutil", "mount", "-mountPoint", self.temp_usb_macos_target_mount, macos_partition_dev])
 
-            self._report_progress(f"Mounting target USB ESP ({esp_partition_dev}) to {self.temp_usb_esp_mount}...")
-            self._run_command(["diskutil", "mount", "-mountPoint", self.temp_usb_esp_mount, esp_partition_dev], timeout=30)
+            core_services_path_usb = os.path.join(self.temp_usb_macos_target_mount, "System", "Library", "CoreServices")
+            self._run_command(["sudo", "mkdir", "-p", core_services_path_usb])
 
-            source_efi_content_path = os.path.join(self.temp_opencore_mount, "EFI")
-            if not os.path.isdir(source_efi_content_path): source_efi_content_path = self.temp_opencore_mount
+            original_bs_dmg = self._find_gibmacos_asset("BaseSystem.dmg", product_folder)
+            if original_bs_dmg:
+                self._report_progress(f"Copying {original_bs_dmg} to {core_services_path_usb}/BaseSystem.dmg")
+                self._run_command(["sudo", "cp", original_bs_dmg, os.path.join(core_services_path_usb, "BaseSystem.dmg")])
+                original_bs_chunklist = original_bs_dmg.replace(".dmg", ".chunklist")
+                if os.path.exists(original_bs_chunklist):
+                    self._report_progress(f"Copying {original_bs_chunklist} to {core_services_path_usb}/BaseSystem.chunklist")
+                    self._run_command(["sudo", "cp", original_bs_chunklist, os.path.join(core_services_path_usb, "BaseSystem.chunklist")])
 
-            target_efi_dir_on_usb = os.path.join(self.temp_usb_esp_mount, "EFI")
-            self._report_progress(f"Copying EFI files from {source_efi_content_path} to {target_efi_dir_on_usb}...")
-            self._run_command(["sudo", "rsync", "-avh", "--delete", f"{source_efi_content_path}/", f"{target_efi_dir_on_usb}/"])
+            install_info_src = self._find_gibmacos_asset("InstallInfo.plist", product_folder)
+            if install_info_src:
+                self._report_progress(f"Copying InstallInfo.plist to {self.temp_usb_macos_target_mount}/InstallInfo.plist")
+                self._run_command(["sudo", "cp", install_info_src, os.path.join(self.temp_usb_macos_target_mount, "InstallInfo.plist")])
 
-            self._unmount_path(self.temp_opencore_mount, force=True)
-            self._unmount_path(self.temp_usb_esp_mount, force=True)
-            self._detach_raw_image_device(raw_efi_disk_id); raw_efi_disk_id = None
+            packages_dir_usb = os.path.join(self.temp_usb_macos_target_mount, "System", "Installation", "Packages")
+            self._run_command(["sudo", "mkdir", "-p", packages_dir_usb])
 
-            # --- Write macOS main image (File-level copy) ---
-            self._report_progress(f"Converting macOS QCOW2 ({self.macos_qcow2_path}) to RAW ({self.macos_raw_path})...")
-            self._report_progress("This may take a very long time...")
-            self._run_command(["qemu-img", "convert", "-O", "raw", self.macos_qcow2_path, self.macos_raw_path])
+            # Copy main installer package(s) or app contents. This is simplified.
+            # A real createinstallmedia copies the .app then uses it. We are building manually.
+            # We need to find the main payload: InstallAssistant.pkg or InstallESD.dmg/SharedSupport.dmg content.
+            main_payload_src = self._find_gibmacos_asset(["InstallAssistant.pkg", "InstallESD.dmg", "SharedSupport.dmg"], product_folder, "Main Installer Payload (PKG/DMG)")
+            if main_payload_src:
+                self._report_progress(f"Copying main payload {os.path.basename(main_payload_src)} to {packages_dir_usb}/")
+                self._run_command(["sudo", "cp", main_payload_src, os.path.join(packages_dir_usb, os.path.basename(main_payload_src))])
+                # If it's SharedSupport.dmg, its contents might be what's needed in Packages or elsewhere.
+                # If InstallAssistant.pkg, it might need to be placed at root or specific app structure.
+            else: self._report_progress("Warning: Main installer payload not found. Installer may be incomplete.")
 
-            self._report_progress(f"Attaching RAW macOS image ({self.macos_raw_path})...")
-            attach_cmd_macos = ["hdiutil", "attach", "-nomount", "-imagekey", "diskimage-class=CRawDiskImage", self.macos_raw_path]
-            macos_attach_output = self._run_command(attach_cmd_macos, capture_output=True).stdout.strip()
-            raw_macos_disk_id = macos_attach_output.splitlines()[-1].strip().split()[0]
-            if not raw_macos_disk_id.startswith("/dev/disk"):
-                raise RuntimeError(f"Failed to attach raw macOS image: {macos_attach_output}")
-            self.attached_raw_images_devices.append(raw_macos_disk_id)
-            self._report_progress(f"Attached raw macOS image as {raw_macos_disk_id}")
-            time.sleep(2)
+            self._run_command(["sudo", "touch", os.path.join(core_services_path_usb, "boot.efi")])
+            self._report_progress("macOS installer assets copied.")
 
-            source_macos_part_dev = self._get_partition_device_id(raw_macos_disk_id, "Apple_APFS_Container") or \
-                                    self._get_partition_device_id(raw_macos_disk_id, "Apple_APFS") or \
-                                    self._get_partition_device_id(raw_macos_disk_id, "Apple_HFS") or \
-                                    f"{raw_macos_disk_id}s2"
-            if not (source_macos_part_dev and os.path.exists(source_macos_part_dev)):
-                 raise RuntimeError(f"Could not find source macOS partition on {raw_macos_disk_id}")
+            # --- OpenCore EFI Setup ---
+            self._report_progress("Setting up OpenCore EFI on ESP...")
+            if not os.path.isdir(OC_TEMPLATE_DIR) or not os.listdir(OC_TEMPLATE_DIR): self._create_minimal_efi_template(self.temp_efi_build_dir)
+            else: self._report_progress(f"Copying OpenCore EFI template from {OC_TEMPLATE_DIR} to {self.temp_efi_build_dir}"); self._run_command(["cp", "-a", f"{OC_TEMPLATE_DIR}/.", self.temp_efi_build_dir])
 
-            self._report_progress(f"Mounting source macOS partition ({source_macos_part_dev}) to {self.temp_macos_source_mount}...")
-            self._run_command(["diskutil", "mount", "readOnly", "-mountPoint", self.temp_macos_source_mount, source_macos_part_dev], timeout=60)
+            temp_config_plist_path = os.path.join(self.temp_efi_build_dir, "EFI", "OC", "config.plist")
+            if not os.path.exists(temp_config_plist_path) and os.path.exists(os.path.join(self.temp_efi_build_dir, "EFI", "OC", "config-template.plist")):
+                shutil.copy2(os.path.join(self.temp_efi_build_dir, "EFI", "OC", "config-template.plist"), temp_config_plist_path)
 
-            self._report_progress(f"Mounting target USB macOS partition ({macos_partition_dev}) to {self.temp_usb_macos_target_mount}...")
-            self._run_command(["diskutil", "mount", "-mountPoint", self.temp_usb_macos_target_mount, macos_partition_dev], timeout=30)
+            if self.enhance_plist_enabled and enhance_config_plist and os.path.exists(temp_config_plist_path):
+                self._report_progress("Attempting to enhance config.plist (note: hardware detection is Linux-only)...")
+                if enhance_config_plist(temp_config_plist_path, self.target_macos_version, self._report_progress): self._report_progress("config.plist enhancement processing complete.")
+                else: self._report_progress("config.plist enhancement call failed or had issues.")
 
-            self._report_progress(f"Copying macOS system files from {self.temp_macos_source_mount} to {self.temp_usb_macos_target_mount} (sudo rsync)...")
-            self._report_progress("This will also take a very long time.")
-            self._run_command([
-                "sudo", "rsync", "-avh", "--delete",
-                "--exclude=.Spotlight-V100", "--exclude=.fseventsd", "--exclude=/.Trashes", "--exclude=/System/Volumes/VM", "--exclude=/private/var/vm",
-                f"{self.temp_macos_source_mount}/", f"{self.temp_usb_macos_target_mount}/"
-            ])
+            self._run_command(["diskutil", "mount", "-mountPoint", self.temp_usb_esp_mount, esp_partition_dev])
+            self._report_progress(f"Copying final EFI folder to USB ESP ({self.temp_usb_esp_mount})...")
+            self._run_command(["sudo", "rsync", "-avh", "--delete", f"{self.temp_efi_build_dir}/EFI/", f"{self.temp_usb_esp_mount}/EFI/"])
 
-            self._report_progress("USB writing process completed successfully.")
+            self._report_progress("USB Installer creation process completed successfully.")
             return True
-
         except Exception as e:
-            self._report_progress(f"An error occurred during USB writing on macOS: {e}")
-            import traceback
-            self._report_progress(traceback.format_exc())
+            self._report_progress(f"An error occurred during USB writing on macOS: {e}\n{traceback.format_exc()}")
             return False
         finally:
-            self._cleanup_all_mounts_and_mappings()
-            self._cleanup_temp_files()
+            self._cleanup_temp_files_and_dirs()
 
 if __name__ == '__main__':
-    if platform.system() != "Darwin": print("This script is intended for macOS."); exit(1)
-    print("USB Writer macOS Standalone Test - File Copy Method")
+    import traceback
+    if platform.system() != "Darwin": print("This script is intended for macOS for standalone testing."); exit(1)
+    print("USB Writer macOS Standalone Test - Installer Method")
+    mock_download_dir = f"/tmp/temp_macos_download_skyscope_{os.getpid()}"; os.makedirs(mock_download_dir, exist_ok=True)
+    # Simulate a more realistic gibMacOS product folder structure for testing _get_gibmacos_product_folder
+    mock_product_name = f"012-34567 - macOS {sys.argv[1] if len(sys.argv) > 1 else 'Sonoma'} 14.1.2"
+    mock_product_folder_path = os.path.join(mock_download_dir, "macOS Downloads", "publicrelease", mock_product_name)
+    os.makedirs(os.path.join(mock_product_folder_path, "SharedSupport"), exist_ok=True) # Create SharedSupport directory
 
-    mock_opencore_path = "mock_opencore_macos.qcow2"
-    mock_macos_path = "mock_macos_macos.qcow2"
-    if not os.path.exists(mock_opencore_path): subprocess.run(["qemu-img", "create", "-f", "qcow2", mock_opencore_path, "384M"])
-    if not os.path.exists(mock_macos_path): subprocess.run(["qemu-img", "create", "-f", "qcow2", mock_macos_path, "1G"])
+    # Create dummy BaseSystem.dmg inside the product folder's SharedSupport
+    dummy_bs_dmg_path = os.path.join(mock_product_folder_path, "SharedSupport", "BaseSystem.dmg")
+    if not os.path.exists(dummy_bs_dmg_path):
+        with open(dummy_bs_dmg_path, "wb") as f: f.write(os.urandom(10*1024*1024)) # 10MB dummy DMG
 
-    print("\nAvailable disks (use 'diskutil list external physical' in Terminal to identify your USB):")
-    subprocess.run(["diskutil", "list", "external", "physical"], check=False)
-    test_device = input("\nEnter target disk identifier (e.g., /dev/diskX - NOT /dev/diskXsY). THIS DISK WILL BE WIPED: ")
+    dummy_installinfo_path = os.path.join(mock_product_folder_path, "InstallInfo.plist")
+    if not os.path.exists(dummy_installinfo_path):
+        with open(dummy_installinfo_path, "wb") as f: plistlib.dump({"DisplayName":f"macOS {sys.argv[1] if len(sys.argv) > 1 else 'Sonoma'}"},f)
 
-    if not test_device or not test_device.startswith("/dev/disk"):
-        print("Invalid disk identifier. Exiting.")
-        if os.path.exists(mock_opencore_path): os.remove(mock_opencore_path)
-        if os.path.exists(mock_macos_path): os.remove(mock_macos_path)
-        exit(1)
+    if not os.path.exists(OC_TEMPLATE_DIR): os.makedirs(OC_TEMPLATE_DIR)
+    if not os.path.exists(os.path.join(OC_TEMPLATE_DIR, "EFI", "OC")): os.makedirs(os.path.join(OC_TEMPLATE_DIR, "EFI", "OC"))
+    dummy_config_template_path = os.path.join(OC_TEMPLATE_DIR, "EFI", "OC", "config.plist")
+    if not os.path.exists(dummy_config_template_path):
+         with open(dummy_config_template_path, "wb") as f: plistlib.dump({"TestTemplate":True}, f)
 
-    confirm = input(f"Are you sure you want to wipe {test_device} and write mock images? (yes/NO): ")
-    success = False
-    if confirm.lower() == 'yes':
-        print("Ensure you have sudo privileges for rsync if needed, or app is run as root.")
-        writer = USBWriterMacOS(test_device, mock_opencore_path, mock_macos_path, print)
-        success = writer.format_and_write()
-    else:
-        print("Test cancelled.")
-
-    print(f"Test finished. Success: {success}")
-    if os.path.exists(mock_opencore_path): os.remove(mock_opencore_path)
-    if os.path.exists(mock_macos_path): os.remove(mock_macos_path)
-    print("Mock files cleaned up.")
+    print("\nAvailable external physical disks (use 'diskutil list external physical'):"); subprocess.run(["diskutil", "list", "external", "physical"], check=False)
+    test_device = input("\nEnter target disk identifier (e.g., /dev/diskX). THIS DISK WILL BE WIPED: ")
+    if not test_device or not test_device.startswith("/dev/disk"): print("Invalid disk."); shutil.rmtree(mock_download_dir, ignore_errors=True); exit(1) # No need to clean OC_TEMPLATE_DIR here
+    if input(f"Sure to wipe {test_device}? (yes/NO): ").lower() == 'yes':
+        writer = USBWriterMacOS(test_device, mock_download_dir, print, True, sys.argv[1] if len(sys.argv) > 1 else "Sonoma")
+        writer.format_and_write()
+    else: print("Test cancelled.")
+    shutil.rmtree(mock_download_dir, ignore_errors=True)
+    print("Mock download dir cleaned up.")
