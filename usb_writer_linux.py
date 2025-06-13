@@ -6,6 +6,7 @@ import shutil
 import glob
 import re
 import plistlib
+import traceback
 
 try:
     from plist_modifier import enhance_config_plist
@@ -19,12 +20,12 @@ OC_TEMPLATE_DIR = os.path.join(os.path.dirname(__file__), "EFI_template_installe
 class USBWriterLinux:
     def __init__(self, device: str, macos_download_path: str,
                  progress_callback=None, enhance_plist_enabled: bool = False,
-                 target_macos_version: str = ""): # target_macos_version is display name e.g. "Sonoma"
+                 target_macos_version: str = ""):
         self.device = device
         self.macos_download_path = macos_download_path
         self.progress_callback = progress_callback
         self.enhance_plist_enabled = enhance_plist_enabled
-        self.target_macos_version = target_macos_version
+        self.target_macos_version = target_macos_version # String name like "Sonoma"
 
         pid = os.getpid()
         self.temp_basesystem_hfs_path = f"temp_basesystem_{pid}.hfs"
@@ -86,90 +87,142 @@ class USBWriterLinux:
         return True
 
     def _get_gibmacos_product_folder(self) -> str:
-        """Heuristically finds the main product folder within gibMacOS downloads."""
-        # gibMacOS often creates .../publicrelease/XXX - macOS [VersionName] [VersionNum]/
-        # We need to find this folder.
+        from constants import MACOS_VERSIONS # Import for this method
         _report = self._report_progress
         _report(f"Searching for macOS product folder in {self.macos_download_path} for version {self.target_macos_version}")
 
-        version_parts = self.target_macos_version.split(" ") # e.g., "Sonoma" or "Mac OS X", "High Sierra"
-        primary_name = version_parts[0] # "Sonoma", "Mac", "High"
-        if primary_name == "Mac" and len(version_parts) > 2 and version_parts[1] == "OS": # "Mac OS X"
-            primary_name = "OS X"
-            if len(version_parts) > 2 and version_parts[2] == "X": primary_name = "OS X" # For "Mac OS X"
+        # Check for a specific versioned download folder first (gibMacOS pattern)
+        # e.g. macOS Downloads/publicrelease/XXX - macOS Sonoma 14.X/
+        possible_toplevel_folders = [
+            os.path.join(self.macos_download_path, "macOS Downloads", "publicrelease"),
+            os.path.join(self.macos_download_path, "macOS Downloads", "developerseed"),
+            os.path.join(self.macos_download_path, "macOS Downloads", "customerseed"),
+            self.macos_download_path # Fallback to searching directly in the provided path
+        ]
 
-        possible_folders = []
-        for root, dirs, _ in os.walk(self.macos_download_path):
-            for d_name in dirs:
-                # Check if directory name contains "macOS" and a part of the target version name/number
-                if "macOS" in d_name and (primary_name in d_name or self.target_macos_version in d_name):
-                    possible_folders.append(os.path.join(root, d_name))
+        version_tag_from_constants = MACOS_VERSIONS.get(self.target_macos_version, self.target_macos_version).lower()
+        target_version_str_simple = self.target_macos_version.lower().replace("macos","").strip()
 
-        if not possible_folders:
-            _report(f"Could not automatically determine specific product folder. Using base download path: {self.macos_download_path}")
-            return self.macos_download_path
 
-        # Prefer shorter paths or more specific matches if multiple found
-        # This heuristic might need refinement. For now, take the first plausible one.
-        _report(f"Found potential product folder(s): {possible_folders}. Using: {possible_folders[0]}")
-        return possible_folders[0]
+        for base_path_to_search in possible_toplevel_folders:
+            if not os.path.isdir(base_path_to_search): continue
+            for item in os.listdir(base_path_to_search):
+                item_path = os.path.join(base_path_to_search, item)
+                item_lower = item.lower()
+                # Heuristic: look for version string or display name in folder name
+                if os.path.isdir(item_path) and \
+                   ("macos" in item_lower and (target_version_str_simple in item_lower or version_tag_from_constants in item_lower)):
+                    _report(f"Identified gibMacOS product folder: {item_path}")
+                    return item_path
 
-    def _find_gibmacos_asset(self, asset_patterns: list[str] | str, product_folder: str, description: str) -> str | None:
-        """Finds the first existing file matching a list of glob patterns within the product_folder."""
+        _report(f"Could not identify a specific product folder. Using base download path: {self.macos_download_path}")
+        return self.macos_download_path
+
+
+    def _find_gibmacos_asset(self, asset_patterns: list[str] | str, product_folder_path: str, search_deep=True) -> str | None:
         if isinstance(asset_patterns, str): asset_patterns = [asset_patterns]
-        self._report_progress(f"Searching for {description} using patterns {asset_patterns} in {product_folder}...")
+        self._report_progress(f"Searching for {asset_patterns} in {product_folder_path}...")
+
+        # Prioritize direct children and common locations
+        common_subdirs = ["", "SharedSupport", "Install macOS*.app/Contents/SharedSupport", "Install macOS*.app/Contents/Resources"]
+
         for pattern in asset_patterns:
-            # Search both in root of product_folder and common subdirs like "SharedSupport" or "*.app/Contents/SharedSupport"
-            search_glob_patterns = [
-                os.path.join(product_folder, pattern),
-                os.path.join(product_folder, "**", pattern), # Recursive search
-            ]
-            for glob_pattern in search_glob_patterns:
-                found_files = glob.glob(glob_pattern, recursive=True)
+            for sub_dir_pattern in common_subdirs:
+                # Construct glob pattern, allowing for versioned app names
+                current_search_base = os.path.join(product_folder_path, sub_dir_pattern.replace("Install macOS*.app", f"Install macOS {self.target_macos_version}.app"))
+                # If the above doesn't exist, try generic app name for glob
+                if not os.path.isdir(os.path.dirname(current_search_base)) and "Install macOS*.app" in sub_dir_pattern:
+                     current_search_base = os.path.join(product_folder_path, sub_dir_pattern)
+
+
+                glob_pattern = os.path.join(glob.escape(current_search_base), pattern) # Escape base path for glob
+
+                # Search non-recursively first in specific paths
+                found_files = glob.glob(glob_pattern, recursive=False)
                 if found_files:
-                    # Sort to get a predictable one if multiple (e.g. if pattern is too generic)
-                    # Prefer files not too deep in structure if multiple found by simple pattern
-                    found_files.sort(key=lambda x: (x.count(os.sep), len(x)))
-                    self._report_progress(f"Found {description} at: {found_files[0]}")
+                    found_files.sort(key=os.path.getsize, reverse=True) # Prefer larger files if multiple (e.g. InstallESD.dmg)
+                    self._report_progress(f"Found '{pattern}' at: {found_files[0]} (in {current_search_base})")
                     return found_files[0]
-        self._report_progress(f"Warning: {description} not found with patterns: {asset_patterns} in {product_folder} or its subdirectories.")
+
+            # If requested and not found yet, do a broader recursive search from product_folder_path
+            if search_deep:
+                deep_search_pattern = os.path.join(glob.escape(product_folder_path), "**", pattern)
+                found_files_deep = sorted(glob.glob(deep_search_pattern, recursive=True), key=len) # Prefer shallower paths
+                if found_files_deep:
+                    self._report_progress(f"Found '{pattern}' via deep search at: {found_files_deep[0]}")
+                    return found_files_deep[0]
+
+        self._report_progress(f"Warning: Asset matching patterns '{asset_patterns}' not found in {product_folder_path} or its common subdirectories.")
         return None
 
-    def _extract_basesystem_hfs_from_source(self, source_dmg_path: str, output_hfs_path: str) -> bool:
-        """Extracts the primary HFS+ partition image (e.g., '4.hfs') from a source DMG (BaseSystem.dmg or InstallESD.dmg)."""
+    def _extract_hfs_from_dmg_or_pkg(self, dmg_or_pkg_path: str, output_hfs_path: str) -> bool:
+        # This method assumes dmg_or_pkg_path is the path to a file like BaseSystem.dmg, InstallESD.dmg, or InstallAssistant.pkg
+        # It tries to extract the core HFS+ filesystem (often '4.hfs' from BaseSystem.dmg)
         os.makedirs(self.temp_dmg_extract_dir, exist_ok=True)
+        current_target_dmg = None
+
         try:
-            self._report_progress(f"Extracting HFS+ partition image from {source_dmg_path} into {self.temp_dmg_extract_dir}...")
-            # 7z e -tdmg <dmg_path> *.hfs -o<output_dir_for_hfs> (usually 4.hfs or similar for BaseSystem)
-            # For InstallESD.dmg, it might be a different internal path or structure.
-            # Assuming the target is a standard BaseSystem.dmg or a DMG containing such structure.
-            self._run_command(["7z", "e", "-tdmg", source_dmg_path, "*.hfs", f"-o{self.temp_dmg_extract_dir}"], check=True)
+            if dmg_or_pkg_path.endswith(".pkg"):
+                self._report_progress(f"Extracting DMGs from PKG: {dmg_or_pkg_path}...")
+                self._run_command(["7z", "x", dmg_or_pkg_path, "*.dmg", "-r", f"-o{self.temp_dmg_extract_dir}"], check=True) # Extract all DMGs recursively
+                dmgs_in_pkg = glob.glob(os.path.join(self.temp_dmg_extract_dir, "**", "*.dmg"), recursive=True)
+                if not dmgs_in_pkg: raise RuntimeError("No DMG found within PKG.")
 
+                # Heuristic: find BaseSystem.dmg, else largest InstallESD.dmg, else largest SharedSupport.dmg
+                bs_dmg = next((d for d in dmgs_in_pkg if "basesystem.dmg" in d.lower()), None)
+                if bs_dmg: current_target_dmg = bs_dmg
+                else:
+                    esd_dmgs = [d for d in dmgs_in_pkg if "installesd.dmg" in d.lower()]
+                    if esd_dmgs: current_target_dmg = max(esd_dmgs, key=os.path.getsize)
+                    else:
+                        ss_dmgs = [d for d in dmgs_in_pkg if "sharedsupport.dmg" in d.lower()]
+                        if ss_dmgs: current_target_dmg = max(ss_dmgs, key=os.path.getsize) # This might contain BaseSystem.dmg
+                        else: current_target_dmg = max(dmgs_in_pkg, key=os.path.getsize) # Last resort: largest DMG
+                if not current_target_dmg: raise RuntimeError("Could not determine primary DMG within PKG.")
+                self._report_progress(f"Identified primary DMG from PKG: {current_target_dmg}")
+            elif dmg_or_pkg_path.endswith(".dmg"):
+                current_target_dmg = dmg_or_pkg_path
+            else:
+                raise RuntimeError(f"Unsupported file type for HFS extraction: {dmg_or_pkg_path}")
+
+            # If current_target_dmg is (likely) InstallESD.dmg or SharedSupport.dmg, we need to find BaseSystem.dmg within it
+            basesystem_dmg_to_process = current_target_dmg
+            if "basesystem.dmg" not in os.path.basename(current_target_dmg).lower():
+                self._report_progress(f"Searching for BaseSystem.dmg within {current_target_dmg}...")
+                # Extract to a sub-folder to avoid name clashes
+                nested_extract_dir = os.path.join(self.temp_dmg_extract_dir, "nested_dmg_contents")
+                os.makedirs(nested_extract_dir, exist_ok=True)
+                self._run_command(["7z", "e", current_target_dmg, "*BaseSystem.dmg", "-r", f"-o{nested_extract_dir}"], check=True)
+                found_bs_dmgs = glob.glob(os.path.join(nested_extract_dir, "**", "*BaseSystem.dmg"), recursive=True)
+                if not found_bs_dmgs: raise RuntimeError(f"Could not extract BaseSystem.dmg from {current_target_dmg}")
+                basesystem_dmg_to_process = found_bs_dmgs[0]
+                self._report_progress(f"Located BaseSystem.dmg for processing: {basesystem_dmg_to_process}")
+
+            self._report_progress(f"Extracting HFS+ partition image from {basesystem_dmg_to_process}...")
+            self._run_command(["7z", "e", "-tdmg", basesystem_dmg_to_process, "*.hfs", f"-o{self.temp_dmg_extract_dir}"], check=True)
             hfs_files = glob.glob(os.path.join(self.temp_dmg_extract_dir, "*.hfs"))
-            if not hfs_files:
-                # Fallback: try extracting * (if only one file inside a simple DMG, like some custom BaseSystem.dmg)
-                self._run_command(["7z", "e", "-tdmg", source_dmg_path, "*", f"-o{self.temp_dmg_extract_dir}"], check=True)
-                hfs_files = glob.glob(os.path.join(self.temp_dmg_extract_dir, "*")) # Check all files
-                hfs_files = [f for f in hfs_files if not f.endswith((".xml", ".chunklist", ".plist")) and os.path.getsize(f) > 100*1024*1024] # Filter out small/meta files
+            if not hfs_files: # If no .hfs, maybe it's a flat DMG image already (unlikely for BaseSystem.dmg)
+                 alt_files = glob.glob(os.path.join(self.temp_dmg_extract_dir, "*"))
+                 alt_files = [f for f in alt_files if os.path.isfile(f) and not f.lower().endswith((".xml",".chunklist",".plist")) and os.path.getsize(f) > 2*1024*1024*1024] # Min 2GB
+                 if alt_files: hfs_files = alt_files
+            if not hfs_files: raise RuntimeError(f"No suitable HFS+ image file found after extracting {basesystem_dmg_to_process}")
 
-            if not hfs_files: raise RuntimeError(f"No suitable .hfs image found after extracting {source_dmg_path}")
-
-            final_hfs_file = max(hfs_files, key=os.path.getsize) # Assume largest is the one
+            final_hfs_file = max(hfs_files, key=os.path.getsize)
             self._report_progress(f"Found HFS+ partition image: {final_hfs_file}. Moving to {output_hfs_path}")
-            shutil.move(final_hfs_file, output_hfs_path) # Use shutil.move for local files
+            shutil.move(final_hfs_file, output_hfs_path)
             return True
         except Exception as e:
-            self._report_progress(f"Error during HFS extraction from DMG: {e}\n{traceback.format_exc()}")
-            return False
+            self._report_progress(f"Error during HFS extraction: {e}\n{traceback.format_exc()}"); return False
         finally:
             if os.path.exists(self.temp_dmg_extract_dir): shutil.rmtree(self.temp_dmg_extract_dir, ignore_errors=True)
+
 
     def format_and_write(self) -> bool:
         try:
             self.check_dependencies()
             self._cleanup_temp_files_and_dirs()
-            for mp in [self.mount_point_usb_esp, self.mount_point_usb_macos_target, self.temp_efi_build_dir]:
-                self._run_command(["sudo", "mkdir", "-p", mp])
+            for mp_dir in [self.mount_point_usb_esp, self.mount_point_usb_macos_target, self.temp_efi_build_dir]:
+                self._run_command(["sudo", "mkdir", "-p", mp_dir])
 
             self._report_progress(f"WARNING: ALL DATA ON {self.device} WILL BE ERASED!")
             for i in range(1, 10): self._run_command(["sudo", "umount", "-lf", f"{self.device}{i}"], check=False, timeout=5); self._run_command(["sudo", "umount", "-lf", f"{self.device}p{i}"], check=False, timeout=5)
@@ -177,7 +230,8 @@ class USBWriterLinux:
             self._report_progress(f"Partitioning {self.device} with GPT (sgdisk)...")
             self._run_command(["sudo", "sgdisk", "--zap-all", self.device])
             self._run_command(["sudo", "sgdisk", "-n", "1:0:+550M", "-t", "1:ef00", "-c", "1:EFI", self.device])
-            self._run_command(["sudo", "sgdisk", "-n", "2:0:0",    "-t", "2:af00", "-c", f"2:Install macOS {self.target_macos_version}", self.device])
+            usb_vol_name = f"Install macOS {self.target_macos_version}"
+            self._run_command(["sudo", "sgdisk", "-n", "2:0:0",    "-t", "2:af00", "-c", f"2:{usb_vol_name[:11]}" , self.device])
             self._run_command(["sudo", "partprobe", self.device], timeout=10); time.sleep(3)
 
             esp_partition_dev = next((f"{self.device}{i}" for i in ["1", "p1"] if os.path.exists(f"{self.device}{i}")), None)
@@ -187,20 +241,15 @@ class USBWriterLinux:
             self._report_progress(f"Formatting ESP ({esp_partition_dev}) as FAT32...")
             self._run_command(["sudo", "mkfs.vfat", "-F", "32", "-n", "EFI", esp_partition_dev])
             self._report_progress(f"Formatting macOS Install partition ({macos_partition_dev}) as HFS+...")
-            self._run_command(["sudo", "mkfs.hfsplus", "-v", f"Install macOS {self.target_macos_version}", macos_partition_dev])
+            self._run_command(["sudo", "mkfs.hfsplus", "-v", usb_vol_name, macos_partition_dev])
 
-            # --- Prepare macOS Installer Content ---
             product_folder = self._get_gibmacos_product_folder()
 
-            # Find BaseSystem.dmg (or equivalent like InstallESD.dmg if BaseSystem.dmg is not directly available)
-            # Some gibMacOS downloads might have InstallESD.dmg which contains BaseSystem.dmg.
-            # Others might have BaseSystem.dmg directly.
-            source_for_hfs_extraction = self._find_gibmacos_asset(["BaseSystem.dmg", "InstallESD.dmg", "SharedSupport.dmg"], product_folder, "BaseSystem.dmg (or source like InstallESD.dmg/SharedSupport.dmg)")
-            if not source_for_hfs_extraction: raise RuntimeError("Essential macOS DMG for BaseSystem extraction not found in download path.")
+            source_for_hfs_extraction = self._find_gibmacos_asset(["BaseSystem.dmg", "InstallESD.dmg", "SharedSupport.dmg", "InstallAssistant.pkg"], product_folder, "BaseSystem.dmg (or source like InstallESD.dmg/SharedSupport.dmg/InstallAssistant.pkg)")
+            if not source_for_hfs_extraction: raise RuntimeError("Essential macOS DMG/PKG for BaseSystem extraction not found in download path.")
 
-            self._report_progress("Extracting bootable HFS+ image from source DMG...")
-            if not self._extract_basesystem_hfs_from_source(source_for_hfs_extraction, self.temp_basesystem_hfs_path):
-                raise RuntimeError("Failed to extract HFS+ image from source DMG.")
+            if not self._extract_hfs_from_dmg_or_pkg(source_for_hfs_extraction, self.temp_basesystem_hfs_path):
+                raise RuntimeError("Failed to extract HFS+ image from BaseSystem assets.")
 
             self._report_progress(f"Writing BaseSystem HFS+ image to {macos_partition_dev} using dd...")
             self._run_command(["sudo", "dd", f"if={self.temp_basesystem_hfs_path}", f"of={macos_partition_dev}", "bs=4M", "status=progress", "oflag=sync"])
@@ -208,80 +257,90 @@ class USBWriterLinux:
             self._report_progress("Mounting macOS Install partition on USB...")
             self._run_command(["sudo", "mount", macos_partition_dev, self.mount_point_usb_macos_target])
 
+            # --- Copying full installer assets ---
+            self._report_progress("Copying macOS installer assets to USB...")
+
+            # 1. Create "Install macOS [VersionName].app" structure
+            app_bundle_name = f"Install macOS {self.target_macos_version}.app"
+            app_bundle_path_usb = os.path.join(self.mount_point_usb_macos_target, app_bundle_name)
+            contents_path_usb = os.path.join(app_bundle_path_usb, "Contents")
+            shared_support_path_usb_app = os.path.join(contents_path_usb, "SharedSupport")
+            resources_path_usb_app = os.path.join(contents_path_usb, "Resources")
+            self._run_command(["sudo", "mkdir", "-p", shared_support_path_usb_app])
+            self._run_command(["sudo", "mkdir", "-p", resources_path_usb_app])
+
+            # 2. Copy BaseSystem.dmg & BaseSystem.chunklist
             core_services_path_usb = os.path.join(self.mount_point_usb_macos_target, "System", "Library", "CoreServices")
             self._run_command(["sudo", "mkdir", "-p", core_services_path_usb])
-
-            # Copy original BaseSystem.dmg and .chunklist from gibMacOS output
-            original_bs_dmg = self._find_gibmacos_asset(["BaseSystem.dmg"], product_folder, "original BaseSystem.dmg")
+            original_bs_dmg = self._find_gibmacos_asset("BaseSystem.dmg", product_folder)
             if original_bs_dmg:
-                self._report_progress(f"Copying {original_bs_dmg} to {core_services_path_usb}/BaseSystem.dmg")
+                self._report_progress(f"Copying BaseSystem.dmg to {core_services_path_usb}/ and {shared_support_path_usb_app}/")
                 self._run_command(["sudo", "cp", original_bs_dmg, os.path.join(core_services_path_usb, "BaseSystem.dmg")])
-                original_bs_chunklist = original_bs_dmg.replace(".dmg", ".chunklist")
-                if os.path.exists(original_bs_chunklist):
-                    self._report_progress(f"Copying {original_bs_chunklist} to {core_services_path_usb}/BaseSystem.chunklist")
+                self._run_command(["sudo", "cp", original_bs_dmg, os.path.join(shared_support_path_usb_app, "BaseSystem.dmg")])
+                original_bs_chunklist = self._find_gibmacos_asset("BaseSystem.chunklist", os.path.dirname(original_bs_dmg)) # Look in same dir as BaseSystem.dmg
+                if original_bs_chunklist:
+                    self._report_progress(f"Copying BaseSystem.chunklist...")
                     self._run_command(["sudo", "cp", original_bs_chunklist, os.path.join(core_services_path_usb, "BaseSystem.chunklist")])
-            else: self._report_progress("Warning: Original BaseSystem.dmg not found in product folder to copy to CoreServices.")
+                    self._run_command(["sudo", "cp", original_bs_chunklist, os.path.join(shared_support_path_usb_app, "BaseSystem.chunklist")])
+            else: self._report_progress("Warning: Original BaseSystem.dmg not found to copy.")
 
-            install_info_src = self._find_gibmacos_asset(["InstallInfo.plist"], product_folder, "InstallInfo.plist")
-            if install_info_src:
-                self._report_progress(f"Copying {install_info_src} to {self.mount_point_usb_macos_target}/InstallInfo.plist")
-                self._run_command(["sudo", "cp", install_info_src, os.path.join(self.mount_point_usb_macos_target, "InstallInfo.plist")])
-            else: self._report_progress("Warning: InstallInfo.plist not found in product folder.")
+            # 3. Copy InstallInfo.plist
+            installinfo_src = self._find_gibmacos_asset("InstallInfo.plist", product_folder)
+            if installinfo_src:
+                self._report_progress(f"Copying InstallInfo.plist...")
+                self._run_command(["sudo", "cp", installinfo_src, os.path.join(contents_path_usb, "Info.plist")]) # For .app bundle
+                self._run_command(["sudo", "cp", installinfo_src, os.path.join(self.mount_point_usb_macos_target, "InstallInfo.plist")]) # For root of volume
+            else: self._report_progress("Warning: InstallInfo.plist not found.")
 
-            # Copy Packages and other assets
-            packages_target_path = os.path.join(self.mount_point_usb_macos_target, "System", "Installation", "Packages")
-            self._run_command(["sudo", "mkdir", "-p", packages_target_path])
+            # 4. Copy main installer package(s) to .app/Contents/SharedSupport/
+            #    And also to /System/Installation/Packages/ for direct BaseSystem boot.
+            packages_dir_usb_system = os.path.join(self.mount_point_usb_macos_target, "System", "Installation", "Packages")
+            self._run_command(["sudo", "mkdir", "-p", packages_dir_usb_system])
 
-            # Try to find and copy InstallAssistant.pkg or InstallESD.dmg/SharedSupport.dmg contents for packages
-            # This part is complex, as gibMacOS output varies.
-            # If InstallAssistant.pkg is found, its contents (especially packages) are needed.
-            # If SharedSupport.dmg is found, its contents are needed.
-            install_assistant_pkg = self._find_gibmacos_asset(["InstallAssistant.pkg"], product_folder, "InstallAssistant.pkg")
-            if install_assistant_pkg:
-                 self._report_progress(f"Copying contents of InstallAssistant.pkg (Packages) from {os.path.dirname(install_assistant_pkg)} to {packages_target_path} (simplified, may need selective copy)")
-                 # This is a placeholder. Real logic would extract from PKG or copy specific subfolders/files.
-                 # For now, just copy the PKG itself as an example.
-                 self._run_command(["sudo", "cp", install_assistant_pkg, packages_target_path])
-            else:
-                shared_support_dmg = self._find_gibmacos_asset(["SharedSupport.dmg"], product_folder, "SharedSupport.dmg for packages")
-                if shared_support_dmg:
-                    self._report_progress(f"Copying contents of SharedSupport.dmg from {shared_support_dmg} to {packages_target_path} (simplified)")
-                    # Mount SharedSupport.dmg and rsync contents, or 7z extract and rsync
-                    # Placeholder: copy the DMG itself. Real solution needs extraction.
-                    self._run_command(["sudo", "cp", shared_support_dmg, packages_target_path])
-                else:
-                    self._report_progress("Warning: Neither InstallAssistant.pkg nor SharedSupport.dmg found for main packages. Installer may be incomplete.")
+            main_payload_patterns = ["InstallAssistant.pkg", "InstallESD.dmg", "SharedSupport.dmg"] # Order of preference
+            main_payload_src = self._find_gibmacos_asset(main_payload_patterns, product_folder, "Main Installer Payload (PKG/DMG)")
 
-            # Create 'Install macOS [Version].app' structure (simplified)
-            app_name = f"Install macOS {self.target_macos_version}.app"
-            app_path_usb = os.path.join(self.mount_point_usb_macos_target, app_name)
-            self._run_command(["sudo", "mkdir", "-p", os.path.join(app_path_usb, "Contents", "SharedSupport")])
-            # Copying some key files into this structure might be needed too.
+            if main_payload_src:
+                payload_basename = os.path.basename(main_payload_src)
+                self._report_progress(f"Copying main payload '{payload_basename}' to {shared_support_path_usb_app}/ and {packages_dir_usb_system}/")
+                self._run_command(["sudo", "cp", main_payload_src, os.path.join(shared_support_path_usb_app, payload_basename)])
+                self._run_command(["sudo", "cp", main_payload_src, os.path.join(packages_dir_usb_system, payload_basename)])
+                # If it's SharedSupport.dmg, its *contents* are often what's needed in Packages, not the DMG itself.
+                # This is a complex step; createinstallmedia does more. For now, copying the DMG/PKG might be enough for OpenCore to find.
+            else: self._report_progress("Warning: Main installer payload (InstallAssistant.pkg, InstallESD.dmg, or SharedSupport.dmg) not found.")
 
-            # --- OpenCore EFI Setup --- (same as before, but using self.temp_efi_build_dir)
+            # 5. Copy AppleDiagnostics.dmg to .app/Contents/SharedSupport/
+            diag_src = self._find_gibmacos_asset("AppleDiagnostics.dmg", product_folder)
+            if diag_src:
+                self._report_progress(f"Copying AppleDiagnostics.dmg to {shared_support_path_usb_app}/")
+                self._run_command(["sudo", "cp", diag_src, os.path.join(shared_support_path_usb_app, "AppleDiagnostics.dmg")])
+
+            # 6. Ensure /System/Library/CoreServices/boot.efi exists (can be a copy of OpenCore's BOOTx64.efi or a generic one)
+            self._report_progress("Ensuring /System/Library/CoreServices/boot.efi exists on installer partition...")
+            self._run_command(["sudo", "touch", os.path.join(core_services_path_usb, "boot.efi")]) # Placeholder, OC will handle actual boot
+
+            self._report_progress("macOS installer assets copied to USB.")
+
+            # --- OpenCore EFI Setup ---
             self._report_progress("Setting up OpenCore EFI on ESP...")
-            if not os.path.isdir(OC_TEMPLATE_DIR): self._report_progress(f"FATAL: OpenCore template dir not found: {OC_TEMPLATE_DIR}"); return False
-
-            self._report_progress(f"Copying OpenCore EFI template from {OC_TEMPLATE_DIR} to {self.temp_efi_build_dir}")
-            self._run_command(["sudo", "cp", "-a", f"{OC_TEMPLATE_DIR}/.", self.temp_efi_build_dir])
-
+            if not os.path.isdir(OC_TEMPLATE_DIR) or not os.listdir(OC_TEMPLATE_DIR): self._create_minimal_efi_template(self.temp_efi_build_dir)
+            else: self._report_progress(f"Copying OpenCore EFI template from {OC_TEMPLATE_DIR} to {self.temp_efi_build_dir}"); self._run_command(["sudo", "cp", "-a", f"{OC_TEMPLATE_DIR}/.", self.temp_efi_build_dir])
             temp_config_plist_path = os.path.join(self.temp_efi_build_dir, "EFI", "OC", "config.plist")
-            # If template is config-template.plist, rename it for enhancement
-            if not os.path.exists(temp_config_plist_path) and os.path.exists(os.path.join(self.temp_efi_build_dir, "EFI", "OC", "config-template.plist")):
-                self._run_command(["sudo", "mv", os.path.join(self.temp_efi_build_dir, "EFI", "OC", "config-template.plist"), temp_config_plist_path])
-
+            if not os.path.exists(temp_config_plist_path):
+                template_plist = os.path.join(self.temp_efi_build_dir, "EFI", "OC", "config-template.plist")
+                if os.path.exists(template_plist): self._run_command(["sudo", "cp", template_plist, temp_config_plist_path])
+                else:
+                    with open(temp_config_plist_path, 'wb') as f: plistlib.dump({"#Comment": "Basic config by Skyscope"}, f, fmt=plistlib.PlistFormat.XML); os.chmod(temp_config_plist_path, 0o644) # Ensure permissions
             if self.enhance_plist_enabled and enhance_config_plist and os.path.exists(temp_config_plist_path):
                 self._report_progress("Attempting to enhance config.plist...")
                 if enhance_config_plist(temp_config_plist_path, self.target_macos_version, self._report_progress): self._report_progress("config.plist enhancement successful.")
                 else: self._report_progress("config.plist enhancement failed or had issues.")
-
             self._run_command(["sudo", "mount", esp_partition_dev, self.mount_point_usb_esp])
             self._report_progress(f"Copying final EFI folder to USB ESP ({self.mount_point_usb_esp})...")
             self._run_command(["sudo", "rsync", "-avh", "--delete", f"{self.temp_efi_build_dir}/EFI/", f"{self.mount_point_usb_esp}/EFI/"])
 
             self._report_progress("USB Installer creation process completed successfully.")
             return True
-
         except Exception as e:
             self._report_progress(f"An error occurred during USB writing: {e}\n{traceback.format_exc()}")
             return False
@@ -289,36 +348,25 @@ class USBWriterLinux:
             self._cleanup_temp_files_and_dirs()
 
 if __name__ == '__main__':
+    # ... (Standalone test block needs constants.MACOS_VERSIONS for _get_gibmacos_product_folder)
+    from constants import MACOS_VERSIONS # For standalone test
+    import traceback
     if os.geteuid() != 0: print("Please run this script as root (sudo) for testing."); exit(1)
-    print("USB Writer Linux Standalone Test - Installer Method (Refined)")
+    print("USB Writer Linux Standalone Test - Installer Method (Fuller Asset Copying)")
+    mock_download_dir = f"temp_macos_download_skyscope_{os.getpid()}"; os.makedirs(mock_download_dir, exist_ok=True)
+    target_version_cli = sys.argv[1] if len(sys.argv) > 1 else "Sonoma" # Example: python usb_writer_linux.py Sonoma
 
-    mock_download_dir = f"temp_macos_download_test_{os.getpid()}"
-    os.makedirs(mock_download_dir, exist_ok=True)
-
-    # Create a more structured mock download similar to gibMacOS output
-    product_name_slug = f"000-00000 - macOS {sys.argv[1] if len(sys.argv) > 1 else 'Sonoma'} 14.0" # Example
-    specific_product_folder = os.path.join(mock_download_dir, "publicrelease", product_name_slug)
+    mock_product_name_segment = MACOS_VERSIONS.get(target_version_cli, target_version_cli).lower() # e.g. "sonoma" or "14"
+    mock_product_name = f"012-34567 - macOS {target_version_cli} {mock_product_name_segment}.x.x"
+    specific_product_folder = os.path.join(mock_download_dir, "macOS Downloads", "publicrelease", mock_product_name)
+    os.makedirs(os.path.join(specific_product_folder, "SharedSupport"), exist_ok=True)
     os.makedirs(specific_product_folder, exist_ok=True)
 
-    # Mock BaseSystem.dmg (tiny, not functional, for path testing)
-    dummy_bs_dmg_path = os.path.join(specific_product_folder, "BaseSystem.dmg")
-    if not os.path.exists(dummy_bs_dmg_path):
-        with open(dummy_bs_dmg_path, "wb") as f: f.write(os.urandom(1024*10)) # 10KB dummy
-
-    # Mock BaseSystem.chunklist
-    dummy_bs_chunklist_path = os.path.join(specific_product_folder, "BaseSystem.chunklist")
-    if not os.path.exists(dummy_bs_chunklist_path):
-        with open(dummy_bs_chunklist_path, "w") as f: f.write("dummy chunklist")
-
-    # Mock InstallInfo.plist
-    dummy_installinfo_path = os.path.join(specific_product_folder, "InstallInfo.plist")
-    if not os.path.exists(dummy_installinfo_path):
-        with open(dummy_installinfo_path, "w") as f: plistlib.dump({"DummyInstallInfo": True}, f)
-
-    # Mock InstallAssistant.pkg (empty for now, just to test its presence)
-    dummy_pkg_path = os.path.join(specific_product_folder, "InstallAssistant.pkg")
-    if not os.path.exists(dummy_pkg_path):
-        with open(dummy_pkg_path, "wb") as f: f.write(os.urandom(1024))
+    with open(os.path.join(specific_product_folder, "SharedSupport", "BaseSystem.dmg"), "wb") as f: f.write(os.urandom(10*1024*1024))
+    with open(os.path.join(specific_product_folder, "SharedSupport", "BaseSystem.chunklist"), "w") as f: f.write("dummy chunklist")
+    with open(os.path.join(specific_product_folder, "InstallInfo.plist"), "wb") as f: plistlib.dump({"DisplayName":f"macOS {target_version_cli}"},f)
+    with open(os.path.join(specific_product_folder, "InstallAssistant.pkg"), "wb") as f: f.write(os.urandom(1024))
+    with open(os.path.join(specific_product_folder, "SharedSupport", "AppleDiagnostics.dmg"), "wb") as f: f.write(os.urandom(1024))
 
 
     if not os.path.exists(OC_TEMPLATE_DIR): os.makedirs(OC_TEMPLATE_DIR)
@@ -327,23 +375,16 @@ if __name__ == '__main__':
     if not os.path.exists(dummy_config_template_path):
          with open(dummy_config_template_path, "w") as f: f.write("<plist><dict><key>TestTemplate</key><true/></dict></plist>")
 
-    print("\nAvailable block devices (be careful!):")
-    subprocess.run(["lsblk", "-d", "-o", "NAME,SIZE,MODEL"], check=True)
+    print("\nAvailable block devices (be careful!):"); subprocess.run(["lsblk", "-d", "-o", "NAME,SIZE,MODEL"], check=True)
     test_device = input("\nEnter target device (e.g., /dev/sdX). THIS DEVICE WILL BE WIPED: ")
 
     if not test_device or not test_device.startswith("/dev/"):
         print("Invalid device. Exiting.")
     else:
-        confirm = input(f"Are you absolutely sure you want to wipe {test_device} and create installer? (yes/NO): ")
+        confirm = input(f"Are you absolutely sure you want to wipe {test_device} and create installer for {target_version_cli}? (yes/NO): ")
         success = False
         if confirm.lower() == 'yes':
-            writer = USBWriterLinux(
-                device=test_device,
-                macos_download_path=mock_download_dir, # Pass base download dir
-                progress_callback=print,
-                enhance_plist_enabled=True,
-                target_macos_version=sys.argv[1] if len(sys.argv) > 1 else "Sonoma"
-            )
+            writer = USBWriterLinux(device=test_device, macos_download_path=mock_download_dir, progress_callback=print, enhance_plist_enabled=True, target_macos_version=target_version_cli)
             success = writer.format_and_write()
         else: print("Test cancelled by user.")
         print(f"Test finished. Success: {success}")

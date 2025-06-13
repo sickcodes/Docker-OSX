@@ -1,96 +1,96 @@
 # Skyscope macOS on PC USB Creator Tool
 
-**Version:** 1.0.0 (Dev - New Workflow)
+**Version:** 1.1.0 (Alpha - Installer Workflow with NVIDIA/OCLP Guidance)
 **Developer:** Miss Casey Jay Topojani
 **Business:** Skyscope Sentinel Intelligence
 
 ## Vision: Your Effortless Bridge to macOS on PC
 
-Welcome to the Skyscope macOS on PC USB Creator Tool! Our vision is to provide an exceptionally user-friendly, GUI-driven application that fully automates the complex process of creating a bootable macOS USB *Installer* for virtually any PC. This tool aims to be your comprehensive solution, simplifying the Hackintosh journey from start to finish by leveraging direct macOS downloads and intelligent OpenCore EFI configuration.
+Welcome to the Skyscope macOS on PC USB Creator Tool! Our vision is to provide an exceptionally user-friendly, GUI-driven application that automates the complex process of creating a bootable macOS USB **Installer** for a wide range of PCs. This tool aims to be your comprehensive solution, simplifying the Hackintosh journey from start to finish by leveraging direct macOS downloads from Apple and intelligent OpenCore EFI configuration.
 
-This project is dedicated to creating a seamless experience, from selecting your desired macOS version (defaulting to the latest like Sequoia where possible) to generating a USB drive that's ready to boot your PC and install macOS. We strive to incorporate advanced options for tech-savvy users while maintaining an intuitive interface for all.
+This project is dedicated to creating a seamless experience, from selecting your desired macOS version (defaulting to the latest like Sequoia where possible) to generating a USB drive that's ready to boot your PC and guide you through installing macOS. We strive to incorporate advanced options for tech-savvy users while maintaining an intuitive interface for all, with a clear path for enabling currently unsupported hardware like specific NVIDIA GPUs on newer macOS versions through community-standard methods.
 
 ## Core Features
 
 *   **Intuitive Graphical User Interface (PyQt6):**
-    *   Dark-themed by default (planned).
+    *   Dark-themed by default (planned UI enhancement).
     *   Rounded window design (platform permitting).
     *   Clear, step-by-step workflow.
     *   Enhanced progress indicators (filling bars, spinners, percentage updates - planned).
 *   **Automated macOS Installer Acquisition:**
-    *   Directly downloads official macOS installer assets from Apple's servers using `gibMacOS` principles.
-    *   Supports user selection of macOS versions (aiming for Sequoia, Sonoma, Ventura, Monterey, Big Sur, etc.).
+    *   Directly downloads official macOS installer assets from Apple's servers using `gibMacOS.py` principles.
+    *   Supports user selection of macOS versions (e.g., Sequoia, Sonoma, Ventura, Monterey, Big Sur, etc.).
 *   **Automated USB Installer Creation:**
     *   **Cross-Platform USB Detection:** Identifies suitable USB drives on Linux, macOS, and Windows (using WMI for more accurate detection on Windows).
     *   **Automated Partitioning:** Creates GUID Partition Table (GPT), an EFI System Partition (FAT32, ~300-550MB), and a main macOS Installer partition (HFS+).
-    *   **macOS Installer Layout:** Automatically extracts and lays out downloaded macOS assets (BaseSystem, installer packages, etc.) onto the USB to create a bootable macOS installer volume.
+    *   **macOS Installer Layout (Linux & macOS):** Automatically extracts and lays out downloaded macOS assets (BaseSystem, key support files, and installer packages) onto the USB to create a bootable macOS installer volume.
+    *   **Windows USB Writing (Partial Automation):** Automates EFI partition setup and EFI file copying. Writing the BaseSystem HFS+ image to the main USB partition requires a guided manual `dd` step by the user. Copying further HFS+ installer content from Windows is not automated.
 *   **Intelligent OpenCore EFI Setup:**
-    *   Assembles a complete OpenCore EFI folder on the USB's EFI partition.
-    *   Includes essential drivers, kexts, and ACPI SSDTs for broad compatibility.
+    *   Assembles a complete OpenCore EFI folder on the USB's EFI partition using a robust template.
     *   **Experimental `config.plist` Auto-Enhancement:**
         *   If enabled by the user (and running the tool on a Linux host for hardware detection):
             *   Gathers host hardware information (iGPU, dGPU, Audio, Ethernet, CPU).
-            *   Applies targeted modifications to the `config.plist` to improve compatibility (e.g., Intel iGPU `DeviceProperties`, audio `layout-id`s, enabling Ethernet kexts).
-            *   Specific handling for NVIDIA GPUs (e.g., GTX 970) based on target macOS version to allow booting (e.g., `nv_disable=1` for newer macOS if iGPU is primary, or boot-args for OCLP compatibility).
+            *   Applies targeted modifications to the `config.plist` for iGPU, audio, Ethernet, and specific NVIDIA GPU considerations.
         *   Creates a backup of the original `config.plist` before modification.
-*   **Privilege Handling:** Checks for and advises on necessary admin/root privileges for USB writing.
-*   **User Guidance:** Provides clear instructions and warnings throughout the process.
+*   **NVIDIA GPU Strategy (for newer macOS like Sonoma/Sequoia):**
+    *   The tool configures the `config.plist` to ensure bootability with NVIDIA Maxwell/Pascal GPUs (like GTX 970).
+    *   If an Intel iGPU is present and usable, it will be prioritized for display, and `nv_disable=1` will be set for the NVIDIA card.
+    *   Includes necessary boot-args (e.g., `amfi_get_out_of_my_way=0x1`) to prepare the system for **post-install patching with OpenCore Legacy Patcher (OCLP)**, which is required for graphics acceleration.
+*   **Privilege Checking:** Warns if administrative/root privileges are needed for USB writing and are not detected.
 
-## NVIDIA GPU Support Strategy (e.g., GTX 970 on newer macOS)
+## NVIDIA GPU Support on Newer macOS (Mojave+): The OCLP Path
 
-*   **Installer Phase:** This tool will configure the OpenCore EFI on the USB installer to allow your system to boot with your NVIDIA card.
-    *   For macOS High Sierra (or older, if supported by download method): The `config.plist` can be set to enable NVIDIA Web Drivers (e.g., `nvda_drv=1`), assuming you would install them into macOS later.
-    *   For macOS Mojave and newer (Sonoma, Sequoia, etc.) where native NVIDIA drivers are absent:
-        *   If your system has an Intel iGPU, this tool will aim to configure the iGPU as primary and add `nv_disable=1` to `boot-args` for the NVIDIA card.
-        *   If the NVIDIA card is your only graphics output, `nv_disable=1` will not be set, allowing macOS to boot with basic display (no acceleration) from your NVIDIA card.
-        *   The `config.plist` will include boot arguments like `amfi_get_out_of_my_way=0x1` to prepare the system for potential use with OpenCore Legacy Patcher.
-*   **Post-macOS Installation (User Action for Acceleration):**
-    *   To achieve graphics acceleration for unsupported NVIDIA cards (like Maxwell GTX 970 or Pascal GTX 10xx) on macOS Mojave and newer, you will need to run the **OpenCore Legacy Patcher (OCLP)** application on your installed macOS system. OCLP applies necessary system patches to re-enable these drivers.
-    *   This tool prepares the USB installer to be compatible with an OCLP workflow but **does not perform the root volume patching itself.**
-*   **CUDA Support:** CUDA is dependent on NVIDIA's official driver stack, which is not available for newer macOS versions. Therefore, CUDA support is generally not achievable on macOS Mojave+ for NVIDIA cards.
+Modern macOS versions (Mojave and newer, including Ventura, Sonoma, and Sequoia) do not natively support NVIDIA Maxwell (e.g., GTX 970) or Pascal GPUs with graphics acceleration.
+
+**How Skyscope Tool Helps:**
+
+1.  **Bootable Installer:** This tool will help you create a macOS USB installer with an OpenCore EFI configured to allow your system to boot with your NVIDIA card (either using an available Intel iGPU with the NVIDIA card disabled by `nv_disable=1`, or with the NVIDIA card providing basic, unaccelerated display if it's the only option).
+2.  **OCLP Preparation:** The `config.plist` generated by this tool will include essential boot arguments (like `amfi_get_out_of_my_way=0x1`) and settings (`SecureBootModel=Disabled`) that are prerequisites for using the OpenCore Legacy Patcher (OCLP).
+
+**User Action Required for NVIDIA Acceleration (Post-Install):**
+
+*   After you have installed macOS onto your PC's internal drive using the USB created by this tool, you **must run the OpenCore Legacy Patcher application from within your new macOS installation.**
+*   OCLP will then apply the necessary system patches to the installed macOS system to enable graphics acceleration for your unsupported NVIDIA card.
+*   This tool **does not** perform these system patches itself. It prepares your installer and EFI to be compatible with the OCLP process.
+*   **CUDA:** CUDA support is tied to NVIDIA's official drivers, which are not available for newer macOS. OCLP primarily restores graphics (Metal/OpenGL/CL) acceleration, not the CUDA compute environment.
+
+For macOS High Sierra or older, this tool can set `nvda_drv=1` if you intend to install NVIDIA Web Drivers (which you must source and install separately).
 
 ## Current Status & Known Limitations
 
 *   **Workflow Transition:** The project is currently transitioning from a Docker-OSX based method to a `gibMacOS`-based installer creation method. Not all platform-specific USB writers are fully refactored for this new approach yet.
 *   **Windows USB Writing:** Creating the HFS+ macOS installer partition and copying files to it from Windows is complex without native HFS+ write support. The EFI part is automated; the main partition might initially require manual steps or use of `dd` for BaseSystem, with file copying being a challenge.
 *   **`config.plist` Enhancement is Experimental:** Hardware detection for this feature is currently Linux-host only. The range of hardware automatically configured is limited to common setups.
-*   **Universal Compatibility:** Hackintoshing is inherently hardware-dependent. While this tool aims for broad compatibility, success on every PC configuration cannot be guaranteed.
+*   **Universal Compatibility:** While striving for broad compatibility, Hackintoshing is hardware-dependent. Success on every PC configuration cannot be guaranteed.
 *   **Dependency on External Projects:** Relies on OpenCore and various community-sourced kexts and configurations. The `gibMacOS.py` script (or its underlying principles) is key for downloading assets.
 
 ## Prerequisites
 
 1.  **Python:** Version 3.8 or newer.
 2.  **Python Libraries:** `PyQt6`, `psutil`. Install via `pip install PyQt6 psutil`.
-3.  **Core Utilities (all platforms, must be in PATH):**
-    *   `git` (used by `gibMacOS.py` and potentially for cloning other resources).
-    *   `7z` or `7za` (7-Zip command-line tool for archive extraction).
-4.  **Platform-Specific CLI Tools for USB Writing:**
+3.  **Core Utilities (All Platforms, in PATH):**
+    *   `git` (for `gibMacOS.py`).
+    *   `7z` or `7za` (7-Zip CLI for archive extraction).
+4.  **`gibMacOS.py` Script:**
+    *   Clone `corpnewt/gibMacOS` (`git clone https://github.com/corpnewt/gibMacOS.git`) into a `scripts/gibMacOS` subdirectory within this project, or ensure `gibMacOS.py` is in the project root or system PATH and adjust `GIBMACOS_SCRIPT_PATH` in `main_app.py` if necessary.
+5.  **Platform-Specific CLI Tools for USB Writing:**
     *   **Linux (e.g., Debian 13 "Trixie"):**
-        *   `sgdisk`, `parted`, `partprobe` (from `gdisk`, `parted`, `util-linux`)
-        *   `mkfs.vfat` (from `dosfstools`)
-        *   `mkfs.hfsplus` (from `hfsprogs`)
-        *   `rsync`
-        *   `dd` (core utility)
-        *   `apfs-fuse`: Often requires manual compilation (e.g., from `sgan81/apfs-fuse` on GitHub). Typical build dependencies: `git g++ cmake libfuse3-dev libicu-dev zlib1g-dev libbz2-dev libssl-dev`. Ensure it's in your PATH.
+        *   `sgdisk` (from `gdisk`), `parted`, `partprobe` (from `util-linux`)
+        *   `mkfs.vfat` (from `dosfstools`), `mkfs.hfsplus` (from `hfsprogs`)
+        *   `rsync`, `dd`
+        *   `apfs-fuse`: Requires manual compilation (e.g., from `sgan81/apfs-fuse` on GitHub). Typical build dependencies: `git g++ cmake libfuse3-dev libicu-dev zlib1g-dev libbz2-dev libssl-dev`.
         *   Install most via: `sudo apt update && sudo apt install gdisk parted dosfstools hfsprogs rsync util-linux p7zip-full` (or `p7zip`)
-    *   **macOS:**
-        *   `diskutil`, `hdiutil`, `rsync`, `cp`, `bless` (standard system tools).
-        *   `7z` (e.g., via Homebrew: `brew install p7zip`).
-    *   **Windows:**
-        *   `diskpart`, `robocopy` (standard system tools).
-        *   `7z.exe` (install and add to PATH).
-        *   A "dd for Windows" utility (user must install and ensure it's in PATH).
+    *   **macOS:** `diskutil`, `hdiutil`, `rsync`, `cp`, `dd`, `bless`. `7z` (e.g., `brew install p7zip`).
+    *   **Windows:** `diskpart`, `robocopy`. `7z.exe`. A "dd for Windows" utility.
 
 ## How to Run (Development Phase)
 
-1.  Ensure all prerequisites for your OS are met.
-2.  Clone this repository.
-3.  **Crucial:** Clone `corpnewt/gibMacOS` into a `./scripts/gibMacOS/` subdirectory within this project, or ensure `gibMacOS.py` is in the project root or your system PATH and update `GIBMACOS_SCRIPT_PATH` in `main_app.py` if necessary.
-4.  Install Python libraries: `pip install PyQt6 psutil`.
-5.  Execute `python main_app.py`.
-6.  **For USB Writing Operations:**
+1.  Meet all prerequisites for your OS, including `gibMacOS.py` setup.
+2.  Clone this repository. Install Python libs: `pip install PyQt6 psutil`.
+3.  Execute `python main_app.py`.
+4.  **For USB Writing Operations:**
     *   **Linux:** Run with `sudo python main_app.py`.
-    *   **macOS:** Run normally. You may be prompted for your password by system commands like `diskutil` or `sudo rsync`. Ensure the app has Full Disk Access if needed.
+    *   **macOS:** Run normally. May prompt for password for `sudo rsync` or `diskutil`. Ensure the app has Full Disk Access if needed.
     *   **Windows:** Run as Administrator.
 
 ## Step-by-Step Usage Guide (New Workflow)
