@@ -41,8 +41,6 @@ If you like this project, consider contributing here or upstream!
 
 ## Quick Start Docker-OSX
 
-Video setup tutorial is also available here: https://www.youtube.com/watch?v=wLezYl77Ll8
-
 **Windows users:** [click here to see the notes below](#id-like-to-run-docker-osx-on-windows)!
 
 <p align="center">
@@ -56,7 +54,18 @@ First time here? try [initial setup](#initial-setup), otherwise try the instruct
 
 Release names and their version:
 
-### Catalina (10.15) [![https://img.shields.io/docker/image-size/sickcodes/docker-osx/latest?label=sickcodes%2Fdocker-osx%3Alatest](https://img.shields.io/docker/image-size/sickcodes/docker-osx/latest?label=sickcodes%2Fdocker-osx%3Alatest)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
+You can run any version of macOS by changing the `SHORTNAME` environment variable.
+
+| macOS Version | `SHORTNAME` |
+| --- | --- |
+| Sequoia (15) | `sequoia` |
+| Sonoma (14) | `sonoma` |
+| Ventura (13) | `ventura` |
+| Monterey (12) | `monterey` |
+| Big Sur (11) | `big-sur` |
+| Catalina (10.15) | `catalina` |
+| Mojave (10.14) | `mojave` |
+| High Sierra (10.13) | `high-sierra` |
 
 ```bash
 docker run -it \
@@ -64,96 +73,19 @@ docker run -it \
     -p 50922:10022 \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
     -e "DISPLAY=${DISPLAY:-:0.0}" \
-    -e SHORTNAME=catalina \
+    -e "SHORTNAME=sequoia" \
     sickcodes/docker-osx:latest
-
-# docker build -t docker-osx .
-```
-### Big Sur (11) [![https://img.shields.io/docker/image-size/sickcodes/docker-osx/latest?label=sickcodes%2Fdocker-osx%3Alatest](https://img.shields.io/docker/image-size/sickcodes/docker-osx/latest?label=sickcodes%2Fdocker-osx%3Alatest)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
-
-```bash
-docker run -it \
-    --device /dev/kvm \
-    -p 50922:10022 \
-    -v /tmp/.X11-unix:/tmp/.X11-unix \
-    -e "DISPLAY=${DISPLAY:-:0.0}" \
-    -e SHORTNAME=big-sur \
-    sickcodes/docker-osx:latest
-
-# docker build -t docker-osx .
 ```
 
-### Monterey (12) [![https://img.shields.io/docker/image-size/sickcodes/docker-osx/latest?label=sickcodes%2Fdocker-osx%3Alatest](https://img.shields.io/docker/image-size/sickcodes/docker-osx/latest?label=sickcodes%2Fdocker-osx%3Alatest)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
+**Explanation of the command:**
 
-```bash
-
-docker run -it \
-    --device /dev/kvm \
-    -p 50922:10022 \
-    -v /tmp/.X11-unix:/tmp/.X11-unix \
-    -e "DISPLAY=${DISPLAY:-:0.0}" \
-    -e GENERATE_UNIQUE=true \
-    -e MASTER_PLIST_URL='https://raw.githubusercontent.com/sickcodes/osx-serial-generator/master/config-custom.plist' \
-    -e SHORTNAME=monterey \
-    sickcodes/docker-osx:latest
-
-# docker build -t docker-osx .
-```
-
-### Ventura (13) [![https://img.shields.io/docker/image-size/sickcodes/docker-osx/latest?label=sickcodes%2Fdocker-osx%3Alatest](https://img.shields.io/docker/image-size/sickcodes/docker-osx/latest?label=sickcodes%2Fdocker-osx%3Alatest)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
-
-```bash
-
-docker run -it \
-    --device /dev/kvm \
-    -p 50922:10022 \
-    -v /tmp/.X11-unix:/tmp/.X11-unix \
-    -e "DISPLAY=${DISPLAY:-:0.0}" \
-    -e GENERATE_UNIQUE=true \
-    -e MASTER_PLIST_URL='https://raw.githubusercontent.com/sickcodes/osx-serial-generator/master/config-custom.plist' \
-    -e SHORTNAME=ventura \
-    sickcodes/docker-osx:latest
-
-# docker build -t docker-osx .
-```
-
-### Sonoma (14) [![https://img.shields.io/docker/image-size/sickcodes/docker-osx/latest?label=sickcodes%2Fdocker-osx%3Alatest](https://img.shields.io/docker/image-size/sickcodes/docker-osx/latest?label=sickcodes%2Fdocker-osx%3Alatest)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
-
-```bash
-
-docker run -it \
-    --device /dev/kvm \
-    -p 50922:10022 \
-    -v /tmp/.X11-unix:/tmp/.X11-unix \
-    -e "DISPLAY=${DISPLAY:-:0.0}" \
-    -e GENERATE_UNIQUE=true \
-    -e CPU='Haswell-noTSX' \
-    -e CPUID_FLAGS='kvm=on,vendor=GenuineIntel,+invtsc,vmware-cpuid-freq=on' \
-    -e MASTER_PLIST_URL='https://raw.githubusercontent.com/sickcodes/osx-serial-generator/master/config-custom-sonoma.plist' \
-    -e SHORTNAME=sonoma \
-    sickcodes/docker-osx:latest
-
-# docker build -t docker-osx .
-```
-
-### Sequoia (15) [![https://img.shields.io/docker/image-size/sickcodes/docker-osx/latest?label=sickcodes%2Fdocker-osx%3Alatest](https://img.shields.io/docker/image-size/sickcodes/docker-osx/latest?label=sickcodes%2Fdocker-osx%3Alatest)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
-
-```bash
-
-docker run -it \
-    --device /dev/kvm \
-    -p 50922:10022 \
-    -v /tmp/.X11-unix:/tmp/.X11-unix \
-    -e "DISPLAY=${DISPLAY:-:0.0}" \
-    -e GENERATE_UNIQUE=true \
-    -e CPU='Haswell-noTSX' \
-    -e CPUID_FLAGS='kvm=on,vendor=GenuineIntel,+invtsc,vmware-cpuid-freq=on' \
-    -e MASTER_PLIST_URL='https://raw.githubusercontent.com/sickcodes/osx-serial-generator/master/config-custom-sonoma.plist' \
-    -e SHORTNAME=sequoia \
-    sickcodes/docker-osx:latest
-
-# docker build -t docker-osx .
-```
+*   `docker run -it`: This command runs a Docker container in interactive mode.
+*   `--device /dev/kvm`: This flag gives the container access to the KVM for hardware acceleration.
+*   `-p 50922:10022`: This flag maps port `10022` in the container to port `50922` on the host. This is used for SSH access.
+*   `-v /tmp/.X11-unix:/tmp/.X11-unix`: This flag mounts the X11 socket from the host to the container. This is used for GUI forwarding.
+*   `-e "DISPLAY=${DISPLAY:-:0.0}"`: This flag sets the `DISPLAY` environment variable in the container. This is also used for GUI forwarding.
+*   `-e "SHORTNAME=sequoia"`: This flag sets the `SHORTNAME` environment variable in the container. This determines which version of macOS to download and install.
+*   `sickcodes/docker-osx:latest`: This is the name of the Docker image to use.
 
 <!-- #### Run Catalina Pre-Installed [![https://img.shields.io/docker/image-size/sickcodes/docker-osx/auto?label=sickcodes%2Fdocker-osx%3Aauto](https://img.shields.io/docker/image-size/sickcodes/docker-osx/auto?label=sickcodes%2Fdocker-osx%3Aauto)](https://hub.docker.com/r/sickcodes/docker-osx/tags?page=1&ordering=last_updated)
 
@@ -429,16 +361,10 @@ Pick one of these while **building**, irrelevant when using docker pull:
 
 There are currently multiple images, each with different use cases (explained [below](#container-images)):
 
-- High Sierra (10.13)
-- Mojave (10.14)
-- Catalina (10.15)
-- Big Sur (11)
-- Monterey (12)
-- Ventura (13)
-- Sonoma (14)
-- Auto (pre-made Catalina)
-- Naked (use your own .img)
-- Naked-Auto (user your own .img and SSH in)
+*   `sickcodes/docker-osx:latest`: This is the main image. It allows you to run any version of macOS by setting the `SHORTNAME` environment variable.
+*   `sickcodes/docker-osx:auto`: This is a pre-installed version of Catalina. It is useful for quickly getting started with Docker-OSX.
+*   `sickcodes/docker-osx:naked`: This image allows you to use your own `.img` file. This is useful for CI/CD purposes or for using a custom version of macOS.
+*   `sickcodes/docker-osx:naked-auto`: This image is similar to the `naked` image, but it also allows you to SSH into the container.
 
 High Sierra:
 
@@ -962,11 +888,15 @@ Additionally, you can string multiple statements together, for example:
     -p 10043:10043 \
 ```
 
-### Bridged networking
+### Networking issues
 
-You might not need to do anything with the default setup to enable internet connectivity from inside the container. Additionally, `curl` may work even if `ping` doesn't.
+If you are having trouble connecting to the internet from within the container, you can try the following:
 
-See discussion [here](https://github.com/sickcodes/Docker-OSX/issues/177) and [here](https://github.com/sickcodes/Docker-OSX/issues/72) and [here](https://github.com/sickcodes/Docker-OSX/issues/88).
+*   **Check your firewall settings.** Make sure that your firewall is not blocking the Docker container from accessing the internet.
+*   **Use a different networking mode.** You can try using a different networking mode, such as `host` or `bridge`.
+*   **Enable IPv4 forwarding.** If you are using a bridged network, you may need to enable IPv4 forwarding on your host machine.
+
+See also: [here](https://github.com/sickcodes/Docker-OSX/issues/177), [here](https://github.com/sickcodes/Docker-OSX/issues/72), and [here](https://github.com/sickcodes/Docker-OSX/issues/88).
 
 ### Enable IPv4 forwarding for bridged network connections for remote installations
 
