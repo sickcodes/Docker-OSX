@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CV - Amal Mohammed Al-Barqi</title>
+    <style>
+        /* تنسيقات عامة */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 30px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+        
+        /* ترويسة الصفحة */
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #4a90e2;
+            padding-bottom: 20px;
+        }
+        
+        h1 {
+            color: #4a90e2;
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+        
+        h2 {
+            color: #2c3e50;
+            margin: 20px 0 10px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        /* أقسام المحتوى */
+        .section {
+            margin-bottom: 25px;
+        }
+        
+        .section-content {
+            padding: 10px 15px;
+        }
+        
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        
+        li {
+            padding: 5px 0;
+            position: relative;
+            padding-right: 20px;
+        }
+        
+        li:before {
+            content: "•";
+            color: #4a90e2;
+            font-weight: bold;
+            position: absolute;
+            right: 0;
+        }
+        
+        /* زر الطباعة */
+        .print-btn {
+            display: block;
+            width: 200px;
+            margin: 30px auto;
+            padding: 12px;
+            background-color: #4a90e2;
+            color: white;
+            text-align: center;
+            border-radius: 5px;
+            cursor: pointer;
+            border: none;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        
+        .print-btn:hover {
+            background-color: #357abD;
+        }
+        
+        /* تنسيقات خاصة للطباعة */
+        @media print {
+            body {
+                background-color: white;
+                padding: 0;
+            }
+            
+            .container {
+                box-shadow: none;
+                padding: 15px;
+                max-width: 100%;
+            }
+            
+            .print-btn {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>CV</h1>
+            <h2>Amal Al-Barqi</h2>
+        </header>
+        
+        <div class="section">
+            <h2>Information systems</h2>
+                
+            <div class="section-content">
+
+        
+
+        <div class="section">
+            <h2>📞 0538853965 </h2>
+            <h2>🪪 446816029</h2>
+            <h2>📧446816029@kku.edu.sa</h2>
+            <div class="section-content">
+                <ul>   
+ 
+            </div>
+        </div>
+        
+          <div class="section">
+            <h2>Skills</h2>
+            <div class="section-content">
+                <ul>
+                    <li>The drawing</li>                
+                    <li>Proficiency in using a laptop</li>
+                    <li>Working on Microsoft Office programs</li>
+                </ul>
+            </div>
+        </div>
+
+        
+        <button class="print-btn" onclick="window.print()">طباعة كملف PDF</button>
+    </div>
+</body>
+        </html>
