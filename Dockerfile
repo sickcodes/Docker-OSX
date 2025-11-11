@@ -357,7 +357,7 @@ VOLUME ["/tmp/.X11-unix"]
 # If BaseSystem.img does not exist, download ${SHORTNAME}
 
 # shortname default is below
-ENV SHORTNAME=sequoia
+ENV SHORTNAME=tahoe
 
 ENV BASESYSTEM_IMAGE=BaseSystem.img
 
