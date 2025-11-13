@@ -1,5 +1,6 @@
 |Version|Date|Notes|
 |---|---|---|
+|   |2021-09-18|Add `-e NETDEV=`|
 |   |2021-09-09|Add Monterey|
 |   |2021-08-27|Add iPhone passthrough OTA!|
 |6.0|2021-08-25|Added naked-auto. Keep kernel at 5.13, even tho it's just for supermin.|

@@ -33,6 +33,7 @@ Flags
 
 # set -xeuf -o pipefail
 
+grep -i Ubuntu /proc/version || { echo "DO NOT RUN THIS ON YOUR WORKSTATION, ONLY RUN THIS ON A THROWAWAY SERVER FOR 1 TIME TESTING" && exit 1 ; }
 
 # gather arguments
 while (( "$#" )); do
