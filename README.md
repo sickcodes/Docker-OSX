@@ -608,6 +608,12 @@ Create your personal image using `:latest` or `big-sur`. Then, pull the image ou
 ## Initial setup
 Before you do anything else, you will need to turn on hardware virtualization in your BIOS. Precisely how will depend on your particular machine (and BIOS), but it should be straightforward.
 
+Depending on your installation, you might need to update package manager:
+
+```bash
+sudo apt-get update
+```
+
 Then, you'll need QEMU and some other dependencies on your host:
 
 ```bash
