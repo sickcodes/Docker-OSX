@@ -222,7 +222,7 @@ build_mac_serial () {
 
 download_vendor_mac_addresses () {
     # download the MAC Address vendor list
-    [ -e "${MAC_ADDRESSES_FILE:=vendor_macs.tsv}" ] || wget -O "${MAC_ADDRESSES_FILE}" https://gitlab.com/wireshark/wireshark/-/raw/master/manuf
+    [ -e "${MAC_ADDRESSES_FILE:=vendor_macs.tsv}" ] || wget -O "${MAC_ADDRESSES_FILE}" https://www.wireshark.org/download/automated/data/manuf
 }
 
 download_qcow_efi_folder () {
